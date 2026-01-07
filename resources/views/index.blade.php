@@ -528,7 +528,7 @@
                             <li><i class="fa fa-check-circle"></i> Nunc consectetur ligula vitae nisl placerat tempus.</li>
                             <li><i class="fa fa-check-circle"></i> Curabitur quis ante vitae lacus varius pretium.</li>
                         </ul>
-                        <a href="#" class="primary-btn" style="white-space: nowrap; text-decoration: none; border-radius: 2px">About Us</a>
+                        <a href="#" class="primary-btn">About Us</a>
                     </div>
                 </div>
             </div>

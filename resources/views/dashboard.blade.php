@@ -123,7 +123,7 @@
             <div class="col-12 text-center">
                 <form action="{{ route('logout') }}" method="POST" class="d-inline">
                     @csrf
-                    <button type="submit" class="btn btn-danger btn-lg px-5">Keluar</button>
+                    <button type="submit" class="site-btn" style="white-space: nowrap; text-decoration: none; border-radius: 2px;">Keluar</button>
                 </form>
             </div>
         </div>

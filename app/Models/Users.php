@@ -14,7 +14,7 @@ class Users extends Authenticatable
     protected $primaryKey = "id";
 
     protected $fillable = [
-        'name', 'email', 'phone', 'gender', 'city', 'institution', 'password'
+        'name', 'email', 'phone', 'gender', 'city', 'institution', 'password', 'role'
     ];
 
     protected $hidden = [

@@ -1,7 +1,9 @@
 @extends('template.temp')
 
 @section('content')
+<!-- Bootstrap 5 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
 <!-- Dashboard Section Begin -->
 <section class="py-5">
     <div class="container">
@@ -121,7 +123,7 @@
             <div class="col-12 text-center">
                 <form action="{{ route('logout') }}" method="POST" class="d-inline">
                     @csrf
-                    <button type="submit" class="site-btn" style="white-space: nowrap; text-decoration: none; border-radius: 5px;">Keluar</button>
+                    <button type="submit" class="btn btn-danger btn-lg px-5">Keluar</button>
                 </form>
             </div>
         </div>

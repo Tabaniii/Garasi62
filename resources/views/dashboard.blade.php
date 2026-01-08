@@ -1,136 +1,147 @@
-@extends('template.temp')
+@extends('layouts.admin')
 
 @section('content')
-<!-- Bootstrap 5 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+@if(session('success'))
+<div class="alert alert-success alert-custom alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
 
-<!-- Dashboard Section Begin -->
-<section class="py-5">
-    <div class="container">
-        @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<h1 class="page-title mb-4">Dashboard</h1>
+
+<!-- Statistik Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card animate-fade-in" style="animation-delay: 0.1s;">
+            <div class="stat-card-icon red animate-bounce-in">
+                <i class="fas fa-car"></i>
+            </div>
+            <div class="stat-card-value animate-count-up">{{ $stats['total_cars'] ?? 0 }}</div>
+            <div class="stat-card-label">Total Mobil</div>
         </div>
-        @endif
-
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="bg-light p-4 rounded">
-                    <h2 class="text-danger mb-2">Selamat Datang, {{ Auth::user()->name }}!</h2>
-                    <p class="text-muted mb-0">Ini adalah halaman dashboard Anda. Di sini Anda dapat mengelola akun dan aktivitas Anda.</p>
-                </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card animate-fade-in" style="animation-delay: 0.2s;">
+            <div class="stat-card-icon black animate-bounce-in">
+                <i class="fas fa-users"></i>
             </div>
+            <div class="stat-card-value animate-count-up">{{ $stats['total_users'] ?? 0 }}</div>
+            <div class="stat-card-label">Total Pengguna</div>
         </div>
-
-        <div class="row g-4 mb-4">
-            <div class="col-lg-4 col-md-6">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-start">
-                            <div class="text-danger me-3" style="font-size: 48px; line-height: 1;">
-                                <i class="fa fa-user"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="card-title mb-2 fw-bold">Profil Saya</h5>
-                                <p class="card-text text-muted mb-0 small">Kelola informasi profil Anda</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card animate-fade-in" style="animation-delay: 0.3s;">
+            <div class="stat-card-icon red animate-bounce-in">
+                <i class="fas fa-file-invoice-dollar"></i>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-start">
-                            <div class="text-danger me-3" style="font-size: 48px; line-height: 1;">
-                                <i class="fa fa-car"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="card-title mb-2 fw-bold">Mobil Saya</h5>
-                                <p class="card-text text-muted mb-0 small">Lihat dan kelola daftar mobil</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-start">
-                            <div class="text-danger me-3" style="font-size: 48px; line-height: 1;">
-                                <i class="fa fa-cog"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="card-title mb-2 fw-bold">Pengaturan</h5>
-                                <p class="card-text text-muted mb-0 small">Ubah pengaturan akun</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="stat-card-value animate-count-up">{{ $stats['total_fund_requests'] ?? 0 }}</div>
+            <div class="stat-card-label">Permintaan Dana</div>
         </div>
-
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4">
-                        <h3 class="text-danger mb-4 fw-bold">Informasi Akun</h3>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="d-flex border-bottom pb-3 mb-3">
-                                    <div class="text-muted fw-semibold me-3" style="min-width: 150px;">Nama:</div>
-                                    <div class="text-dark">{{ Auth::user()->name }}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex border-bottom pb-3 mb-3">
-                                    <div class="text-muted fw-semibold me-3" style="min-width: 150px;">Email:</div>
-                                    <div class="text-dark">{{ Auth::user()->email }}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex border-bottom pb-3 mb-3">
-                                    <div class="text-muted fw-semibold me-3" style="min-width: 150px;">Nomor Telepon:</div>
-                                    <div class="text-dark">{{ Auth::user()->phone }}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex border-bottom pb-3 mb-3">
-                                    <div class="text-muted fw-semibold me-3" style="min-width: 150px;">Jenis Kelamin:</div>
-                                    <div class="text-dark">{{ Auth::user()->gender }}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex border-bottom pb-3 mb-3">
-                                    <div class="text-muted fw-semibold me-3" style="min-width: 150px;">Kota:</div>
-                                    <div class="text-dark">{{ Auth::user()->city }}</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex border-bottom pb-3 mb-3">
-                                    <div class="text-muted fw-semibold me-3" style="min-width: 150px;">Institusi:</div>
-                                    <div class="text-dark">{{ Auth::user()->institution }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="stat-card animate-fade-in" style="animation-delay: 0.4s;">
+            <div class="stat-card-icon black animate-bounce-in">
+                <i class="fas fa-clock"></i>
             </div>
+            <div class="stat-card-value animate-count-up">{{ $stats['pending_fund_requests'] ?? 0 }}</div>
+            <div class="stat-card-label">Menunggu Persetujuan</div>
         </div>
+    </div>
+</div>
 
-        <div class="row">
-            <div class="col-12 text-center">
-                <form action="{{ route('logout') }}" method="POST" class="d-inline">
-                    @csrf
-                    <button type="submit" class="site-btn" style="white-space: nowrap; text-decoration: none; border-radius: 2px;">Keluar</button>
-                </form>
+<!-- Chart dan Info Cards Row -->
+<div class="row g-4 mb-5">
+    <!-- Chart Card -->
+    <div class="col-lg-8">
+        <div class="chart-card animate-slide-in-left">
+            <h3 class="chart-card-title">Statistik Mobil</h3>
+            <canvas id="carChart" height="100"></canvas>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+        <div class="info-card animate-slide-in-right">
+            <div class="info-card-header">
+                <h5 class="info-card-title">Aksi Cepat</h5>
+            </div>
+            <div class="d-grid gap-3">
+                <a href="{{ route('index') }}" class="btn btn-danger btn-animate" style="background: linear-gradient(135deg, #dc2626, #991b1b); border: none; padding: 14px 20px;">
+                    <i class="fas fa-home me-2"></i>Kunjungi Halaman Utama
+                </a>
+                <a href="{{ route('cars.create') }}" class="btn btn-outline-danger btn-animate" style="padding: 12px 20px;">
+                    <i class="fas fa-plus me-2"></i>Tambah Mobil Baru
+                </a>
+                <a href="{{ route('cars.index') }}" class="btn btn-outline-dark btn-animate" style="padding: 12px 20px;">
+                    <i class="fas fa-list me-2"></i>Lihat Semua Mobil
+                </a>
+                <a href="{{ route('about') }}" class="btn btn-outline-dark btn-animate" style="padding: 12px 20px;">
+                    <i class="fas fa-info-circle me-2"></i>Kelola Tentang
+                </a>
             </div>
         </div>
     </div>
-</section>
-<!-- Dashboard Section End -->
+</div>
 
-<!-- Bootstrap 5 JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+@push('scripts')
+<script>
+    // Chart untuk Statistik Mobil
+    const ctx = document.getElementById('carChart').getContext('2d');
+    
+    // Data untuk chart (contoh data)
+    const carData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+        datasets: [{
+            label: 'Mobil Sewa',
+            data: [12, 19, 15, 25, 22, 30],
+            backgroundColor: 'rgba(220, 38, 38, 0.2)',
+            borderColor: '#dc2626',
+            borderWidth: 2,
+            tension: 0.4
+        }, {
+            label: 'Mobil Beli',
+            data: [8, 15, 12, 20, 18, 25],
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            borderColor: '#000000',
+            borderWidth: 2,
+            tension: 0.4
+        }]
+    };
+
+    new Chart(ctx, {
+        type: 'line',
+        data: carData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            animation: {
+                duration: 1500,
+                easing: 'easeInOutQuart'
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+</script>
+@endpush
 @endsection

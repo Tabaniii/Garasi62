@@ -8,6 +8,50 @@ use Illuminate\Support\Facades\Storage;
 
 class CarController extends Controller
 {
+    /**
+     * Check if image already exists by hash
+     */
+    private function findExistingImage($file)
+    {
+        $hash = md5_file($file->getRealPath());
+        $allCars = car::whereNotNull('image')->get();
+        
+        foreach ($allCars as $car) {
+            if ($car->image && is_array($car->image)) {
+                foreach ($car->image as $imagePath) {
+                    if (Storage::disk('public')->exists($imagePath)) {
+                        $existingHash = md5_file(Storage::disk('public')->path($imagePath));
+                        if ($existingHash === $hash) {
+                            return $imagePath;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Delete unused images
+     */
+    private function deleteUnusedImages($oldImages, $newImages, $currentCarId = null)
+    {
+        $imagesToDelete = array_diff($oldImages, $newImages);
+        
+        foreach ($imagesToDelete as $imagePath) {
+            // Check if image is used by other cars
+            $query = car::whereJsonContains('image', $imagePath);
+            if ($currentCarId) {
+                $query->where('id', '!=', $currentCarId);
+            }
+            $isUsed = $query->exists();
+            
+            if (!$isUsed && Storage::disk('public')->exists($imagePath)) {
+                Storage::disk('public')->delete($imagePath);
+            }
+        }
+    }
     public function show()
     {
         $cars = car::all();
@@ -54,8 +98,17 @@ class CarController extends Controller
         $imagePaths = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('cars', 'public');
-                $imagePaths[] = $path;
+                // Check if image already exists by hash
+                $existingPath = $this->findExistingImage($image);
+                
+                if ($existingPath) {
+                    // Use existing image (no duplicate upload)
+                    $imagePaths[] = $existingPath;
+                } else {
+                    // Upload new image
+                    $path = $image->store('cars', 'public');
+                    $imagePaths[] = $path;
+                }
             }
         }
 
@@ -111,6 +164,9 @@ class CarController extends Controller
 
         $car = car::findOrFail($id);
         
+        // Get old images for cleanup
+        $oldImages = $car->image && is_array($car->image) ? $car->image : [];
+        
         // Handle existing images
         $existingImages = $request->input('existing_images', []);
         $imagePaths = $existingImages;
@@ -118,8 +174,17 @@ class CarController extends Controller
         // Handle new uploaded images
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('cars', 'public');
-                $imagePaths[] = $path;
+                // Check if image already exists by hash
+                $existingPath = $this->findExistingImage($image);
+                
+                if ($existingPath) {
+                    // Use existing image (no duplicate upload)
+                    $imagePaths[] = $existingPath;
+                } else {
+                    // Upload new image
+                    $path = $image->store('cars', 'public');
+                    $imagePaths[] = $path;
+                }
             }
         }
 
@@ -134,7 +199,10 @@ class CarController extends Controller
         }
 
         $data = $request->except(['images', 'existing_images']);
-        $data['image'] = $imagePaths;
+        $data['image'] = array_unique($imagePaths); // Remove duplicates
+
+        // Delete unused images (only if not used by other cars)
+        $this->deleteUnusedImages($oldImages, $data['image'], $id);
 
         // Handle features arrays
         if ($request->has('interior_features')) {
@@ -162,16 +230,21 @@ class CarController extends Controller
     {
         $car = car::findOrFail($id);
         
-        // Hapus gambar dari storage
-        if ($car->image && is_array($car->image)) {
-            foreach ($car->image as $imagePath) {
-                if (Storage::disk('public')->exists($imagePath)) {
-                    Storage::disk('public')->delete($imagePath);
-                }
+        // Get images before delete
+        $imagesToDelete = $car->image && is_array($car->image) ? $car->image : [];
+        
+        // Delete car first
+        $car->delete();
+        
+        // Hapus gambar dari storage jika tidak digunakan mobil lain
+        foreach ($imagesToDelete as $imagePath) {
+            // Check if image is used by other cars
+            $isUsed = car::whereJsonContains('image', $imagePath)->exists();
+            
+            if (!$isUsed && Storage::disk('public')->exists($imagePath)) {
+                Storage::disk('public')->delete($imagePath);
             }
         }
-        
-        $car->delete();
 
         return redirect()->route('cars.index')->with('success', 'Mobil berhasil dihapus!');
     }

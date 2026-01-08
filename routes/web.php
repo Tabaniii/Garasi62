@@ -14,8 +14,18 @@ Route::view('/blog-details', 'blog-details')->name('blog.details');
 Route::view('/about', 'about')->name('about');
 //car
 Route::get('/car', [CarController::class, 'show'])->name('cars');
-Route::view('/car-details', 'car-details')->name('car.details');
+Route::get('/car/{id}', [CarController::class, 'showDetail'])->name('car.details');
 Route::view('/contact', 'contact')->name('contact');
+
+// CRUD Mobil (Protected by auth middleware)
+Route::middleware('auth')->group(function () {
+    Route::get('/cars', [CarController::class, 'index'])->name('cars.index');
+    Route::get('/cars/create', [CarController::class, 'create'])->name('cars.create');
+    Route::post('/cars', [CarController::class, 'store'])->name('cars.store');
+    Route::get('/cars/{id}/edit', [CarController::class, 'edit'])->name('cars.edit');
+    Route::put('/cars/{id}', [CarController::class, 'update'])->name('cars.update');
+    Route::delete('/cars/{id}', [CarController::class, 'destroy'])->name('cars.destroy');
+});
 
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.store');

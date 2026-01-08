@@ -169,7 +169,7 @@ class CarController extends Controller
                     Storage::disk('public')->delete($imagePath);
                 }
             }
-        }
+        } // hai
         
         $car->delete();
 

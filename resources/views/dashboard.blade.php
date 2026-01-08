@@ -25,6 +25,39 @@
         <div class="stat-card animate-fade-in" style="animation-delay: 0.2s;">
             <div class="stat-card-icon black animate-bounce-in">
                 <i class="fas fa-users"></i>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <div class="text-danger me-3" style="font-size: 48px; line-height: 1;">
+                                <i class="fa fa-user"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-2 fw-bold">Profil Saya</h5>
+                                <p class="card-text text-muted mb-0 small">Kelola informasi profil Anda</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <a href="{{ route('cars.index') }}" class="text-decoration-none">
+                    <div class="card h-100 shadow-sm border-0" style="cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start">
+                                <div class="text-danger me-3" style="font-size: 48px; line-height: 1;">
+                                    <i class="fa fa-car"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title mb-2 fw-bold text-dark">Mobil Saya</h5>
+                                    <p class="card-text text-muted mb-0 small">Lihat dan kelola daftar mobil</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
             </div>
             <div class="stat-card-value animate-count-up">{{ $stats['total_users'] ?? 0 }}</div>
             <div class="stat-card-label">Total Pengguna</div>

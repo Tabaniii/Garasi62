@@ -351,13 +351,10 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const col = document.createElement('div');
-                    col.className = 'col-md-3 col-sm-4 col-6';
+                    col.className = 'col-md-3';
                     col.innerHTML = `
                         <div class="position-relative">
-                            <img src="${e.target.result}" alt="Preview ${i + 1}" class="img-thumbnail w-100" style="height: 180px; object-fit: cover; border-radius: 8px;">
-                            <div class="position-absolute top-0 start-0 m-2 bg-success text-white px-2 py-1 rounded" style="font-size: 11px; font-weight: 600;">
-                                <i class="fas fa-plus-circle me-1"></i>Baru
-                            </div>
+                            <img src="${e.target.result}" alt="Preview ${i + 1}" class="img-thumbnail w-100" style="height: 150px; object-fit: cover;">
                         </div>
                     `;
                     preview.appendChild(col);

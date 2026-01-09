@@ -13,6 +13,7 @@ class car extends Model
         'tipe',
         'tahun',
         'brand',
+        'nama',
         'kilometer',
         'transmisi',
         'harga',

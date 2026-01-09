@@ -1153,7 +1153,6 @@ ol {
 	font-size: 15px;
 	color: #db2d2e;
 	font-weight: 700;
-	border-top: 1px solid #ebebeb;
 	padding-left: 120px;
 	padding-top: 14px;
 	padding-bottom: 11px;
@@ -1789,7 +1788,7 @@ ol {
 }
 
 .testimonial__slider.owl-carousel .col-lg-6 {
-	max-width: 100%;
+	max-width: 100%;	
 }
 
 .testimonial__slider.owl-carousel .owl-stage-outer {

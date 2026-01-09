@@ -5,13 +5,87 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\car;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class CarController extends Controller
 {
-    public function show()
+    public function show(Request $request)
     {
-        $cars = car::all();
-        return view('car', compact('cars'));
+        $query = car::query();
+
+        // Search by nama or brand
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'like', '%' . $search . '%')
+                  ->orWhere('brand', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filter by brand
+        if ($request->filled('brand')) {
+            $query->where('brand', $request->brand);
+        }
+
+        // Filter by transmisi
+        if ($request->filled('transmisi')) {
+            $query->where('transmisi', $request->transmisi);
+        }
+
+        // Filter by tipe (rent/buy)
+        if ($request->filled('tipe')) {
+            $query->where('tipe', $request->tipe);
+        }
+
+        // Filter by tahun
+        if ($request->filled('tahun')) {
+            $query->where('tahun', $request->tahun);
+        }
+
+        // Filter by metode
+        if ($request->filled('metode')) {
+            $query->where('metode', $request->metode);
+        }
+
+        // Filter by kapasitas mesin
+        if ($request->filled('kapasitasmesin')) {
+            $query->where('kapasitasmesin', $request->kapasitasmesin);
+        }
+
+        // Filter by price range
+        if ($request->filled('min_price')) {
+            $query->whereRaw('CAST(harga AS UNSIGNED) >= ?', [$request->min_price]);
+        }
+        if ($request->filled('max_price')) {
+            $query->whereRaw('CAST(harga AS UNSIGNED) <= ?', [$request->max_price]);
+        }
+
+        // Sort
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        
+        if ($sortBy == 'harga') {
+            $query->orderByRaw('CAST(harga AS UNSIGNED) ' . $sortOrder);
+        } else {
+            $query->orderBy($sortBy, $sortOrder);
+        }
+
+        // Pagination
+        $perPage = $request->get('per_page', 9);
+        $cars = $query->paginate($perPage)->withQueryString();
+
+        // Get unique values for filters from database
+        $brands = car::distinct()->whereNotNull('brand')->pluck('brand')->sort()->values();
+        $transmisiList = car::distinct()->whereNotNull('transmisi')->pluck('transmisi')->sort()->values();
+        $tahunList = car::distinct()->whereNotNull('tahun')->pluck('tahun')->sort()->values();
+        $metodeList = car::distinct()->whereNotNull('metode')->pluck('metode')->sort()->values();
+        $kapasitasmesinList = car::distinct()->whereNotNull('kapasitasmesin')->pluck('kapasitasmesin')->sort()->values();
+        
+        // Get min and max price from database
+        $minPrice = car::whereNotNull('harga')->min(DB::raw('CAST(harga AS UNSIGNED)'));
+        $maxPrice = car::whereNotNull('harga')->max(DB::raw('CAST(harga AS UNSIGNED)'));
+
+        return view('car', compact('cars', 'brands', 'transmisiList', 'tahunList', 'metodeList', 'kapasitasmesinList', 'minPrice', 'maxPrice'));
     }
 
     // CRUD Methods untuk Dashboard
@@ -34,6 +108,7 @@ class CarController extends Controller
             'tipe' => 'required|in:rent,buy',
             'tahun' => 'required|string|max:4',
             'brand' => 'required|string|max:20',
+            'nama' => 'required|string|max:100',
             'kilometer' => 'required|string|max:6',
             'transmisi' => 'required|string|max:10',
             'harga' => 'required|string|max:10',
@@ -92,6 +167,7 @@ class CarController extends Controller
             'tipe' => 'required|in:rent,buy',
             'tahun' => 'required|string|max:4',
             'brand' => 'required|string|max:20',
+            'nama' => 'required|string|max:100',
             'kilometer' => 'required|string|max:6',
             'transmisi' => 'required|string|max:10',
             'harga' => 'required|string|max:10',

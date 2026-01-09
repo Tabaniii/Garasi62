@@ -84,6 +84,183 @@
     </div>
 </div>
 
+<!-- Mobil Terbaru Section -->
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <div class="info-card animate-fade-in">
+            <div class="info-card-header">
+                <h5 class="info-card-title">
+                    <i class="fas fa-car me-2"></i>Mobil Terbaru
+                </h5>
+                <a href="{{ route('cars.index') }}" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-eye me-1"></i>Lihat Semua
+                </a>
+            </div>
+            @if($stats['recent_cars']->count() > 0)
+            <div class="recent-cars-grid">
+                @foreach($stats['recent_cars'] as $car)
+                <div class="recent-car-card">
+                    <div class="recent-car-image">
+                        @if($car->image && is_array($car->image) && count($car->image) > 0)
+                            <img src="{{ asset('storage/' . $car->image[0]) }}" alt="{{ $car->brand }}">
+                        @else
+                            <div class="car-placeholder">
+                                <i class="fas fa-car"></i>
+                            </div>
+                        @endif
+                        <span class="car-type-badge {{ $car->tipe == 'rent' ? 'badge-rent' : 'badge-sale' }}">
+                            {{ $car->tipe == 'rent' ? 'Sewa' : 'Jual' }}
+                        </span>
+                    </div>
+                    <div class="recent-car-info">
+                        <h6 class="recent-car-brand">{{ strtoupper($car->brand) }}</h6>
+                        <p class="recent-car-details">
+                            <i class="fas fa-calendar-alt"></i> {{ $car->tahun }} &nbsp;
+                            <i class="fas fa-tachometer-alt"></i> {{ number_format($car->kilometer, 0, ',', '.') }} km
+                        </p>
+                        <p class="recent-car-price">Rp {{ number_format($car->harga, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @else
+            <div class="text-center py-5">
+                <div class="text-muted">
+                    <i class="fas fa-car fa-3x mb-3"></i>
+                    <p>Belum ada mobil yang ditambahkan</p>
+                    <a href="{{ route('cars.create') }}" class="btn btn-danger mt-3">
+                        <i class="fas fa-plus me-2"></i>Tambah Mobil Pertama
+                    </a>
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<style>
+.recent-cars-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.recent-car-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.recent-car-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.15);
+    border-color: #dc2626;
+}
+
+.recent-car-image {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f5f5f5, #e9ecef);
+}
+
+.recent-car-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.recent-car-card:hover .recent-car-image img {
+    transform: scale(1.1);
+}
+
+.car-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+}
+
+.car-placeholder i {
+    font-size: 48px;
+}
+
+.car-type-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badge-sale {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: #fff;
+}
+
+.badge-rent {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+    color: #fff;
+}
+
+.recent-car-info {
+    padding: 14px;
+}
+
+.recent-car-brand {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin: 0 0 8px 0;
+    text-transform: uppercase;
+}
+
+.recent-car-details {
+    font-size: 12px;
+    color: #6b7280;
+    margin: 0 0 8px 0;
+}
+
+.recent-car-details i {
+    margin-right: 4px;
+    color: #dc2626;
+}
+
+.recent-car-price {
+    font-size: 16px;
+    font-weight: 900;
+    color: #dc2626;
+    margin: 0;
+}
+
+.info-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+@media (max-width: 768px) {
+    .recent-cars-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+}
+</style>
+
 @push('scripts')
 <script>
     // Chart untuk Statistik Mobil

@@ -56,6 +56,16 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
+                                    <label for="nama" class="form-label">Nama Mobil <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('nama') is-invalid @enderror" id="nama" name="nama" value="{{ old('nama') }}" placeholder="Contoh: Avanza, Civic, Camry" required maxlength="100">
+                                    @error('nama')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
                                     <label for="tahun" class="form-label">Tahun <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('tahun') is-invalid @enderror" id="tahun" name="tahun" value="{{ old('tahun') }}" placeholder="2020" required maxlength="4">
                                     @error('tahun')

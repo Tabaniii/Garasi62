@@ -6,6 +6,7 @@ use App\Http\Middleware\AuthenticateMiddleware;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
 
 Route::view('/', 'index')->name('home');
 Route::view('/index', 'index')->name('index');
@@ -26,6 +27,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/cars/{id}/edit', [CarController::class, 'edit'])->name('cars.edit');
     Route::put('/cars/{id}', [CarController::class, 'update'])->name('cars.update');
     Route::delete('/cars/{id}', [CarController::class, 'destroy'])->name('cars.destroy');
+    
+    // Users
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
 });
 
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');

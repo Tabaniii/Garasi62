@@ -3,6 +3,717 @@
 @section('header-title', 'Kelola Mobil')
 
 @section('content')
+<style>
+/* Global Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.animate-fade-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Header */
+.page-header-section {
+    background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%) !important;
+    padding: 45px 40px !important;
+    border-radius: 24px !important;
+    border: 1px solid #e9ecef !important;
+    margin-bottom: 40px !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #dc2626, #ef4444, #f87171, #ef4444, #dc2626);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+.page-header-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, rgba(220, 38, 38, 0.03), transparent 50%);
+    pointer-events: none;
+}
+
+.page-header-content {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    gap: 25px;
+    position: relative;
+    z-index: 1;
+}
+
+.page-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.page-header-section .page-title {
+    font-size: 36px !important;
+    font-weight: 900 !important;
+    background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 !important;
+    letter-spacing: -0.5px;
+}
+
+.page-badge {
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: #fff;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4), 0 0 0 0 rgba(220, 38, 38, 0.5);
+    animation: pulse 2s ease-in-out infinite;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.page-badge::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 3s infinite;
+}
+
+.page-subtitle {
+    font-size: 15px;
+    color: #6b7280;
+    margin: 0;
+    font-weight: 500;
+}
+
+.page-subtitle i {
+    color: #dc2626;
+    margin-right: 8px;
+}
+
+.btn-add-new {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.35), 0 0 0 0 rgba(220, 38, 38, 0.5);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-add-new::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-add-new:hover::before {
+    width: 400px;
+    height: 400px;
+}
+
+.btn-add-new:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(220, 38, 38, 0.45), 0 0 0 4px rgba(220, 38, 38, 0.1);
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    color: #fff;
+}
+
+.btn-add-new i {
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s;
+}
+
+.btn-add-new:hover i {
+    transform: rotate(90deg) scale(1.1);
+}
+
+.btn-add-new i {
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    .page-header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .page-header-section .page-title {
+        font-size: 28px !important;
+    }
+    
+    .btn-add-new {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Grid Layout */
+.cars-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
+    gap: 20px !important;
+    margin-bottom: 45px !important;
+}
+
+@media (max-width: 768px) {
+    .cars-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+}
+
+.car-card {
+    background: #fff !important;
+    border-radius: 16px !important;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
+    border: 1px solid #e9ecef !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex !important;
+    flex-direction: column;
+    position: relative;
+    backdrop-filter: blur(10px);
+}
+
+.car-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 20px;
+    padding: 2px;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+
+.car-card:hover {
+    transform: translateY(-10px) scale(1.01);
+    box-shadow: 0 20px 60px rgba(220, 38, 38, 0.2), 0 0 0 1px rgba(220, 38, 38, 0.1) !important;
+    border-color: #dc2626 !important;
+}
+
+.car-card:hover::before {
+    opacity: 1;
+}
+
+/* Card Image */
+.car-card-image {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e9ecef 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+}
+
+.car-card-image::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.03) 100%);
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.car-card:hover .car-card-image::after {
+    opacity: 0;
+}
+
+.car-main-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    object-position: center;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    display: block;
+}
+
+.car-card:hover .car-main-image {
+    transform: scale(1.05);
+}
+
+.car-status-badge {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 3px;
+    padding: 3px 10px !important;
+    border-radius: 5px !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    margin-top: 5px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s;
+}
+
+.badge-rent {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.badge-sale {
+    background: linear-gradient(135deg, #10b981, #34d399) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.car-image-count {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.7));
+    backdrop-filter: blur(12px);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+}
+
+.car-card:hover .car-image-count {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.car-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    padding: 15px;
+}
+
+.car-image-placeholder i {
+    font-size: 48px;
+    color: #9ca3af;
+    opacity: 0.5;
+}
+
+/* Card Body */
+.car-card-body {
+    padding: 14px !important;
+    flex: 1;
+    display: flex !important;
+    flex-direction: column;
+    background: linear-gradient(to bottom, #ffffff, #fafafa);
+}
+
+.car-brand-section {
+    margin-bottom: 12px !important;
+    padding-bottom: 10px !important;
+    border-bottom: 2px solid #f3f4f6 !important;
+    position: relative;
+}
+
+.car-brand-section::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 35px;
+    height: 2px;
+    background: linear-gradient(90deg, #dc2626, #ef4444);
+    border-radius: 2px;
+}
+
+.car-brand {
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 6px 0 !important;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+}
+
+/* Car Details List */
+.car-details-list {
+    margin: 12px 0 !important;
+    padding: 5px 0 !important;
+    list-style: none !important;
+    background: linear-gradient(135deg, #fafafa, #ffffff);
+    border-radius: 8px;
+    border: 1px solid #f3f4f6;
+}
+
+.car-detail-row {
+    display: flex !important;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    margin: 2px 0;
+    border-radius: 6px;
+    border-bottom: none !important;
+    background: transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: default;
+}
+
+.car-detail-row:hover {
+    background: linear-gradient(135deg, #fafafa, #f5f5f5);
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.car-detail-row:last-child {
+    border-bottom: none !important;
+}
+
+.detail-icon {
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    color: #dc2626;
+    font-size: 12px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+.car-detail-row:hover .detail-icon {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: #fff;
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.detail-text {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.detail-label {
+    font-size: 11px !important;
+    color: #6b7280 !important;
+    font-weight: 600 !important;
+    min-width: 70px;
+}
+
+.detail-value {
+    font-size: 12px !important;
+    color: #1a1a1a !important;
+    font-weight: 700 !important;
+    transition: color 0.3s;
+}
+
+.car-detail-row:hover .detail-value {
+    color: #dc2626 !important;
+}
+
+.car-card-actions {
+    display: flex !important;
+    gap: 8px !important;
+    margin-top: 14px !important;
+    padding-top: 12px !important;
+    border-top: 2px solid #f3f4f6 !important;
+}
+
+.btn-action {
+    flex: 1 !important;
+    padding: 8px 12px !important;
+    border-radius: 7px !important;
+    font-weight: 700 !important;
+    font-size: 11px !important;
+    border: 2px solid;
+    cursor: pointer;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-action::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-action:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-action i {
+    font-size: 12px;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s;
+}
+
+.btn-action:hover i {
+    transform: scale(1.1);
+}
+
+.btn-action span {
+    position: relative;
+    z-index: 1;
+}
+
+.btn-edit-action {
+    background: linear-gradient(135deg, #fff, #fafafa) !important;
+    color: #f59e0b !important;
+    border-color: #fbbf24 !important;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+}
+
+.btn-edit-action:hover {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
+    border-color: #f59e0b !important;
+    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
+}
+
+.btn-delete-action {
+    background: linear-gradient(135deg, #fff, #fafafa) !important;
+    color: #dc2626 !important;
+    border-color: #ef4444 !important;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+}
+
+.btn-delete-action:hover {
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+    border-color: #dc2626 !important;
+    color: #fff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+}
+
+/* Empty State */
+.empty-state {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+    border-radius: 20px !important;
+    padding: 80px 40px !important;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+    border: 2px dashed #e9ecef !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.empty-state::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(220, 38, 38, 0.05) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+.empty-state-icon {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 25px;
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 1;
+}
+
+.empty-state-icon i {
+    font-size: 56px;
+    color: #9ca3af;
+}
+
+.empty-state-title {
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    color: #1a1a1a !important;
+    margin-bottom: 12px !important;
+    position: relative;
+    z-index: 1;
+}
+
+.empty-state-text {
+    font-size: 16px !important;
+    color: #6b7280 !important;
+    margin-bottom: 30px !important;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-empty-state {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.btn-empty-state:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    color: #fff;
+}
+
+/* Back Button */
+.btn-back-dashboard {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #1a1a1a, #374151);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: none;
+}
+
+.btn-back-dashboard:hover {
+    background: linear-gradient(135deg, #000000, #1a1a1a);
+    transform: translateX(-6px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    color: #fff;
+}
+
+.btn-back-dashboard i {
+    transition: transform 0.3s;
+}
+
+.btn-back-dashboard:hover i {
+    transform: translateX(-4px);
+}
+
+/* Success Alert Enhancement */
+.alert-custom {
+    border-radius: 12px !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2) !important;
+    margin-bottom: 25px !important;
+}
+
+/* Border Top Enhancement */
+.border-top {
+    border-top: 2px solid #e9ecef !important;
+    padding-top: 30px !important;
+}
+</style>
+
         @if(session('success'))
 <div class="alert alert-success alert-custom alert-dismissible fade show" role="alert">
     <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
@@ -46,59 +757,69 @@
                 <i class="fas fa-car"></i>
             </div>
             @endif
-            <div class="car-status-badge-top {{ $car->tipe == 'rent' ? 'badge-rent-top' : 'badge-sale-top' }}">
-                {{ $car->tipe == 'rent' ? 'Sewa' : 'Jual' }}
-            </div>
         </div>
         <div class="car-card-body">
             <div class="car-brand-section">
                 <h5 class="car-brand">{{ strtoupper($car->brand) }}</h5>
-                <span class="car-year-badge">
-                    <i class="fas fa-calendar-alt"></i>
-                    {{ $car->tahun }}
+                <span class="car-status-badge {{ $car->tipe == 'rent' ? 'badge-rent' : 'badge-sale' }}">
+                    {{ $car->tipe == 'rent' ? 'For Rent' : 'For Sale' }}
                 </span>
             </div>
-            <div class="car-details-grid">
-                <div class="car-detail-item">
-                    <div class="detail-icon-wrapper">
-                        <i class="fas fa-tachometer-alt"></i>
+            <div class="car-details-list">
+                <div class="car-detail-row">
+                    <div class="detail-icon">
+                        <i class="fas fa-calendar-alt"></i>
                     </div>
-                    <div class="detail-content">
-                        <span class="detail-label">Kilometer</span>
-                        <strong class="detail-value">{{ $car->kilometer }} km</strong>
+                    <div class="detail-text">
+                        <span class="detail-label">Tahun:</span>
+                        <span class="detail-value">{{ $car->tahun }}</span>
                     </div>
                 </div>
-                <div class="car-detail-item">
-                    <div class="detail-icon-wrapper">
+                <div class="car-detail-row">
+                    <div class="detail-icon">
+                        <i class="fas fa-road"></i>
+                    </div>
+                    <div class="detail-text">
+                        <span class="detail-label">Kilometer:</span>
+                        <span class="detail-value">{{ number_format($car->kilometer, 0, ',', '.') }} km</span>
+                    </div>
+                </div>
+                <div class="car-detail-row">
+                    <div class="detail-icon">
                         <i class="fas fa-cog"></i>
                     </div>
-                    <div class="detail-content">
-                        <span class="detail-label">Transmisi</span>
-                        <strong class="detail-value">{{ $car->transmisi }}</strong>
+                    <div class="detail-text">
+                        <span class="detail-label">Transmisi:</span>
+                        <span class="detail-value">{{ $car->transmisi }}</span>
                     </div>
                 </div>
-                <div class="car-detail-item">
-                    <div class="detail-icon-wrapper">
-                        <i class="fas fa-engine"></i>
+                <div class="car-detail-row">
+                    <div class="detail-icon">
+                        <i class="fas fa-tachometer-alt"></i>
                     </div>
-                    <div class="detail-content">
-                        <span class="detail-label">Kapasitas</span>
-                        <strong class="detail-value">{{ $car->kapasitasmesin }}</strong>
+                    <div class="detail-text">
+                        <span class="detail-label">Kapasitas:</span>
+                        <span class="detail-value">{{ $car->kapasitasmesin }}</span>
                     </div>
                 </div>
-                <div class="car-detail-item">
-                    <div class="detail-icon-wrapper">
+                <div class="car-detail-row">
+                    <div class="detail-icon">
+                        <i class="fas fa-tag"></i>
+                    </div>
+                    <div class="detail-text">
+                        <span class="detail-label">Harga:</span>
+                        <span class="detail-value">Rp {{ number_format($car->harga, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+                <div class="car-detail-row">
+                    <div class="detail-icon">
                         <i class="fas fa-money-bill-wave"></i>
                     </div>
-                    <div class="detail-content">
-                        <span class="detail-label">Metode</span>
-                        <strong class="detail-value">{{ $car->metode }}</strong>
+                    <div class="detail-text">
+                        <span class="detail-label">Metode:</span>
+                        <span class="detail-value">{{ $car->metode }}</span>
                     </div>
                 </div>
-            </div>
-            <div class="car-price-section">
-                <div class="price-label">Harga</div>
-                <div class="price-value">Rp {{ number_format($car->harga, 0, ',', '.') }}</div>
             </div>
             <div class="car-card-actions">
                 <a href="{{ route('cars.edit', $car->id) }}" class="btn-action btn-edit-action">
@@ -139,655 +860,6 @@
                 </a>
             </div>
 
-@push('styles')
-<style>
-/* Global Animations */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-fade-in {
-    animation: fadeInUp 0.6s ease-out forwards;
-}
-
-/* Header */
-.page-header-section {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    padding: 40px 35px;
-    border-radius: 20px;
-    border: 1px solid #e9ecef;
-    margin-bottom: 35px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-    position: relative;
-    overflow: hidden;
-}
-
-.page-header-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #dc2626, #ef4444, #dc2626);
-    background-size: 200% 100%;
-    animation: shimmer 3s ease-in-out infinite;
-}
-
-@keyframes shimmer {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
-
-.page-header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 25px;
-    position: relative;
-    z-index: 1;
-}
-
-.page-title-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-}
-
-.page-title {
-    font-size: 36px;
-    font-weight: 900;
-    background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin: 0;
-    letter-spacing: -0.5px;
-}
-
-.page-badge {
-    padding: 8px 16px;
-    background: linear-gradient(135deg, #dc2626, #ef4444);
-    color: #fff;
-    border-radius: 25px;
-    font-size: 13px;
-    font-weight: 700;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-}
-
-.page-subtitle {
-    font-size: 15px;
-    color: #6b7280;
-    margin: 0;
-    font-weight: 500;
-}
-
-.page-subtitle i {
-    color: #dc2626;
-    margin-right: 8px;
-}
-
-.btn-add-new {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 28px;
-    background: linear-gradient(135deg, #dc2626, #ef4444);
-    color: #fff;
-    text-decoration: none;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 15px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
-    border: none;
-}
-
-.btn-add-new:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
-    background: linear-gradient(135deg, #b91c1c, #dc2626);
-}
-
-.btn-add-new i {
-    font-size: 16px;
-}
-
-@media (max-width: 768px) {
-    .page-header-content {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .page-title {
-        font-size: 28px;
-    }
-    
-    .btn-add-new {
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-/* Grid Layout */
-.cars-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 28px;
-    margin-bottom: 45px;
-}
-
-@media (max-width: 768px) {
-    .cars-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-}
-
-.car-card {
-    background: #fff;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e9ecef;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
-    position: relative;
-}
-
-.car-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: 20px;
-    padding: 2px;
-    background: linear-gradient(135deg, #dc2626, #ef4444);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    opacity: 0;
-    transition: opacity 0.4s;
-}
-
-.car-card:hover {
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 40px rgba(220, 38, 38, 0.15);
-    border-color: #dc2626;
-}
-
-.car-card:hover::before {
-    opacity: 1;
-}
-
-/* Card Image */
-.car-card-image {
-    position: relative;
-    width: 100%;
-    height: 260px;
-    overflow: hidden;
-    background: linear-gradient(135deg, #f5f5f5 0%, #e9ecef 100%);
-}
-
-.car-main-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.car-card:hover .car-main-image {
-    transform: scale(1.1);
-}
-
-.car-status-badge-top {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    padding: 8px 16px;
-    border-radius: 25px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-}
-
-.badge-rent-top {
-    background: linear-gradient(135deg, #3b82f6, #60a5fa);
-    color: #fff;
-}
-
-.badge-sale-top {
-    background: linear-gradient(135deg, #10b981, #34d399);
-    color: #fff;
-}
-
-.car-image-count {
-    position: absolute;
-    bottom: 16px;
-    left: 16px;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(10px);
-    color: #fff;
-    padding: 8px 14px;
-    border-radius: 25px;
-    font-size: 12px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.car-image-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-}
-
-.car-image-placeholder i {
-    font-size: 72px;
-    color: #9ca3af;
-    opacity: 0.5;
-}
-
-/* Card Body */
-.car-card-body {
-    padding: 24px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background: #fff;
-}
-
-.car-brand-section {
-    margin-bottom: 18px;
-}
-
-.car-brand {
-    font-size: 24px;
-    font-weight: 900;
-    color: #1a1a1a;
-    margin: 0 0 10px 0;
-    text-transform: uppercase;
-    letter-spacing: -0.5px;
-    line-height: 1.2;
-}
-
-.car-year-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-    color: #4b5563;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    border: 1px solid #e5e7eb;
-}
-
-.car-year-badge i {
-    font-size: 12px;
-    color: #dc2626;
-}
-
-.car-details-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin: 18px 0;
-}
-
-@media (max-width: 480px) {
-    .car-details-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.car-detail-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: linear-gradient(135deg, #f9fafb, #f3f4f6);
-    border-radius: 10px;
-    border: 1px solid #e9ecef;
-    transition: all 0.3s;
-}
-
-.car-detail-item:hover {
-    background: linear-gradient(135deg, #f3f4f6, #e9ecef);
-    transform: translateX(4px);
-}
-
-.detail-icon-wrapper {
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #dc2626, #ef4444);
-    color: #fff;
-    border-radius: 8px;
-    font-size: 15px;
-    flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
-}
-
-.detail-content {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-    min-width: 0;
-}
-
-.detail-label {
-    font-size: 10px;
-    color: #6b7280;
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.detail-value {
-    font-size: 14px;
-    font-weight: 700;
-    color: #1a1a1a;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.car-price-section {
-    background: linear-gradient(135deg, #dc2626, #ef4444, #dc2626);
-    background-size: 200% 200%;
-    animation: gradientShift 3s ease infinite;
-    color: #fff;
-    padding: 20px;
-    border-radius: 14px;
-    margin-top: 18px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-
-.car-price-section::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    animation: rotate 10s linear infinite;
-}
-
-@keyframes gradientShift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
-
-@keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.price-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    opacity: 0.95;
-    margin-bottom: 6px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    position: relative;
-    z-index: 1;
-}
-
-.price-value {
-    font-size: 26px;
-    font-weight: 900;
-    letter-spacing: -0.5px;
-    position: relative;
-    z-index: 1;
-}
-
-.car-card-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 22px;
-    padding-top: 22px;
-    border-top: 2px solid #f3f4f6;
-}
-
-.btn-action {
-    flex: 1;
-    padding: 14px 16px;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 14px;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-action::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-}
-
-.btn-action:hover::before {
-    width: 300px;
-    height: 300px;
-}
-
-.btn-action i {
-    position: relative;
-    z-index: 1;
-}
-
-.btn-action span {
-    position: relative;
-    z-index: 1;
-}
-
-.btn-edit-action {
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-}
-
-.btn-edit-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
-    background: linear-gradient(135deg, #d97706, #f59e0b);
-}
-
-.btn-delete-action {
-    background: linear-gradient(135deg, #dc2626, #ef4444);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-}
-
-.btn-delete-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
-    background: linear-gradient(135deg, #b91c1c, #dc2626);
-}
-
-/* Empty State */
-.empty-state {
-    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    border-radius: 20px;
-    padding: 80px 40px;
-    text-align: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-    border: 2px dashed #e9ecef;
-    position: relative;
-    overflow: hidden;
-}
-
-.empty-state::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(220, 38, 38, 0.05) 0%, transparent 70%);
-    animation: rotate 20s linear infinite;
-}
-
-.empty-state-icon {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 25px;
-    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    position: relative;
-    z-index: 1;
-}
-
-.empty-state-icon i {
-    font-size: 56px;
-    color: #9ca3af;
-}
-
-.empty-state-title {
-    font-size: 28px;
-    font-weight: 800;
-    color: #1a1a1a;
-    margin-bottom: 12px;
-    position: relative;
-    z-index: 1;
-}
-
-.empty-state-text {
-    font-size: 16px;
-    color: #6b7280;
-    margin-bottom: 30px;
-    position: relative;
-    z-index: 1;
-}
-
-.btn-empty-state {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 32px;
-    background: linear-gradient(135deg, #dc2626, #ef4444);
-    color: #fff;
-    text-decoration: none;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 15px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
-    position: relative;
-    z-index: 1;
-}
-
-.btn-empty-state:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4);
-    background: linear-gradient(135deg, #b91c1c, #dc2626);
-}
-
-/* Back Button */
-.btn-back-dashboard {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 28px;
-    background: linear-gradient(135deg, #1a1a1a, #374151);
-    color: #fff;
-    text-decoration: none;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 15px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    border: none;
-}
-
-.btn-back-dashboard:hover {
-    background: linear-gradient(135deg, #000000, #1a1a1a);
-    transform: translateX(-6px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-}
-
-.btn-back-dashboard i {
-    transition: transform 0.3s;
-}
-
-.btn-back-dashboard:hover i {
-    transform: translateX(-4px);
-}
-
-/* Success Alert Enhancement */
-.alert-custom {
-    border-radius: 12px;
-    border: none;
-    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2);
-    margin-bottom: 25px;
-}
-
-/* Border Top Enhancement */
-.border-top {
-    border-top: 2px solid #e9ecef !important;
-    padding-top: 30px !important;
-}
-</style>
-@endpush
-
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -819,4 +891,5 @@
 </script>
 @endpush
 @endsection
+
 

@@ -765,6 +765,10 @@
                 <i class="fas fa-car"></i>
                 <span>Mobil</span>
             </a>
+            <a href="{{ route('users.index') }}" class="sidebar-menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                <i class="fas fa-users"></i>
+                <span>Pengguna</span>
+            </a>
             <a href="{{ route('about') }}" class="sidebar-menu-item">
                 <i class="fas fa-info-circle"></i>
                 <span>Tentang</span>

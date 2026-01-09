@@ -30,6 +30,8 @@ class DashboardController extends Controller
             'approved_fund_requests' => $approvedFundRequests,
             'recent_cars' => car::orderBy('created_at', 'desc')->limit(5)->get(),
             'recent_users' => User::orderBy('created_at', 'desc')->limit(5)->get(),
+            'cars_for_sale' => car::where('tipe', 'sale')->count(),
+            'cars_for_rent' => car::where('tipe', 'rent')->count(),
         ];
 
         return view('dashboard', compact('stats'));

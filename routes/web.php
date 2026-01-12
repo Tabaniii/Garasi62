@@ -7,10 +7,11 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\IndexController;
 
-Route::view('/', 'index')->name('home');
-Route::view('/index', 'index')->name('index');
-Route::view('/index.html', 'index')->name('index.html');
+Route::get('/', [IndexController::class, 'index'])->name('home');
+Route::get('/index', [IndexController::class, 'index'])->name('index');
+Route::get('/index.html', [IndexController::class, 'index'])->name('index.html');
 Route::view('/blog', 'blog')->name('blog');
 Route::view('/blog-details', 'blog-details')->name('blog.details');
 Route::view('/about', 'about')->name('about');

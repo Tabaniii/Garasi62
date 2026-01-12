@@ -1,197 +1,122 @@
 @extends('template.temp')
 
-<!-- @section('title', 'Home - GARASI62') Set the title for the page -->
+@section('title', $blog->title . ' - GARASI62')
 
 @section('content')
-    <!-- Breadcrumb End -->
-    <div class="breadcrumb-option set-bg" data-setbg="img/breadcrumb-bg.jpg">
+    <!-- Blog Details Hero Begin -->
+    <section class="blog-details-hero spad set-bg" data-setbg="{{ $blog->image ? asset('storage/' . $blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <div class="breadcrumb__text">
-                        <h2>Latest Blogs</h2>
-                        <div class="breadcrumb__links">
-                            <a href="./index.html"><i class="fa fa-home"></i> Home</a>
-                            <span>Our Blogs</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Breadcrumb Begin -->
-
-    <!-- Blog Section Begin -->
-    <section class="blog spad">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-9">
-                    <div class="row">
-                        <div class="col-lg-6 col-md-6 col-sm-6">
-                            <div class="blog__item">
-                                <div class="blog__item__pic set-bg" data-setbg="img/blog/blog-1.jpg">
-                                    <ul>
-                                        <li>By Polly Williams</li>
-                                        <li>Dec 11, 2018</li>
-                                        <li>8 Comment</li>
-                                    </ul>
-                                </div>
-                                <div class="blog__item__text">
-                                    <h5><a href="#">Benjamin Franklin S Method Of</a></h5>
-                                    <p>Great business ideas when utilized effectively can save lots of money. This is
-                                        not only easy for those who work full-time as an advertiser...</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6">
-                            <div class="blog__item">
-                                <div class="blog__item__pic set-bg" data-setbg="img/blog/blog-2.jpg">
-                                    <ul>
-                                        <li>By Evelyn Lane</li>
-                                        <li>Dec 17, 2018</li>
-                                        <li>Comment</li>
-                                    </ul>
-                                </div>
-                                <div class="blog__item__text">
-                                    <h5><a href="#">Where To Look For Cheap Brochure</a></h5>
-                                    <p>Usually potential customers will visit home for business dealing. Print good
-                                        amount of fliers and give it to anyone who is visiting home like family...</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6">
-                            <div class="blog__item">
-                                <div class="blog__item__pic set-bg" data-setbg="img/blog/blog-3.jpg">
-                                    <ul>
-                                        <li>By Jessie Palmer</li>
-                                        <li>Dec 19, 2018</li>
-                                        <li>Comment</li>
-                                    </ul>
-                                </div>
-                                <div class="blog__item__text">
-                                    <h5><a href="#">Promotional Advertising Specialty</a></h5>
-                                    <p>For those who work outside home, employ college students to distribute fliers at
-                                        supermarkets, community centers...</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6">
-                            <div class="blog__item">
-                                <div class="blog__item__pic set-bg" data-setbg="img/blog/blog-4.jpg">
-                                    <ul>
-                                        <li>By Don Townsend</li>
-                                        <li>Dec 22, 2018</li>
-                                        <li>Comment</li>
-                                    </ul>
-                                </div>
-                                <div class="blog__item__text">
-                                    <h5><a href="#">Using Banner Stands To Increase</a></h5>
-                                    <p>Spread the word by the mouth. Talk to everyone about the product and ask them to
-                                        talk about it to others...</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6">
-                            <div class="blog__item">
-                                <div class="blog__item__pic set-bg" data-setbg="img/blog/blog-5.jpg">
-                                    <ul>
-                                        <li>By Isabella Mann</li>
-                                        <li>Dec 25, 2018</li>
-                                        <li>2 Comment</li>
-                                    </ul>
-                                </div>
-                                <div class="blog__item__text">
-                                    <h5><a href="#">3 Smart Reasons Why You Should </a></h5>
-                                    <p>It’s a very powerful tool to increase the network and doesn’t even cost anything.
-                                        When receiving a casual call from family members and friends...</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-6">
-                            <div class="blog__item">
-                                <div class="blog__item__pic set-bg" data-setbg="img/blog/blog-6.jpg">
-                                    <ul>
-                                        <li>By Polly Williams</li>
-                                        <li>Dec 27, 2018</li>
-                                        <li>6 Comment</li>
-                                    </ul>
-                                </div>
-                                <div class="blog__item__text">
-                                    <h5><a href="#">Search Engine Optimization And</a></h5>
-                                    <p>Some businesses place a jar at the reception counter where the business cards can
-                                        be dropped for future reference, while visiting them...</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="pagination__option">
-                        <a href="#" class="active">1</a>
-                        <a href="#">2</a>
-                        <a href="#">3</a>
-                        <a href="#"><span class="arrow_carrot-2right"></span></a>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6 col-sm-9">
-                    <div class="blog__sidebar">
-                        <form action="#" class="blog__sidebar__search">
-                            <input type="text" placeholder="Search...">
-                            <button type="submit"><i class="fa fa-search"></i></button>
-                        </form>
-                        <div class="blog__sidebar__feature">
-                            <h4>Feature News</h4>
-                            <div class="blog__sidebar__feature__item">
-                                <h6><a href="#">Where To Look For Cheap Brochure</a></h6>
-                                <ul>
-                                    <li>By Polly Williams</li>
-                                    <li>Dec 27, 2018</li>
-                                </ul>
-                            </div>
-                            <div class="blog__sidebar__feature__item">
-                                <h6><a href="#">Using Banner Stands To Increase</a></h6>
-                                <ul>
-                                    <li>By Evelyn Lane</li>
-                                    <li>Dec 17, 2018</li>
-                                </ul>
-                            </div>
-                            <div class="blog__sidebar__feature__item">
-                                <h6><a href="#">Promotional Advertising Specialty</a></h6>
-                                <ul>
-                                    <li>By Don Townsend</li>
-                                    <li>Dec 22, 2018</li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="blog__sidebar__categories">
-                            <h4>Categories</h4>
-                            <ul>
-                                <li><a href="#">Creativity</a></li>
-                                <li><a href="#">Design</a></li>
-                                <li><a href="#">Inspiration</a></li>
-                                <li><a href="#">News</a></li>
-                            </ul>
-                        </div>
-                        <div class="blog__sidebar__tag">
-                            <h4>Tag</h4>
-                            <a href="#">Car Dealer</a>
-                            <a href="#">bmw</a>
-                            <a href="#">Chevrolet</a>
-                            <a href="#">ferrari</a>
-                            <a href="#">Honda</a>
-                            <a href="#">Hatchback</a>
-                        </div>
-                        <div class="blog__sidebar__newslatter">
-                            <h4>Newsletter</h4>
-                            <p>Subscribe our newsletter gor get</p>
-                            <form action="#">
-                                <input type="text" placeholder="Your email">
-                                <button type="submit">Subscribe</button>
-                            </form>
-                        </div>
+            <div class="row d-flex justify-content-center">
+                <div class="col-lg-10">
+                    <div class="blog__details__hero__text">
+                        @if($blog->tags && is_array($blog->tags))
+                            <span class="label">{{ implode(', ', $blog->tags) }}</span>
+                        @else
+                            <span class="label">{{ $blog->category ?? 'Blog' }}</span>
+                        @endif
+                        <h2>{{ $blog->title }}</h2>
+                        <ul>
+                            <li><i class="fa fa-user"></i> <span>By {{ $blog->author }}</span></li>
+                            <li><i class="fa fa-calendar-o"></i> <span>{{ $blog->published_at ? $blog->published_at->format('M d, Y') : $blog->created_at->format('M d, Y') }}</span></li>
+                            <li><i class="fa fa-comments"></i> <span>{{ $blog->comment_count }} {{ $blog->comment_count == 1 ? 'Comment' : 'Comments' }}</span></li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    <!-- Blog Section End -->
+    <!-- Blog Details Hero End -->
 
-    @endsection
+    <!-- Blog Details Section Begin -->
+    <section class="blog-details spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="blog__details__pic">
+                        <img src="{{ $blog->image ? asset('storage/' . $blog->image) : asset('img/blog/details/details-pic.jpg') }}" alt="{{ $blog->title }}">
+                    </div>
+                </div>
+            </div>
+            <div class="row d-flex justify-content-center">
+                <div class="col-lg-8">
+                    <div class="blog__details__text">
+                        {!! $blog->content !!}
+                    </div>                    
+
+                    <!-- Author Bio (opsional, bisa ambil dari user jika ada relasi) -->
+                    <div class="blog__details__author">
+                        <div class="blog__details__author__text">
+                            <h5>{{ $blog->author }}</h5>
+                            <p>Penulis artikel ini adalah bagian dari tim GARASI62 yang berdedikasi menyediakan konten berkualitas.</p>
+                        </div>
+                    </div>
+
+                    <!-- Related Posts -->
+                    @if($relatedBlogs->count() > 0)
+                    <div class="blog__details__btns">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <h5 class="mb-4">Artikel Terkait</h5>
+                                <div class="row">
+                                    @foreach($relatedBlogs as $index => $related)
+                                        @if($index < 2)
+                                        <div class="col-lg-6">
+                                            <a href="{{ route('blog.show', $related->slug) }}" class="blog__details__btns__item set-bg"
+                                                data-setbg="{{ $related->image ? asset('storage/' . $related->image) : asset('img/blog/blog-1.jpg') }}">
+                                                <h6>{{ $related->title }}</h6>
+                                                <ul>
+                                                    <li>By {{ $related->author }}</li>
+                                                    <li>{{ $related->published_at ? $related->published_at->format('M d, Y') : $related->created_at->format('M d, Y') }}</li>
+                                                </ul>
+                                            </a>
+                                        </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    <!-- Comments Section (Placeholder - Anda bisa integrasikan sistem komentar nanti) -->
+                    <div class="blog__details__comment">
+                        <h4>{{ $blog->comment_count }} {{ $blog->comment_count == 1 ? 'Comment' : 'Comments' }}</h4>
+                        <div class="alert alert-info">
+                            Sistem komentar sedang dalam pengembangan. Silakan hubungi kami untuk memberikan masukan.
+                        </div>
+                    </div>
+
+                    <!-- Comment Form (Nonaktif sementara) -->
+                    {{-- 
+                    <div class="blog__details__comment__form">
+                        <h4>Leave A Reply</h4>
+                        <form action="#">
+                            <div class="input-list">
+                                <div class="input-list-item">
+                                    <p>Name <span class="text-danger">*</span></p>
+                                    <input type="text" required>
+                                </div>
+                                <div class="input-list-item">
+                                    <p>Email <span class="text-danger">*</span></p>
+                                    <input type="email" required>
+                                </div>
+                                <div class="input-list-item">
+                                    <p>Website</p>
+                                    <input type="text">
+                                </div>
+                            </div>
+                            <div class="input-desc">
+                                <p>Comment <span class="text-danger">*</span></p>
+                                <textarea required></textarea>
+                            </div>
+                            <button type="submit" class="site-btn">Submit Now</button>
+                        </form>
+                    </div>
+                    --}}
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Blog Details Section End -->
+
+@endsection

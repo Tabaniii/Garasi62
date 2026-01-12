@@ -8,12 +8,15 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\IndexController;
+use App\Http\Controllers\BlogController;
 
 Route::get('/', [IndexController::class, 'index'])->name('home');
 Route::get('/index', [IndexController::class, 'index'])->name('index');
 Route::get('/index.html', [IndexController::class, 'index'])->name('index.html');
-Route::view('/blog', 'blog')->name('blog');
-Route::view('/blog-details', 'blog-details')->name('blog.details');
+
+// Public Blog Routes
+Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 Route::view('/about', 'about')->name('about');
 //car
 Route::get('/car', [CarController::class, 'show'])->name('cars');
@@ -31,6 +34,16 @@ Route::middleware('auth')->group(function () {
     
     // Users
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    
+    // Blog Management (Admin)
+    Route::prefix('admin/blogs')->name('blogs.admin.')->group(function () {
+        Route::get('/', [BlogController::class, 'adminIndex'])->name('index');
+        Route::get('/create', [BlogController::class, 'create'])->name('create');
+        Route::post('/', [BlogController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [BlogController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [BlogController::class, 'update'])->name('update');
+        Route::delete('/{id}', [BlogController::class, 'destroy'])->name('destroy');
+    });
 });
 
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');

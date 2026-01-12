@@ -18,7 +18,7 @@
                             <h2>IDR 2.2M</h2>
                         </div>
                         <a href="#" class="primary-btn"><img src="img/wheel.png" alt=""> Test Drive</a>
-                        <a href="#" class="primary-btn more-btn">Learn More</a>
+                        <a href="{{ route('about') }}" class="primary-btn more-btn">Learn More</a>
                     </div>
                 </div>
                 <div class="col-lg-5">
@@ -182,7 +182,7 @@
                         <img src="img/services/services-1.png" alt="">
                         <h5>Rental A Cars</h5>
                         <p>Consectetur adipiscing elit incididunt ut labore et dolore magna aliqua. Risus commodo viverra maecenas.</p>
-                        <a href="#"><i class="fa fa-long-arrow-right"></i></a>
+                        <a href="{{ route('about') }}"><i class="fa fa-long-arrow-right"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
@@ -190,7 +190,7 @@
                         <img src="img/services/services-2.png" alt="">
                         <h5>Buying A Cars</h5>
                         <p>Consectetur adipiscing elit incididunt ut labore et dolore magna aliqua. Risus commodo viverra maecenas.</p>
-                        <a href="#"><i class="fa fa-long-arrow-right"></i></a>
+                        <a href="{{ route('about') }}"><i class="fa fa-long-arrow-right"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
@@ -198,7 +198,7 @@
                         <img src="img/services/services-3.png" alt="">
                         <h5>Car Maintenance</h5>
                         <p>Consectetur adipiscing elit incididunt ut labore et dolore magna aliqua. Risus commodo viverra maecenas.</p>
-                        <a href="#"><i class="fa fa-long-arrow-right"></i></a>
+                        <a href="{{ route('about') }}"><i class="fa fa-long-arrow-right"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
@@ -206,7 +206,7 @@
                         <img src="img/services/services-4.png" alt="">
                         <h5>Support 24/7</h5>
                         <p>Consectetur adipiscing elit incididunt ut labore et dolore magna aliqua. Risus commodo viverra maecenas.</p>
-                        <a href="#"><i class="fa fa-long-arrow-right"></i></a>
+                        <a href="{{ route('about') }}"><i class="fa fa-long-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -229,7 +229,7 @@
                             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Quis ipsum suspendisse ultrices gravida. Risus commodo viverra maecenas accumsan lacus vel facilisis.</p>
                         </div>
                         <div class="feature__text__btn">
-                            <a href="#" class="primary-btn">About Us</a>
+                            <a href="{{ route('about') }}" class="primary-btn">About Us</a>
                             <a href="#" class="primary-btn partner-btn">Our Partners</a>
                         </div>
                     </div>
@@ -528,7 +528,7 @@
                             <li><i class="fa fa-check-circle"></i> Nunc consectetur ligula vitae nisl placerat tempus.</li>
                             <li><i class="fa fa-check-circle"></i> Curabitur quis ante vitae lacus varius pretium.</li>
                         </ul>
-                        <a href="#" class="primary-btn">About Us</a>
+                        <a href="{{ route('about') }}" class="primary-btn">About Us</a>
                     </div>
                 </div>
             </div>

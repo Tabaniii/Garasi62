@@ -760,7 +760,7 @@
         </div>
         <div class="car-card-body">
             <div class="car-brand-section">
-                <h5 class="car-brand">{{ strtoupper($car->brand) }}</h5>
+                <h5 class="car-brand">{{ strtoupper($car->nama) }}</h5>
                 <span class="car-status-badge {{ $car->tipe == 'rent' ? 'badge-rent' : 'badge-sale' }}">
                     {{ $car->tipe == 'rent' ? 'For Rent' : 'For Sale' }}
                 </span>

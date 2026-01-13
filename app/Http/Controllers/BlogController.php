@@ -44,6 +44,20 @@ class BlogController extends Controller
     public function show($slug)
     {
         $blog = Blog::published()->where('slug', $slug)->firstOrFail();
+        
+        // Load comments with nested replies recursively (only approved)
+        // Using recursive eager loading for unlimited depth
+        $blog->load(['comments' => function($query) {
+            $query->where('status', 'approved')
+                  ->whereNull('parent_id')
+                  ->orderBy('created_at', 'desc');
+        }]);
+        
+        // Load nested replies recursively for each comment
+        $blog->comments->each(function($comment) {
+            $this->loadNestedReplies($comment);
+        });
+        
         $relatedBlogs = Blog::published()
             ->where('id', '!=', $blog->id)
             ->where(function($query) use ($blog) {
@@ -57,6 +71,18 @@ class BlogController extends Controller
             ->get();
         
         return view('blog', compact('blog', 'relatedBlogs'));
+    }
+
+    // Helper method to load nested replies recursively
+    private function loadNestedReplies($comment)
+    {
+        $comment->load(['replies' => function($query) {
+            $query->where('status', 'approved')->orderBy('created_at', 'asc');
+        }]);
+        
+        foreach ($comment->replies as $reply) {
+            $this->loadNestedReplies($reply);
+        }
     }
 
     // Admin methods - CRUD

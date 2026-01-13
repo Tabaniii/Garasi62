@@ -78,45 +78,225 @@
                     </div>
                     @endif
 
-                    <!-- Comments Section (Placeholder - Anda bisa integrasikan sistem komentar nanti) -->
+                    <!-- Comments Section -->
                     <div class="blog__details__comment">
-                        <h4>{{ $blog->comment_count }} {{ $blog->comment_count == 1 ? 'Comment' : 'Comments' }}</h4>
-                        <div class="alert alert-info">
-                            Sistem komentar sedang dalam pengembangan. Silakan hubungi kami untuk memberikan masukan.
-                        </div>
+                        <h4>{{ $blog->comments->count() }} {{ $blog->comments->count() == 1 ? 'Comment' : 'Comments' }}</h4>
+                        
+                        @if($blog->comments->count() > 0)
+                            @foreach($blog->comments as $comment)
+                            <div class="blog__details__comment__item" id="comment-{{ $comment->id }}">
+                                <div class="blog__details__comment__item__pic">
+                                    <div style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 20px;">
+                                        {{ strtoupper(substr($comment->commenter_name, 0, 1)) }}
+                                    </div>
+                                </div>
+                                <div class="blog__details__comment__item__text">
+                                    <h6>{{ $comment->commenter_name }}</h6>
+                                    <p>{{ $comment->comment }}</p>
+                                    <ul>
+                                        <li><i class="fa fa-calendar-o"></i> {{ $comment->created_at->format('M d, Y H:i') }}</li>
+                                        <li><a href="#" class="reply-btn" data-comment-id="{{ $comment->id }}" data-commenter="{{ $comment->commenter_name }}"><i class="fa fa-reply"></i> Reply</a></li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- Nested Replies (Recursive) -->
+                                @if($comment->replies->count() > 0)
+                                    @include('blog.comment-replies', ['replies' => $comment->replies, 'level' => 1])
+                                @endif
+                            </div>
+                            @endforeach
+                        @else
+                            <div class="alert alert-info">
+                                Belum ada komentar. Jadilah yang pertama untuk berkomentar!
+                            </div>
+                        @endif
                     </div>
 
-                    <!-- Comment Form (Nonaktif sementara) -->
-                    {{-- 
-                    <div class="blog__details__comment__form">
+                    <!-- Comment Form -->
+                    <div class="blog__details__comment__form" id="commentForm" data-is-logged-in="{{ Auth::check() ? 'true' : 'false' }}">
                         <h4>Leave A Reply</h4>
-                        <form action="#">
-                            <div class="input-list">
-                                <div class="input-list-item">
-                                    <p>Name <span class="text-danger">*</span></p>
-                                    <input type="text" required>
-                                </div>
-                                <div class="input-list-item">
-                                    <p>Email <span class="text-danger">*</span></p>
-                                    <input type="email" required>
-                                </div>
-                                <div class="input-list-item">
-                                    <p>Website</p>
-                                    <input type="text">
-                                </div>
+                        <form id="commentFormElement">
+                            <input type="hidden" id="parent_id" name="parent_id" value="">
+                            <div id="replyTo" style="display: none; margin-bottom: 15px; padding: 10px; background: #f3f4f6; border-radius: 5px;">
+                                <span>Membalas ke: <strong id="replyToName"></strong></span>
+                                <a href="#" id="cancelReply" style="float: right; color: #dc2626;">Batal</a>
                             </div>
                             <div class="input-desc">
                                 <p>Comment <span class="text-danger">*</span></p>
-                                <textarea required></textarea>
+                                <textarea id="commentText" name="comment" required rows="5" placeholder="Tulis komentar Anda di sini..."></textarea>
                             </div>
-                            <button type="submit" class="site-btn">Submit Now</button>
+                            <button type="submit" class="site-btn" id="submitCommentBtn">
+                                <span id="submitBtnText">Submit Now</span>
+                                <span id="submitBtnLoading" style="display: none;">Mengirim...</span>
+                            </button>
                         </form>
                     </div>
-                    --}}
                 </div>
             </div>
         </div>
     </section>
     <!-- Blog Details Section End -->
+
+@push('scripts')
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const commentForm = document.getElementById('commentFormElement');
+    const submitBtn = document.getElementById('submitCommentBtn');
+    const submitBtnText = document.getElementById('submitBtnText');
+    const submitBtnLoading = document.getElementById('submitBtnLoading');
+    const commentText = document.getElementById('commentText');
+    const parentIdInput = document.getElementById('parent_id');
+    const replyToDiv = document.getElementById('replyTo');
+    const replyToName = document.getElementById('replyToName');
+    const cancelReplyBtn = document.getElementById('cancelReply');
+    const commentFormDiv = document.getElementById('commentForm');
+    
+    // Check if user is logged in
+    const isLoggedIn = commentFormDiv.getAttribute('data-is-logged-in') === 'true';
+    
+    // Handle reply button click using event delegation (works for all levels including nested)
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.reply-btn')) {
+            e.preventDefault();
+            const replyBtn = e.target.closest('.reply-btn');
+            
+            if (!isLoggedIn) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Login Diperlukan',
+                    text: 'Anda harus login terlebih dahulu untuk mengirim komentar.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Login',
+                    cancelButtonText: 'Batal',
+                    confirmButtonColor: '#dc2626'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '{{ route("login") }}';
+                    }
+                });
+                return;
+            }
+            
+            const commentId = replyBtn.getAttribute('data-comment-id');
+            const commenterName = replyBtn.getAttribute('data-commenter');
+            
+            parentIdInput.value = commentId;
+            replyToName.textContent = commenterName;
+            replyToDiv.style.display = 'block';
+            
+            // Scroll to form
+            document.getElementById('commentForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            commentText.focus();
+        }
+    });
+    
+    // Cancel reply
+    cancelReplyBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        parentIdInput.value = '';
+        replyToDiv.style.display = 'none';
+    });
+    
+    // Handle form submission
+    commentForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Check if user is logged in
+        if (!isLoggedIn) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Login Diperlukan',
+                text: 'Anda harus login terlebih dahulu untuk mengirim komentar.',
+                showCancelButton: true,
+                confirmButtonText: 'Login',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#dc2626'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{{ route("login") }}';
+                }
+            });
+            return;
+        }
+        
+        const comment = commentText.value.trim();
+        
+        if (!comment) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Komentar Kosong',
+                text: 'Silakan isi komentar Anda terlebih dahulu.',
+                confirmButtonColor: '#dc2626'
+            });
+            return;
+        }
+        
+        // Disable submit button
+        submitBtn.disabled = true;
+        submitBtnText.style.display = 'none';
+        submitBtnLoading.style.display = 'inline';
+        
+        // Prepare data
+        const formData = {
+            comment: comment,
+            parent_id: parentIdInput.value || null,
+            _token: '{{ csrf_token() }}'
+        };
+        
+        // Send AJAX request
+        fetch('{{ route("comments.store", $blog->slug) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Komentar Terkirim!',
+                    text: data.message,
+                    confirmButtonColor: '#dc2626'
+                }).then(() => {
+                    // Reset form
+                    commentText.value = '';
+                    parentIdInput.value = '';
+                    replyToDiv.style.display = 'none';
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal Mengirim Komentar',
+                    text: data.message || 'Terjadi kesalahan. Silakan coba lagi.',
+                    confirmButtonColor: '#dc2626'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi Kesalahan',
+                text: 'Tidak dapat mengirim komentar. Silakan coba lagi.',
+                confirmButtonColor: '#dc2626'
+            });
+        })
+        .finally(() => {
+            // Enable submit button
+            submitBtn.disabled = false;
+            submitBtnText.style.display = 'inline';
+            submitBtnLoading.style.display = 'none';
+        });
+    });
+});
+</script>
+@endpush
 
 @endsection

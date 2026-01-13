@@ -58,4 +58,16 @@ class Blog extends Model
                      ->whereNotNull('published_at')
                      ->where('published_at', '<=', now());
     }
+
+    // Relationship with Comments
+    public function comments()
+    {
+        return $this->hasMany(Comment::class)->whereNull('parent_id')->where('status', 'approved')->orderBy('created_at', 'desc');
+    }
+
+    // Relationship with All Comments (including pending)
+    public function allComments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }

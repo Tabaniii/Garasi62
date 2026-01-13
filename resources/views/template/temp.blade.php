@@ -94,6 +94,8 @@
     <script src="{{ asset('garasi62/js/jquery.slicknav.js')}}"></script>
     <script src="{{ asset('garasi62/js/owl.carousel.min.js')}}"></script>
     <script src="{{ asset('garasi62/js/main.js')}}"></script>
+    
+    @stack('scripts')
 </body>
 
 </html>

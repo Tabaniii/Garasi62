@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\IndexController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\CommentController;
 
 Route::get('/', [IndexController::class, 'index'])->name('home');
 Route::get('/index', [IndexController::class, 'index'])->name('index');
@@ -17,6 +18,9 @@ Route::get('/index.html', [IndexController::class, 'index'])->name('index.html')
 // Public Blog Routes
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
+// Public Comment Routes (auth checked in controller)
+Route::post('/blog/{slug}/comment', [CommentController::class, 'store'])->name('comments.store');
 Route::view('/about', 'about')->name('about');
 //car
 Route::get('/car', [CarController::class, 'show'])->name('cars');
@@ -43,6 +47,14 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/edit', [BlogController::class, 'edit'])->name('edit');
         Route::put('/{id}', [BlogController::class, 'update'])->name('update');
         Route::delete('/{id}', [BlogController::class, 'destroy'])->name('destroy');
+    });
+    
+    // Comment Management (Admin)
+    Route::prefix('admin/comments')->name('comments.admin.')->group(function () {
+        Route::get('/', [CommentController::class, 'adminIndex'])->name('index');
+        Route::post('/{id}/approve', [CommentController::class, 'approve'])->name('approve');
+        Route::post('/{id}/reject', [CommentController::class, 'reject'])->name('reject');
+        Route::delete('/{id}', [CommentController::class, 'destroy'])->name('destroy');
     });
 });
 

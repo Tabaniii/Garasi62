@@ -10,6 +10,9 @@ class IndexController extends Controller
 {
     public function index()
     {
+        // Get cars data for display (latest cars, limit to 12 for homepage)
+        $cars = car::orderBy('created_at', 'desc')->limit(12)->get();
+        
         // Get unique values for filters from database
         $brands = car::distinct()->whereNotNull('brand')->pluck('brand')->sort()->values();
         $tahunList = car::distinct()->whereNotNull('tahun')->pluck('tahun')->sort()->values();
@@ -20,7 +23,6 @@ class IndexController extends Controller
         $minPrice = car::whereNotNull('harga')->min(DB::raw('CAST(harga AS UNSIGNED)')) ?? 0;
         $maxPrice = car::whereNotNull('harga')->max(DB::raw('CAST(harga AS UNSIGNED)')) ?? 1000000000;
 
-        return view('index', compact('brands', 'tahunList', 'transmisiList', 'kapasitasmesinList', 'minPrice', 'maxPrice'));
+        return view('index', compact('cars', 'brands', 'tahunList', 'transmisiList', 'kapasitasmesinList', 'minPrice', 'maxPrice'));
     }
 }
-

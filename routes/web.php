@@ -26,6 +26,7 @@ Route::view('/about', 'about')->name('about');
 Route::get('/car', [CarController::class, 'show'])->name('cars');
 Route::get('/car/{id}', [CarController::class, 'showDetail'])->name('car.details');
 Route::view('/contact', 'contact')->name('contact');
+Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 
 // CRUD Mobil (Protected by auth middleware)
 Route::middleware('auth')->group(function () {

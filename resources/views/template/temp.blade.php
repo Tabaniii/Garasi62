@@ -95,6 +95,9 @@
     <script src="{{ asset('garasi62/js/owl.carousel.min.js')}}"></script>
     <script src="{{ asset('garasi62/js/main.js')}}"></script>
     
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     @stack('scripts')
 </body>
 

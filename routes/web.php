@@ -7,10 +7,12 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\IndexController;
+use App\Http\Controllers\ContactController;
 
-Route::view('/', 'index')->name('home');
-Route::view('/index', 'index')->name('index');
-Route::view('/index.html', 'index')->name('index.html');
+Route::get('/', [IndexController::class, 'index'])->name('home');
+Route::get('/index', [IndexController::class, 'index'])->name('index');
+Route::get('/index.html', [IndexController::class, 'index'])->name('index.html');
 Route::view('/blog', 'blog')->name('blog');
 Route::view('/blog-details', 'blog-details')->name('blog.details');
 Route::view('/about', 'about')->name('about');
@@ -18,6 +20,7 @@ Route::view('/about', 'about')->name('about');
 Route::get('/car', [CarController::class, 'show'])->name('cars');
 Route::get('/car/{id}', [CarController::class, 'showDetail'])->name('car.details');
 Route::view('/contact', 'contact')->name('contact');
+Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 
 // CRUD Mobil (Protected by auth middleware)
 Route::middleware('auth')->group(function () {

@@ -40,17 +40,18 @@
                 </div>
                 <div class="col-lg-6 col-md-6">
                     <div class="contact__form">
-                        <form action="#">
+                        <form action="{{ route('contact.send') }}" method="POST" id="contactForm">
+                            @csrf
                             <div class="row">
                                 <div class="col-lg-6">
-                                    <input type="text" placeholder="Name">
+                                    <input type="text" name="name" placeholder="Name" value="{{ old('name') }}" required>
                                 </div>
                                 <div class="col-lg-6">
-                                    <input type="text" placeholder="Email">
+                                    <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" required>
                                 </div>
                             </div>
-                            <input type="text" placeholder="Subject">
-                            <textarea placeholder="Your Question"></textarea>
+                            <input type="text" name="subject" placeholder="Subject" value="{{ old('subject') }}" required>
+                            <textarea name="message" placeholder="Your Question" required>{{ old('message') }}</textarea>
                             <button type="submit" class="site-btn">Submit Now</button>
                         </form>
                     </div>
@@ -91,5 +92,86 @@
         </div>
     </div>
     <!-- Contact Address End -->
+
+@push('scripts')
+<script>
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: '{{ session('success') }}',
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'OK'
+        });
+    @endif
+
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: '{{ session('error') }}',
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'OK'
+        });
+    @endif
+
+    @if($errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Validasi Gagal',
+            html: '<ul style="text-align: left; padding-left: 20px;">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
+            confirmButtonColor: '#dc3545',
+            confirmButtonText: 'OK'
+        });
+    @endif
+
+    // Handle form submission dengan loading
+    document.addEventListener('DOMContentLoaded', function() {
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+            contactForm.addEventListener('submit', function(e) {
+                const form = this;
+                const submitBtn = form.querySelector('button[type="submit"]');
+                
+                // Validasi client-side
+                const name = form.querySelector('input[name="name"]').value.trim();
+                const email = form.querySelector('input[name="email"]').value.trim();
+                const subject = form.querySelector('input[name="subject"]').value.trim();
+                const message = form.querySelector('textarea[name="message"]').value.trim();
+                
+                if (!name || !email || !subject || !message) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Perhatian!',
+                        text: 'Mohon lengkapi semua field yang wajib diisi.',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: 'OK'
+                    });
+                    return false;
+                }
+                
+                // Validasi email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(email)) {
+                    e.preventDefault();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Email Tidak Valid!',
+                        text: 'Mohon masukkan alamat email yang valid.',
+                        confirmButtonColor: '#dc3545',
+                        confirmButtonText: 'OK'
+                    });
+                    return false;
+                }
+                
+                // Show loading
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Mengirim...';
+            });
+        }
+    });
+</script>
+@endpush
 
 @endsection

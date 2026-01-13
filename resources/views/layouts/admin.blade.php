@@ -765,6 +765,20 @@
                 <i class="fas fa-car"></i>
                 <span>Mobil</span>
             </a>
+            <a href="{{ route('blogs.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('blogs.admin.*') ? 'active' : '' }}">
+                <i class="fas fa-blog"></i>
+                <span>Blog</span>
+            </a>
+            <a href="{{ route('comments.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('comments.admin.*') ? 'active' : '' }}">
+                <i class="fas fa-comments"></i>
+                <span>Komentar</span>
+                @php
+                    $pendingComments = \App\Models\Comment::where('status', 'pending')->count();
+                @endphp
+                @if($pendingComments > 0)
+                <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: auto;">{{ $pendingComments }}</span>
+                @endif
+            </a>
             <a href="{{ route('users.index') }}" class="sidebar-menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
                 <i class="fas fa-users"></i>
                 <span>Pengguna</span>

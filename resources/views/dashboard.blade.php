@@ -79,6 +79,9 @@
                 <a href="{{ route('about') }}" class="btn btn-outline-dark btn-animate" style="padding: 12px 20px;">
                     <i class="fas fa-info-circle me-2"></i>Kelola Tentang
                 </a>
+                <a href="{{ route('blogs.admin.index') }}" class="btn btn-outline-danger btn-animate" style="padding: 12px 20px;">
+                    <i class="fas fa-blog me-2"></i>Kelola Blog
+                </a>
             </div>
         </div>
     </div>

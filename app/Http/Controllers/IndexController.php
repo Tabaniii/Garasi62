@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\car;
+use App\Models\Blog;
 use Illuminate\Support\Facades\DB;
 
 class IndexController extends Controller
@@ -23,6 +24,9 @@ class IndexController extends Controller
         $minPrice = car::whereNotNull('harga')->min(DB::raw('CAST(harga AS UNSIGNED)')) ?? 0;
         $maxPrice = car::whereNotNull('harga')->max(DB::raw('CAST(harga AS UNSIGNED)')) ?? 1000000000;
 
-        return view('index', compact('cars', 'brands', 'tahunList', 'transmisiList', 'kapasitasmesinList', 'minPrice', 'maxPrice'));
+        // Get latest published blogs (limit 3)
+        $blogs = Blog::published()->orderBy('published_at', 'desc')->limit(3)->get();
+
+        return view('index', compact('cars', 'brands', 'tahunList', 'transmisiList', 'kapasitasmesinList', 'minPrice', 'maxPrice', 'blogs'));
     }
 }

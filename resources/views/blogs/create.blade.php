@@ -102,9 +102,12 @@
 
         <div class="mb-4">
             <label for="image" class="form-label">Gambar Blog</label>
-            <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" accept="image/*" onchange="previewImage(this)">
+            <input type="file" class="form-control @error('image') is-invalid @enderror @error('error') is-invalid @enderror" id="image" name="image" accept="image/*" onchange="previewImage(this)">
             @error('image')
-                <div class="invalid-feedback">{{ $message }}</div>
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
+            @error('error')
+                <div class="alert alert-danger mt-2">{{ $message }}</div>
             @enderror
             <small class="text-muted">Format: JPG, PNG, GIF, WEBP (Maks 5MB)</small>
             <div id="imagePreview" class="mt-3"></div>
@@ -182,12 +185,36 @@
 <script>
 function previewImage(input) {
     const preview = document.getElementById('imagePreview');
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    
     if (input.files && input.files[0]) {
+        const file = input.files[0];
+        
+        // Validasi tipe file
+        if (!allowedTypes.includes(file.type)) {
+            alert('Format file tidak didukung. Gunakan JPG, PNG, GIF, atau WEBP.');
+            input.value = '';
+            preview.innerHTML = '';
+            return;
+        }
+        
+        // Validasi ukuran file
+        if (file.size > maxSize) {
+            alert('Ukuran file terlalu besar. Maksimal 5MB.');
+            input.value = '';
+            preview.innerHTML = '';
+            return;
+        }
+        
         const reader = new FileReader();
         reader.onload = function(e) {
-            preview.innerHTML = '<img src="' + e.target.result + '" class="image-preview" alt="Preview">';
+            preview.innerHTML = `
+                <img src="${e.target.result}" class="image-preview" alt="Preview">
+                <small class="d-block text-muted mt-2">Ukuran: ${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+            `;
         }
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
     } else {
         preview.innerHTML = '';
     }

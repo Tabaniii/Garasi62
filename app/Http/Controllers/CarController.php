@@ -102,55 +102,139 @@ class CarController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'images' => 'required|array|min:1|max:6',
-            'images.*' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // max 5MB per image
-            'tipe' => 'required|in:rent,buy',
-            'tahun' => 'required|string|max:4',
-            'brand' => 'required|string|max:20',
-            'nama' => 'required|string|max:100',
-            'kilometer' => 'required|string|max:6',
-            'transmisi' => 'required|string|max:10',
-            'harga' => 'required|string|max:10',
-            'metode' => 'required|string|max:5',
-            'kapasitasmesin' => 'required|string|max:50',
-            'stock' => 'nullable|string|max:50',
-            'vin' => 'nullable|string|max:50',
-            'msrp' => 'nullable|string|max:15',
-            'dealer_discounts' => 'nullable|string|max:15',
-            'description' => 'nullable|string',
-            'interior_features' => 'nullable|array',
-            'safety_features' => 'nullable|array',
-            'extra_features' => 'nullable|array',
-            'technical_specs' => 'nullable|string',
-            'location' => 'nullable|string|max:255',
-        ]);
+        try {
+            // Validasi file terlebih dahulu
+            if (!$request->hasFile('images')) {
+                return back()->withErrors(['images' => 'Gambar wajib diisi.'])->withInput();
+            }
 
-        $imagePaths = [];
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('cars', 'public');
+            $files = $request->file('images');
+            if (empty($files) || count($files) < 1) {
+                return back()->withErrors(['images' => 'Minimal 1 gambar diperlukan.'])->withInput();
+            }
+
+            if (count($files) > 6) {
+                return back()->withErrors(['images' => 'Maksimal 6 gambar yang diizinkan.'])->withInput();
+            }
+
+            // Validasi setiap file
+            foreach ($files as $index => $file) {
+                if (!$file->isValid()) {
+                    return back()->withErrors(['images.' . $index => 'File gambar tidak valid.'])->withInput();
+                }
+
+                // Cek MIME type
+                $mimeType = $file->getMimeType();
+                $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
+                
+                if (!in_array($mimeType, $allowedMimes)) {
+                    return back()->withErrors(['images.' . $index => 'Format file tidak didukung. Gunakan JPG, PNG, GIF, atau WEBP.'])->withInput();
+                }
+
+                // Cek ukuran file (5MB = 5120 KB)
+                if ($file->getSize() > 5120 * 1024) {
+                    return back()->withErrors(['images.' . $index => 'Ukuran file terlalu besar. Maksimal 5MB per gambar.'])->withInput();
+                }
+            }
+
+            // Validasi field lainnya
+            $request->validate([
+                'tipe' => 'required|in:rent,buy',
+                'tahun' => 'required|string|max:4',
+                'brand' => 'required|string|max:20',
+                'nama' => 'required|string|max:100',
+                'kilometer' => 'required|string|max:6',
+                'transmisi' => 'required|string|max:10',
+                'harga' => 'required|string|max:10',
+                'metode' => 'required|string|max:5',
+                'kapasitasmesin' => 'required|string|max:50',
+                'stock' => 'nullable|string|max:50',
+                'vin' => 'nullable|string|max:50',
+                'msrp' => 'nullable|string|max:15',
+                'dealer_discounts' => 'nullable|string|max:15',
+                'description' => 'nullable|string',
+                'interior_features' => 'nullable|array',
+                'safety_features' => 'nullable|array',
+                'extra_features' => 'nullable|array',
+                'technical_specs' => 'nullable|string',
+                'location' => 'nullable|string|max:255',
+            ]);
+
+            // Ensure storage directory exists
+            if (!Storage::disk('public')->exists('cars')) {
+                Storage::disk('public')->makeDirectory('cars');
+            }
+
+            $imagePaths = [];
+            foreach ($files as $file) {
+                // Generate hash dari file untuk cek duplikat
+                $fileHash = hash_file('md5', $file->getRealPath());
+                
+                // Cek apakah file dengan hash yang sama sudah ada
+                $existingCar = car::whereNotNull('image')
+                    ->get()
+                    ->filter(function($car) use ($fileHash) {
+                        if (is_array($car->image)) {
+                            foreach ($car->image as $imagePath) {
+                                $fullPath = storage_path('app/public/' . $imagePath);
+                                if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    })
+                    ->first();
+                
+                if ($existingCar) {
+                    // Gunakan path yang sudah ada
+                    $existingImagePath = null;
+                    if (is_array($existingCar->image)) {
+                        foreach ($existingCar->image as $imagePath) {
+                            $fullPath = storage_path('app/public/' . $imagePath);
+                            if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
+                                $existingImagePath = $imagePath;
+                                break;
+                            }
+                        }
+                    }
+                    if ($existingImagePath) {
+                        $imagePaths[] = $existingImagePath;
+                        continue; // Skip upload, gunakan yang sudah ada
+                    }
+                }
+                
+                // Upload file baru jika tidak ada duplikat
+                $path = $file->store('cars', 'public');
+                if (!$path) {
+                    throw new \Exception('Gagal mengupload gambar. Pastikan folder storage dapat ditulis.');
+                }
                 $imagePaths[] = $path;
             }
-        }
 
-        $data = $request->except(['images']);
-        $data['image'] = $imagePaths;
+            $data = $request->except(['images']);
+            $data['image'] = $imagePaths;
 
-        // Handle features arrays
-        if ($request->has('interior_features')) {
-            $data['interior_features'] = array_filter($request->input('interior_features', []));
-        }
-        if ($request->has('safety_features')) {
-            $data['safety_features'] = array_filter($request->input('safety_features', []));
-        }
-        if ($request->has('extra_features')) {
-            $data['extra_features'] = array_filter($request->input('extra_features', []));
-        }
+            // Handle features arrays
+            if ($request->has('interior_features')) {
+                $data['interior_features'] = array_filter($request->input('interior_features', []));
+            }
+            if ($request->has('safety_features')) {
+                $data['safety_features'] = array_filter($request->input('safety_features', []));
+            }
+            if ($request->has('extra_features')) {
+                $data['extra_features'] = array_filter($request->input('extra_features', []));
+            }
 
-        car::create($data);
+            car::create($data);
 
-        return redirect()->route('cars.index')->with('success', 'Mobil berhasil ditambahkan!');
+            return redirect()->route('cars.index')->with('success', 'Mobil berhasil ditambahkan!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Error storing car: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])->withInput();
+        }
     }
 
     public function edit($id)
@@ -194,6 +278,45 @@ class CarController extends Controller
         // Handle new uploaded images
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
+                // Generate hash dari file untuk cek duplikat
+                $fileHash = hash_file('md5', $image->getRealPath());
+                
+                // Cek apakah file dengan hash yang sama sudah ada
+                $existingCar = car::where('id', '!=', $id)
+                    ->whereNotNull('image')
+                    ->get()
+                    ->filter(function($otherCar) use ($fileHash) {
+                        if (is_array($otherCar->image)) {
+                            foreach ($otherCar->image as $imagePath) {
+                                $fullPath = storage_path('app/public/' . $imagePath);
+                                if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    })
+                    ->first();
+                
+                if ($existingCar) {
+                    // Gunakan path yang sudah ada
+                    $existingImagePath = null;
+                    if (is_array($existingCar->image)) {
+                        foreach ($existingCar->image as $imagePath) {
+                            $fullPath = storage_path('app/public/' . $imagePath);
+                            if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
+                                $existingImagePath = $imagePath;
+                                break;
+                            }
+                        }
+                    }
+                    if ($existingImagePath) {
+                        $imagePaths[] = $existingImagePath;
+                        continue; // Skip upload, gunakan yang sudah ada
+                    }
+                }
+                
+                // Upload file baru jika tidak ada duplikat
                 $path = $image->store('cars', 'public');
                 $imagePaths[] = $path;
             }
@@ -236,19 +359,52 @@ class CarController extends Controller
 
     public function destroy($id)
     {
-        $car = car::findOrFail($id);
-        
-        // Hapus gambar dari storage
-        if ($car->image && is_array($car->image)) {
-            foreach ($car->image as $imagePath) {
-                if (Storage::disk('public')->exists($imagePath)) {
-                    Storage::disk('public')->delete($imagePath);
+        try {
+            $car = car::findOrFail($id);
+            
+            // Hapus gambar dari storage
+            if ($car->image && is_array($car->image)) {
+                foreach ($car->image as $imagePath) {
+                    // Cek apakah gambar digunakan oleh mobil lain
+                    $isUsedByOtherCar = car::where('id', '!=', $id)
+                        ->whereNotNull('image')
+                        ->get()
+                        ->filter(function($otherCar) use ($imagePath) {
+                            if (is_array($otherCar->image)) {
+                                return in_array($imagePath, $otherCar->image);
+                            }
+                            return false;
+                        })
+                        ->isNotEmpty();
+                    
+                    // Hapus file hanya jika tidak digunakan oleh mobil lain
+                    if (!$isUsedByOtherCar && Storage::disk('public')->exists($imagePath)) {
+                        Storage::disk('public')->delete($imagePath);
+                    }
                 }
             }
-        }
-        
-        $car->delete();
+            
+            $car->delete();
 
-        return redirect()->route('cars.index')->with('success', 'Mobil berhasil dihapus!');
+            if (request()->expectsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Mobil berhasil dihapus!'
+                ]);
+            }
+
+            return redirect()->route('cars.index')->with('success', 'Mobil berhasil dihapus!');
+        } catch (\Exception $e) {
+            \Log::error('Error deleting car: ' . $e->getMessage());
+            
+            if (request()->expectsJson() || request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Terjadi kesalahan saat menghapus mobil.'
+                ], 500);
+            }
+            
+            return redirect()->route('cars.index')->with('error', 'Terjadi kesalahan saat menghapus mobil.');
+        }
     }
 }

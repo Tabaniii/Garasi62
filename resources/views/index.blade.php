@@ -384,54 +384,37 @@
             </div>
         </div>
         <div class="row">
+            @forelse($blogs as $blog)
             <div class="col-lg-4 col-md-6">
                 <div class="latest__blog__item">
-                    <div class="latest__blog__item__pic set-bg" data-setbg="img/latest-blog/lb-1.jpg">
+                    <div class="latest__blog__item__pic set-bg" 
+                         @if($blog->image)
+                         data-setbg="{{ asset('storage/' . $blog->image) }}"
+                         style="background-image: url('{{ asset('storage/' . $blog->image) }}');"
+                         @else
+                         data-setbg="img/latest-blog/lb-1.jpg"
+                         style="background-image: url('{{ asset('img/latest-blog/lb-1.jpg') }}');"
+                         @endif>
                         <ul>
-                            <li>By Polly Williams</li>
-                            <li>Dec 19, 2018</li>
-                            <li>Comment</li>
+                            <li>By {{ $blog->author }}</li>
+                            <li>{{ $blog->published_at ? $blog->published_at->format('M d, Y') : $blog->created_at->format('M d, Y') }}</li>
+                            <li>{{ $blog->comment_count ?? 0 }} Comment{{ ($blog->comment_count ?? 0) != 1 ? 's' : '' }}</li>
                         </ul>
                     </div>
                     <div class="latest__blog__item__text">
-                        <h5>Benjamin Franklin S Method Of Habit Formation</h5>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Risus commodo viverra maecenas accumsan lacus vel facilisis.</p>
-                        <a href="#">View More <i class="fa fa-long-arrow-right"></i></a>
+                        <h5>{{ $blog->title }}</h5>
+                        <p>{{ $blog->excerpt ? Str::limit($blog->excerpt, 150) : Str::limit(strip_tags($blog->content), 150) }}</p>
+                        <a href="{{ route('blog.show', $blog->slug) }}">View More <i class="fa fa-long-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="latest__blog__item">
-                    <div class="latest__blog__item__pic set-bg" data-setbg="img/latest-blog/lb-2.jpg">
-                        <ul>
-                            <li>By Mattie Ramirez</li>
-                            <li>Dec 19, 2018</li>
-                            <li>Comment</li>
-                        </ul>
-                    </div>
-                    <div class="latest__blog__item__text">
-                        <h5>How To Set Intentions That Energize You</h5>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Risus commodo viverra maecenas accumsan lacus vel facilisis.</p>
-                        <a href="#">View More <i class="fa fa-long-arrow-right"></i></a>
-                    </div>
+            @empty
+            <div class="col-lg-12">
+                <div class="text-center" style="padding: 60px 20px;">
+                    <p style="color: #6b7280; font-size: 16px;">Belum ada blog yang dipublikasikan.</p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="latest__blog__item">
-                    <div class="latest__blog__item__pic set-bg" data-setbg="img/latest-blog/lb-3.jpg">
-                        <ul>
-                            <li>By Nicholas Brewer</li>
-                            <li>Dec 19, 2018</li>
-                            <li>Comment</li>
-                        </ul>
-                    </div>
-                    <div class="latest__blog__item__text">
-                        <h5>Burning Desire Golden Key Or Red Herring</h5>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Risus commodo viverra maecenas accumsan lacus vel facilisis.</p>
-                        <a href="#">View More <i class="fa fa-long-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
+            @endforelse
         </div>
     </div>
 </section>

@@ -769,6 +769,10 @@
                 <i class="fas fa-blog"></i>
                 <span>Blog</span>
             </a>
+            <a href="{{ route('testimonials.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('testimonials.admin.*') ? 'active' : '' }}">
+                <i class="fas fa-quote-right"></i>
+                <span>Testimoni</span>
+            </a>
             <a href="{{ route('comments.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('comments.admin.*') ? 'active' : '' }}">
                 <i class="fas fa-comments"></i>
                 <span>Komentar</span>
@@ -843,4 +847,3 @@
     @stack('scripts')
 </body>
 </html>
-

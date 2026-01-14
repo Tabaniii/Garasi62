@@ -423,6 +423,73 @@
 }
 </style>
 
+/* Enhanced Delete Confirmation Styling */
+.swal2-popup-custom-delete {
+    border-radius: 20px !important;
+    padding: 35px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid #e9ecef !important;
+    max-width: 550px !important;
+}
+
+.swal2-title-custom-delete {
+    font-size: 28px !important;
+    font-weight: 900 !important;
+    color: #1a1a1a !important;
+    margin-bottom: 20px !important;
+    letter-spacing: -0.5px !important;
+}
+
+.swal2-html-container-custom-delete {
+    font-size: 14px !important;
+    color: #6b7280 !important;
+    line-height: 1.6 !important;
+    text-align: left !important;
+}
+
+.swal2-confirm-custom-delete {
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+    color: #fff !important;
+    padding: 14px 28px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    border: none !important;
+    transition: all 0.3s !important;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
+}
+
+.swal2-confirm-custom-delete:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4) !important;
+    background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
+}
+
+.swal2-cancel-custom-delete {
+    background: linear-gradient(135deg, #fff, #fafafa) !important;
+    color: #6b7280 !important;
+    padding: 14px 28px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    border: 2px solid #e9ecef !important;
+    transition: all 0.3s !important;
+}
+
+.swal2-cancel-custom-delete:hover {
+    background: linear-gradient(135deg, #f9fafb, #f3f4f6) !important;
+    border-color: #d1d5db !important;
+    transform: translateY(-2px) !important;
+    color: #4b5563 !important;
+}
+
+.swal2-icon-custom-delete.swal2-warning {
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
+    border-width: 4px !important;
+}
+</style>
+
 <script>
 // Handle Approve Button
 document.addEventListener('DOMContentLoaded', function() {
@@ -608,7 +675,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </p>
                         <p style="color: #991b1b; font-size: 13px; margin: 8px 0 0 0;">Komentar akan dihapus secara permanen dari database.</p>
                     </div>
-                </div>`,
+                      </div>`,
                 icon: 'warning',
                 iconColor: '#dc2626',
                 showCancelButton: true,

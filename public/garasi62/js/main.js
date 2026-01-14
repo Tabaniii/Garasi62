@@ -86,24 +86,21 @@
         Testimonial Slider
     ----------------------------*/
     var testimonialSlider = $(".testimonial__slider");
-    testimonialSlider.owlCarousel({
-        loop: true,
-        margin: 0,
-        items: 2,
-        dots: true,
-        nav: true,
-        navText: ["<i class='fa fa-angle-left'></i>", "<i class='fa fa-angle-right'></i>"],
-        smartSpeed: 1200,
-        autoHeight: false,
-        autoplay: false,
-        responsive: {
-            768: {
-                items: 2
-            },
-            0: {
-                items: 1
-            }
-        }
+    testimonialSlider.each(function () {
+        var $this = $(this);
+        var itemCount = $this.find(".testimonial__item").length;
+
+        $this.owlCarousel({
+            loop: itemCount > 1,
+            margin: 0,
+            items: 1,
+            dots: itemCount > 1,
+            nav: itemCount > 1,
+            navText: ["<i class='fa fa-angle-left'></i>", "<i class='fa fa-angle-right'></i>"],
+            smartSpeed: 1200,
+            autoHeight: true,
+            autoplay: false
+        });
     });
 
     /*-----------------------------

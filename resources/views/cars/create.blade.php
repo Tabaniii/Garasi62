@@ -35,12 +35,15 @@
 
                             <div class="mb-3">
                                 <label for="images" class="form-label">Gambar Mobil <span class="text-danger">*</span> (Maksimal 6 gambar)</label>
-                                <input type="file" class="form-control @error('images') is-invalid @enderror @error('images.*') is-invalid @enderror" id="images" name="images[]" accept="image/*" multiple required>
+                                <input type="file" class="form-control @error('images') is-invalid @enderror @error('images.*') is-invalid @enderror @error('error') is-invalid @enderror" id="images" name="images[]" accept="image/*" multiple required>
                                 @error('images')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                                 @error('images.*')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                                @error('error')
+                                    <div class="alert alert-danger mt-2">{{ $message }}</div>
                                 @enderror
                                 <small class="form-text text-muted">Pilih 1-6 gambar mobil (Format: JPG, PNG, GIF, WEBP, Maks 5MB per gambar)</small>
                                 <div id="imagePreview" class="mt-3 row g-2"></div>
@@ -269,6 +272,8 @@
         
         const files = e.target.files;
         const maxFiles = 6;
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
         
         if (files.length > maxFiles) {
             alert('Maksimal ' + maxFiles + ' gambar yang diizinkan.');
@@ -276,16 +281,40 @@
             return;
         }
         
+        if (files.length < 1) {
+            alert('Minimal 1 gambar diperlukan.');
+            return;
+        }
+        
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
+            
+            // Validasi tipe file
+            if (!allowedTypes.includes(file.type)) {
+                alert(`File ${i + 1}: Format tidak didukung. Gunakan JPG, PNG, GIF, atau WEBP.`);
+                e.target.value = '';
+                preview.innerHTML = '';
+                return;
+            }
+            
+            // Validasi ukuran file
+            if (file.size > maxSize) {
+                alert(`File ${i + 1}: Ukuran file terlalu besar. Maksimal 5MB per gambar.`);
+                e.target.value = '';
+                preview.innerHTML = '';
+                return;
+            }
+            
+            // Preview gambar
             if (file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const col = document.createElement('div');
-                    col.className = 'col-md-3';
+                    col.className = 'col-md-3 mb-2';
                     col.innerHTML = `
                         <div class="position-relative">
                             <img src="${e.target.result}" alt="Preview ${i + 1}" class="img-thumbnail w-100" style="height: 150px; object-fit: cover;">
+                            <small class="d-block text-center mt-1 text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
                         </div>
                     `;
                     preview.appendChild(col);

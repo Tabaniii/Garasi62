@@ -819,13 +819,17 @@
                     <i class="fas fa-edit"></i>
                     <span>Edit</span>
                 </a>
-                <form action="{{ route('cars.destroy', $car->id) }}" method="POST" class="d-inline flex-fill" onsubmit="return confirm('Apakah Anda yakin ingin menghapus mobil ini?');">
+                <button type="button" class="btn-action btn-delete-action w-100" 
+                        data-car-id="{{ $car->id }}" 
+                        data-car-name="{{ $car->nama }}" 
+                        data-car-brand="{{ $car->brand }}"
+                        onclick="confirmDeleteCar(this)">
+                    <i class="fas fa-trash"></i>
+                    <span>Hapus</span>
+                </button>
+                <form id="delete-car-form-{{ $car->id }}" action="{{ route('cars.destroy', $car->id) }}" method="POST" style="display: none;">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn-action btn-delete-action w-100">
-                        <i class="fas fa-trash"></i>
-                        <span>Hapus</span>
-                    </button>
                 </form>
             </div>
         </div>
@@ -882,6 +886,223 @@
         });
     });
 </script>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmDeleteCar(button) {
+    const carId = button.getAttribute('data-car-id');
+    const carName = button.getAttribute('data-car-name');
+    const carBrand = button.getAttribute('data-car-brand');
+    Swal.fire({
+        title: '<strong style="color: #1a1a1a;">Hapus Mobil?</strong>',
+        html: `<div style="text-align: left; padding: 5px 0;">
+            <p style="color: #6b7280; margin-bottom: 10px; font-size: 13px;">Anda akan menghapus mobil berikut:</p>
+            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; border-left: 3px solid #dc2626; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; flex-shrink: 0;">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <strong style="color: #1a1a1a; display: block; margin-bottom: 3px; font-size: 14px;">${carName}</strong>
+                        <span style="background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-size: 11px; color: #6b7280; font-weight: 600;">
+                            <i class="fas fa-tag me-1"></i>${carBrand}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div style="background: #fef2f2; padding: 10px; border-radius: 6px; border-left: 3px solid #ef4444; margin-top: 10px;">
+                <p style="color: #dc2626; font-size: 12px; margin: 0; display: flex; align-items: center; gap: 6px; margin-bottom: 5px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 12px;"></i>
+                    <strong>Tindakan ini tidak dapat dibatalkan!</strong>
+                </p>
+                <p style="color: #991b1b; font-size: 11px; margin: 0;">
+                    Mobil dan semua gambar terkait akan dihapus secara permanen.
+                </p>
+            </div>
+        </div>`,
+        icon: 'warning',
+        iconColor: '#dc2626',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-trash me-2"></i>Ya, Hapus Mobil',
+        cancelButtonText: '<i class="fas fa-times me-2"></i>Batal',
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        customClass: {
+            popup: 'swal2-popup-custom-delete-car',
+            confirmButton: 'swal2-confirm-custom-delete-car',
+            cancelButton: 'swal2-cancel-custom-delete-car',
+            title: 'swal2-title-custom-delete-car',
+            htmlContainer: 'swal2-html-container-custom-delete-car',
+            icon: 'swal2-icon-custom-delete-car'
+        },
+        buttonsStyling: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading
+            Swal.fire({
+                title: 'Menghapus Mobil...',
+                html: '<p style="font-size: 13px; color: #6b7280;">Mohon tunggu, mobil sedang dihapus.</p>',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                customClass: {
+                    popup: 'swal2-popup-custom-delete-car',
+                    title: 'swal2-title-custom-delete-car'
+                }
+            });
+
+            // Submit form
+            const form = document.getElementById('delete-car-form-' + carId);
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.close();
+                
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<strong style="color: #1a1a1a; font-size: 18px;">Berhasil!</strong>',
+                        html: '<p style="color: #6b7280; font-size: 13px;">Mobil berhasil dihapus.</p>',
+                        confirmButtonText: '<i class="fas fa-check me-2"></i>OK',
+                        confirmButtonColor: '#10b981',
+                        customClass: {
+                            popup: 'swal2-popup-custom-delete-car',
+                            confirmButton: 'swal2-confirm-custom-delete-car',
+                            title: 'swal2-title-custom-delete-car'
+                        },
+                        buttonsStyling: false
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '<strong style="color: #1a1a1a; font-size: 18px;">Gagal!</strong>',
+                        html: '<p style="color: #6b7280; font-size: 13px;">Terjadi kesalahan saat menghapus mobil. Silakan coba lagi.</p>',
+                        confirmButtonText: '<i class="fas fa-check me-2"></i>OK',
+                        confirmButtonColor: '#dc2626',
+                        customClass: {
+                            popup: 'swal2-popup-custom-delete-car',
+                            confirmButton: 'swal2-confirm-custom-delete-car',
+                            title: 'swal2-title-custom-delete-car'
+                        },
+                        buttonsStyling: false
+                    });
+                }
+            })
+            .catch(error => {
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: '<strong style="color: #1a1a1a;">Gagal!</strong>',
+                    html: '<p style="color: #6b7280;">Terjadi kesalahan saat menghapus mobil. Silakan coba lagi.</p>',
+                    confirmButtonText: '<i class="fas fa-check me-2"></i>OK',
+                    confirmButtonColor: '#dc2626',
+                    customClass: {
+                        popup: 'swal2-popup-custom-delete-car',
+                        confirmButton: 'swal2-confirm-custom-delete-car',
+                        title: 'swal2-title-custom-delete-car'
+                    },
+                    buttonsStyling: false
+                });
+            });
+        }
+    });
+}
+</script>
+
+<style>
+/* SweetAlert2 Custom Styling for Car Delete */
+.swal2-popup-custom-delete-car {
+    border-radius: 12px !important;
+    padding: 20px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid #e9ecef !important;
+    max-width: 450px !important;
+}
+
+.swal2-title-custom-delete-car {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: #1a1a1a !important;
+    margin-bottom: 12px !important;
+    letter-spacing: -0.3px !important;
+}
+
+.swal2-html-container-custom-delete-car {
+    font-size: 13px !important;
+    color: #6b7280 !important;
+    line-height: 1.5 !important;
+    text-align: left !important;
+}
+
+.swal2-confirm-custom-delete-car {
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+    color: #fff !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    border: none !important;
+    transition: all 0.3s !important;
+    box-shadow: 0 3px 10px rgba(220, 38, 38, 0.3) !important;
+}
+
+.swal2-confirm-custom-delete-car:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4) !important;
+    background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
+}
+
+.swal2-cancel-custom-delete-car {
+    background: linear-gradient(135deg, #fff, #fafafa) !important;
+    color: #6b7280 !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    border: 2px solid #e9ecef !important;
+    transition: all 0.3s !important;
+}
+
+.swal2-cancel-custom-delete-car:hover {
+    background: linear-gradient(135deg, #f9fafb, #f3f4f6) !important;
+    border-color: #d1d5db !important;
+    transform: translateY(-2px) !important;
+    color: #4b5563 !important;
+}
+
+.swal2-icon-custom-delete-car.swal2-warning {
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
+    border-width: 3px !important;
+    width: 50px !important;
+    height: 50px !important;
+    margin-bottom: 15px !important;
+}
+
+.swal2-icon-custom-delete-car.swal2-success {
+    border-color: #10b981 !important;
+    color: #10b981 !important;
+    width: 50px !important;
+    height: 50px !important;
+}
+</style>
 @endpush
 @endsection
 

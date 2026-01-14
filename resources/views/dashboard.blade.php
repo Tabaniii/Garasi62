@@ -69,8 +69,8 @@
                 <a href="{{ route('cars.index') }}" class="btn btn-outline-dark btn-animate" style="padding: 12px 20px;">
                     <i class="fas fa-list me-2"></i>Lihat Semua Mobil
                 </a>
-                <a href="{{ route('about') }}" class="btn btn-outline-dark btn-animate" style="padding: 12px 20px;">
-                    <i class="fas fa-info-circle me-2"></i>Kelola Tentang
+                <a href="{{ route('testimonials.admin.index') }}" class="btn btn-outline-dark btn-animate" style="padding: 12px 20px;">
+                    <i class="fas fa-quote-right me-2"></i>Kelola Testimoni
                 </a>
                 <a href="{{ route('blogs.admin.index') }}" class="btn btn-outline-danger btn-animate" style="padding: 12px 20px;">
                     <i class="fas fa-blog me-2"></i>Kelola Blog
@@ -126,6 +126,94 @@
                     <p>Belum ada mobil yang ditambahkan</p>
                     <a href="{{ route('cars.create') }}" class="btn btn-danger mt-3">
                         <i class="fas fa-plus me-2"></i>Tambah Mobil Pertama
+                    </a>
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+
+<!-- Testimonials Section -->
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <div class="info-card animate-fade-in">
+            <div class="info-card-header">
+                <h5 class="info-card-title">
+                    <i class="fas fa-quote-right me-2"></i>Testimoni Terbaru
+                </h5>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-danger" style="font-size: 12px; padding: 6px 12px;">
+                        <i class="fas fa-check-circle me-1"></i>{{ $stats['active_testimonials'] ?? 0 }} Aktif
+                    </span>
+                    <a href="{{ route('testimonials.admin.index') }}" class="btn btn-sm btn-outline-danger">
+                        <i class="fas fa-eye me-1"></i>Lihat Semua
+                    </a>
+                </div>
+            </div>
+            @if(isset($stats['recent_testimonials']) && $stats['recent_testimonials']->count() > 0)
+            <div class="testimonials-grid">
+                @foreach($stats['recent_testimonials'] as $testimonial)
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            @if($testimonial->image)
+                                <img src="{{ asset('storage/' . $testimonial->image) }}" alt="{{ $testimonial->name }}">
+                            @else
+                                <div class="avatar-placeholder">
+                                    {{ strtoupper(mb_substr($testimonial->name, 0, 1)) }}
+                                </div>
+                            @endif
+                        </div>
+                        <div class="testimonial-info">
+                            <h6 class="testimonial-name">{{ $testimonial->name }}</h6>
+                            @if($testimonial->position || $testimonial->company)
+                                <p class="testimonial-role">
+                                    {{ $testimonial->position }}
+                                    @if($testimonial->position && $testimonial->company)
+                                        , 
+                                    @endif
+                                    {{ $testimonial->company }}
+                                </p>
+                            @endif
+                        </div>
+                        <div class="testimonial-rating">
+                            @for($i = 0; $i < $testimonial->rating; $i++)
+                                <i class="fas fa-star text-warning"></i>
+                            @endfor
+                            @for($i = $testimonial->rating; $i < 5; $i++)
+                                <i class="far fa-star text-muted"></i>
+                            @endfor
+                        </div>
+                    </div>
+                    <div class="testimonial-body">
+                        <p class="testimonial-message">
+                            <i class="fas fa-quote-left text-danger me-2" style="opacity: 0.3;"></i>
+                            {{ Str::limit($testimonial->message, 120) }}
+                            @if(strlen($testimonial->message) > 120)
+                                <span class="text-muted">...</span>
+                            @endif
+                        </p>
+                    </div>
+                    <div class="testimonial-footer">
+                        <small class="text-muted">
+                            <i class="far fa-calendar me-1"></i>
+                            {{ $testimonial->created_at->format('d M Y') }}
+                        </small>
+                        <span class="badge {{ $testimonial->is_active ? 'bg-success' : 'bg-secondary' }}" style="font-size: 10px;">
+                            {{ $testimonial->is_active ? 'Aktif' : 'Nonaktif' }}
+                        </span>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @else
+            <div class="text-center py-5">
+                <div class="text-muted">
+                    <i class="fas fa-quote-right fa-3x mb-3" style="opacity: 0.3;"></i>
+                    <p>Belum ada testimoni yang ditambahkan</p>
+                    <a href="{{ route('testimonials.admin.create') }}" class="btn btn-danger mt-3">
+                        <i class="fas fa-plus me-2"></i>Tambah Testimoni Pertama
                     </a>
                 </div>
             </div>
@@ -253,6 +341,161 @@
     .recent-cars-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         gap: 15px;
+    }
+}
+
+/* Testimonials Grid Styles */
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.testimonial-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.testimonial-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626, #991b1b);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+}
+
+.testimonial-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(220, 38, 38, 0.15);
+    border-color: #dc2626;
+}
+
+.testimonial-card:hover::before {
+    transform: scaleX(1);
+}
+
+.testimonial-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.testimonial-avatar {
+    flex-shrink: 0;
+    position: relative;
+}
+
+.testimonial-avatar img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #dc2626;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+    transition: transform 0.3s;
+}
+
+.testimonial-card:hover .testimonial-avatar img {
+    transform: scale(1.1);
+}
+
+.avatar-placeholder {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 20px;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
+    transition: transform 0.3s;
+}
+
+.testimonial-card:hover .avatar-placeholder {
+    transform: scale(1.1);
+}
+
+.testimonial-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.testimonial-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.testimonial-role {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.testimonial-rating {
+    flex-shrink: 0;
+    display: flex;
+    gap: 2px;
+    font-size: 12px;
+}
+
+.testimonial-body {
+    margin-bottom: 16px;
+    padding-left: 8px;
+}
+
+.testimonial-message {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #4b5563;
+    margin: 0;
+    font-style: italic;
+}
+
+.testimonial-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.testimonial-footer small {
+    font-size: 12px;
+}
+
+@media (max-width: 768px) {
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .testimonial-card {
+        padding: 20px;
     }
 }
 </style>

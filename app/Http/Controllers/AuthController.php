@@ -23,8 +23,12 @@ class AuthController extends Controller
             'gender' => 'required',
             'city' => 'required',
             'institution' => 'required',
+            'role' => 'required|in:buyer,seller', // Hanya buyer dan seller yang bisa register
             'password' => 'required|confirmed|min:6',
             'password_confirmation' => 'required' 
+        ], [
+            'role.required' => 'Pilih tipe akun (Buyer atau Seller).',
+            'role.in' => 'Tipe akun harus Buyer atau Seller.',
         ]);
 
         Users::create([
@@ -34,6 +38,7 @@ class AuthController extends Controller
             'gender' => $request->gender,
             'city' => $request->city,
             'institution' => $request->institution,
+            'role' => $request->role, // buyer atau seller
             'password' => Hash::make($request->password),
         ]);
 
@@ -54,10 +59,13 @@ class AuthController extends Controller
 
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $request->session()->regenerate();
-            return redirect()->route('dashboard')->with('success', 'Selamat datang di dashboard!'); 
+            
+            // Redirect ke halaman yang diminta sebelumnya atau dashboard
+            $intended = $request->session()->pull('url.intended', route('dashboard'));
+            return redirect($intended)->with('success', 'Login berhasil! Selamat datang kembali.');
         }
 
-        return back()->withErrors(['email' => 'Email atau password salah.']);
+        return back()->withErrors(['email' => 'Email atau password salah.'])->withInput($request->only('email'));
     }
 
     public function logout()

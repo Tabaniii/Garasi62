@@ -214,6 +214,33 @@
             opacity:.7;
             cursor:not-allowed
         }
+        .back-link{
+            color:#dc3545;
+            text-decoration:none;
+            font-size:.95rem;
+            display:inline-flex;
+            align-items:center;
+            transition:color .2s,transform .2s;
+            margin-bottom:20px;
+            padding:10px 15px;
+            border-radius:8px;
+            background:rgba(220,53,69,.1);
+            border:1px solid rgba(220,53,69,.2);
+            width:fit-content
+        }
+        .back-link:hover{
+            color:#ff4757;
+            transform:translateX(-3px);
+            background:rgba(220,53,69,.15);
+            text-decoration:none
+        }
+        .back-link i{
+            margin-right:8px;
+            transition:transform .2s
+        }
+        .back-link:hover i{
+            transform:translateX(-2px)
+        }
         .form-footer{
             text-align:center;
             margin-top:25px;
@@ -273,32 +300,41 @@
             .card-header h1{font-size:1.5rem}
             .logo-container img{max-width:150px}
         }
+        /* Fade In Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .container {
+            animation: fadeIn 0.6s ease-out;
+        }
+        .card {
+            animation: fadeIn 0.8s ease-out;
+        }
     </style>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="container">
         <div class="logo-container">
             <img src="{{ asset('img/logo.svg') }}" alt="Garasi62 Logo" loading="eager">
         </div>
+        <a href="{{ url()->previous() == url()->current() ? route('home') : url()->previous() }}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </a>
         <div class="card">
             <div class="card-header">
                 <h1><i class="fas fa-sign-in-alt me-2"></i>Masuk</h1>
                 <p>Selamat datang kembali!</p>
             </div>
             <div class="card-body">
-                @if(session('success'))
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-                </div>
-                @endif
-                @if($errors->any())
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    @foreach($errors->all() as $error)
-                        <div>{{ $error }}</div>
-                    @endforeach
-                </div>
-                @endif
                 <form action="{{ route('login.store') }}" method="POST" id="loginForm">
                     @csrf
                     <div class="input-group">
@@ -382,7 +418,34 @@
         emailInput.addEventListener('blur',function(){
             const e=this.value.trim();
             this.style.borderColor=e&&!e.includes('@')?'#f56565':'#333'
-        })
+        });
+        
+        // SweetAlert untuk success/error
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'OK',
+                timer: 3000,
+                timerProgressBar: true
+            }).then(() => {
+                @if(session('redirect'))
+                    window.location.href = '{{ session('redirect') }}';
+                @endif
+            });
+        @endif
+        
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Gagal',
+                html: '<ul style="text-align: left; padding-left: 20px;">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'OK'
+            });
+        @endif
     </script>
 </body>
 </html>

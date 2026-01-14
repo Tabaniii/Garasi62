@@ -3,13 +3,6 @@
 @section('header-title', 'Kelola Pengguna')
 
 @section('content')
-@if(session('success'))
-<div class="alert alert-success alert-custom alert-dismissible fade show" role="alert">
-    <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-@endif
-
 <div class="page-header-section mb-5">
     <div class="page-header-content">
         <div class="page-header-text">
@@ -20,6 +13,12 @@
             <p class="page-subtitle">
                 <i class="fas fa-info-circle me-2"></i>Daftar semua pengguna yang terdaftar di sistem
             </p>
+        </div>
+        <div class="page-header-actions">
+            <a href="{{ route('users.create') }}" class="btn-create-user">
+                <i class="fas fa-plus-circle me-2"></i>
+                <span>Tambah Pengguna</span>
+            </a>
         </div>
     </div>
 </div>
@@ -41,10 +40,12 @@
                             <th>Nama</th>
                             <th>Email</th>
                             <th>No. Telepon</th>
+                            <th>Role</th>
                             <th>Jenis Kelamin</th>
                             <th>Kota</th>
                             <th>Institusi</th>
                             <th>Tanggal Daftar</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -62,6 +63,19 @@
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->phone ?? '-' }}</td>
                             <td>
+                                @if($user->role)
+                                    @if($user->role == 'admin')
+                                        <span class="badge bg-danger">{{ strtoupper($user->role) }}</span>
+                                    @elseif($user->role == 'seller')
+                                        <span class="badge bg-warning">{{ strtoupper($user->role) }}</span>
+                                    @else
+                                        <span class="badge bg-success">{{ strtoupper($user->role) }}</span>
+                                    @endif
+                                @else
+                                    <span class="badge bg-secondary">-</span>
+                                @endif
+                            </td>
+                            <td>
                                 @if($user->gender)
                                     <span class="badge bg-info">{{ ucfirst($user->gender) }}</span>
                                 @else
@@ -75,10 +89,24 @@
                                     {{ $user->created_at->format('d M Y') }}
                                 </small>
                             </td>
+                            <td>
+                                <div class="btn-group-action">
+                                    <a href="{{ route('users.edit', $user->id) }}" class="btn-action btn-edit" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline delete-user-form" data-user-id="{{ $user->id }}" data-user-name="{{ $user->name }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="button" class="btn-action btn-delete delete-btn" title="Hapus" data-user-name="{{ $user->name }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center py-5">
+                            <td colspan="10" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-users fa-3x mb-3"></i>
                                     <p>Belum ada data pengguna</p>
@@ -316,6 +344,74 @@
     color: #fff;
 }
 
+.btn-create-user {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    border: none;
+    white-space: nowrap;
+}
+
+.btn-create-user:hover {
+    background: linear-gradient(135deg, #b91c1c, #dc2626);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+    color: #fff;
+}
+
+.btn-group-action {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.btn-action {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.btn-edit {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+}
+
+.btn-edit:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    color: #fff;
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: #fff;
+}
+
+.btn-delete:hover {
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    color: #fff;
+}
+
 @media (max-width: 768px) {
     .user-table {
         font-size: 12px;
@@ -332,6 +428,211 @@
         gap: 12px;
     }
 }
+
+@push('scripts')
+
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: '{{ session('success') }}',
+            confirmButtonColor: '#dc2626',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: true
+        });
+    });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: '{{ session('error') }}',
+            confirmButtonColor: '#dc2626',
+            showConfirmButton: true
+        });
+    });
+</script>
+@endif
+
+<script>
+// Handle delete button clicks - wait for both DOM and SweetAlert to be ready
+(function() {
+    function initDeleteButtons() {
+        // Check if SweetAlert is loaded
+        if (typeof Swal === 'undefined') {
+            console.log('SweetAlert not loaded yet, retrying...');
+            setTimeout(initDeleteButtons, 100);
+            return;
+        }
+        
+        // Check if buttons exist
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        if (deleteButtons.length === 0) {
+            console.log('Delete buttons not found');
+            return;
+        }
+        
+        console.log('Initializing delete buttons:', deleteButtons.length);
+        
+        // Handle delete button clicks
+        deleteButtons.forEach(function(button) {
+            // Check if already has listener
+            if (button.hasAttribute('data-listener-attached')) {
+                return;
+            }
+            
+            button.setAttribute('data-listener-attached', 'true');
+            
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const userName = this.getAttribute('data-user-name');
+                const form = this.closest('form');
+                
+                if (!form) {
+                    console.error('Form not found');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Form tidak ditemukan',
+                        confirmButtonColor: '#dc2626'
+                    });
+                    return;
+                }
+                
+                if (typeof Swal === 'undefined') {
+                    console.error('SweetAlert not loaded');
+                    return;
+                }
+                
+                Swal.fire({
+                    title: 'Apakah yakin ingin menghapus user?',
+                    html: `<div style="text-align: left; padding: 10px 0;">
+                            <p style="margin-bottom: 10px;"><strong>Nama Pengguna:</strong> ${userName}</p>
+                            <p style="color: #dc2626; font-size: 14px; font-weight: 600; margin-top: 10px;">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Data yang dihapus tidak dapat dikembalikan!
+                            </p>
+                          </div>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: '<i class="fas fa-trash me-2"></i>Ya, Hapus!',
+                    cancelButtonText: '<i class="fas fa-times me-2"></i>Batal',
+                    reverseButtons: true,
+                    customClass: {
+                        popup: 'swal2-popup-custom-delete',
+                        title: 'swal2-title-custom-delete',
+                        htmlContainer: 'swal2-html-container-custom-delete',
+                        confirmButton: 'swal2-confirm-custom-delete',
+                        cancelButton: 'swal2-cancel-custom-delete',
+                        icon: 'swal2-icon-custom-delete'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loading
+                        Swal.fire({
+                            title: 'Menghapus...',
+                            text: 'Mohon tunggu sebentar',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        
+                        // Submit form
+                        form.submit();
+                    }
+                });
+            });
+        });
+    }
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initDeleteButtons, 200);
+        });
+    } else {
+        setTimeout(initDeleteButtons, 200);
+    }
+})();
+</script>
+
+<style>
+.swal2-popup-custom-delete {
+    border-radius: 20px !important;
+    padding: 35px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid #e9ecef !important;
+    max-width: 550px !important;
+}
+
+.swal2-title-custom-delete {
+    font-size: 28px !important;
+    font-weight: 900 !important;
+    color: #1a1a1a !important;
+    margin-bottom: 20px !important;
+    letter-spacing: -0.5px !important;
+}
+
+.swal2-html-container-custom-delete {
+    font-size: 14px !important;
+    color: #6b7280 !important;
+    line-height: 1.6 !important;
+    text-align: left !important;
+}
+
+.swal2-confirm-custom-delete {
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+    color: #fff !important;
+    padding: 14px 28px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    border: none !important;
+    transition: all 0.3s !important;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
+}
+
+.swal2-confirm-custom-delete:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4) !important;
+    background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
+}
+
+.swal2-cancel-custom-delete {
+    background: linear-gradient(135deg, #fff, #fafafa) !important;
+    color: #6b7280 !important;
+    padding: 14px 28px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    border: 2px solid #e9ecef !important;
+    transition: all 0.3s !important;
+}
+
+.swal2-cancel-custom-delete:hover {
+    background: linear-gradient(135deg, #f9fafb, #f3f4f6) !important;
+    border-color: #d1d5db !important;
+    transform: translateY(-2px) !important;
+    color: #4b5563 !important;
+}
+
+.swal2-icon-custom-delete.swal2-warning {
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
+    border-width: 4px !important;
+}
 </style>
+@endpush
 @endsection
 

@@ -196,109 +196,107 @@
     </section>
     <!-- Team Section End -->
 
-    <!-- Testimonial Section Begin -->
-    <section class="testimonial spad">
+    <section class="testimonial spad" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); position: relative; overflow: hidden;">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="section-title testimonial-title">
-                        <span>Testimonials</span>
-                        <h2>What People Say About Us</h2>
-                        <p>Our customers are our biggest supporters. What do they think of us? Lorem</p>
+                    <div class="section-title testimonial-title" style="position: relative; z-index: 2;">
+                        <span style="color: #dc2626; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 14px;">Testimonials</span>
+                        <h2 style="font-size: 42px; font-weight: 800; margin: 15px 0 20px; color: #1a1a1a; position: relative;">
+                            What People Say About Us
+                            <span style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 80px; height: 4px; background: linear-gradient(90deg, #dc2626, #991b1b); border-radius: 2px;"></span>
+                        </h2>
+                        <p style="font-size: 16px; color: #6b7280; max-width: 600px; margin: 0 auto;">Our customers are our biggest supporters. What do they think of us?</p>
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" style="margin-top: 50px;">
                 <div class="testimonial__slider owl-carousel">
-                    <div class="col-lg-6">
-                        <div class="testimonial__item">
-                            <div class="testimonial__item__author">
-                                <div class="testimonial__item__author__pic">
-                                    <img src="img/testimonial/testimonial-1.png" alt="">
+                    @forelse($testimonials as $testimonial)
+                        <div class="col-lg-6">
+                            <div class="testimonial__item" style="background: #ffffff; border-radius: 20px; padding: 35px;  border: 1px solid #f0f0f0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; height: 100%;">
+                                <!-- Decorative Quote Icon -->
+                                <div style="position: absolute; top: 20px; right: 20px; opacity: 0.1; font-size: 80px; color: #dc2626; line-height: 1;">
+                                    <i class="fa fa-quote-right"></i>
                                 </div>
-                                <div class="testimonial__item__author__text">
-                                    <div class="rating">
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
+                                
+                                <div class="testimonial__item__author" style="display: flex; align-items: center; margin-bottom: 25px; position: relative; z-index: 1;">
+                                    <div class="testimonial__item__author__pic" style="margin-right: 20px; position: relative;">
+                                        @if($testimonial->image)
+                                            <img src="{{ asset('storage/' . $testimonial->image) }}" alt="{{ $testimonial->name }}" style="width: 80px; height: 80px; border-radius: 10px; object-fit: cover; border: 4px solid #dc2626;">
+                                        @else
+                                            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 32px; color: #ffffff; border: 4px solid #ffffff;">
+                                                {{ strtoupper(mb_substr($testimonial->name, 0, 1)) }}
+                                            </div>
+                                        @endif
                                     </div>
-                                    <h5>John Smith /<span> CEO Colorlib</span></h5>
-                                </div>
-                            </div>
-                            <p>For one thing they usually step all over the hedges and plants on the side of someone’s
-                                house killing</p>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="testimonial__item">
-                            <div class="testimonial__item__author">
-                                <div class="testimonial__item__author__pic">
-                                    <img src="img/testimonial/testimonial-2.png" alt="">
-                                </div>
-                                <div class="testimonial__item__author__text">
-                                    <div class="rating">
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
+                                    <div class="testimonial__item__author__text" style="flex: 1;">
+                                        <div class="rating" style="margin-bottom: 10px;">
+                                            @for($i = 0; $i < $testimonial->rating; $i++)
+                                                <i class="fa fa-star" style="color: #fbbf24; font-size: 16px; margin-right: 3px; text-shadow: 0 1px 2px rgba(251, 191, 36, 0.3);"></i>
+                                            @endfor
+                                            @for($i = $testimonial->rating; $i < 5; $i++)
+                                                <i class="fa fa-star" style="color: #e5e7eb; font-size: 16px; margin-right: 3px;"></i>
+                                            @endfor
+                                        </div>
+                                        <h5 style="font-size: 18px; font-weight: 700; color: #1a1a1a; margin: 0 0 5px 0;">
+                                            {{ $testimonial->name }}
+                                            @if($testimonial->position || $testimonial->company)
+                                                <span style="color: #6b7280; font-weight: 500; font-size: 14px;">
+                                                    / {{ $testimonial->position }}
+                                                    @if($testimonial->position && $testimonial->company)
+                                                        , 
+                                                    @endif
+                                                    {{ $testimonial->company }}
+                                                </span>
+                                            @endif
+                                        </h5>
                                     </div>
-                                    <h5>Emma Sandoval /<span> Marketing Manager</span></h5>
                                 </div>
+                                <p style="font-size: 15px; line-height: 1.8; color: #4b5563; margin: 0; position: relative; z-index: 1; font-style: italic;">"{{ $testimonial->message }}"</p>
+                                
+                                <!-- Hover Effect Border -->
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #dc2626, #991b1b); transform: scaleX(0); transform-origin: left; transition: transform 0.4s;"></div>
                             </div>
-                            <p>It seems though that some of the biggest problems with the internet advertising trends
-                                are the lack of</p>
                         </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="testimonial__item">
-                            <div class="testimonial__item__author">
-                                <div class="testimonial__item__author__pic">
-                                    <img src="img/testimonial/testimonial-1.png" alt="">
-                                </div>
-                                <div class="testimonial__item__author__text">
-                                    <div class="rating">
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                    </div>
-                                    <h5>John Smith /<span> CEO Colorlib</span></h5>
-                                </div>
+                    @empty
+                        <div class="col-lg-12">
+                            <div class="text-center" style="padding: 60px 20px;">
+                                <i class="fa fa-quote-right" style="font-size: 64px; color: #e5e7eb; margin-bottom: 20px;"></i>
+                                <p style="font-size: 18px; color: #6b7280;">Belum ada testimoni yang ditampilkan.</p>
                             </div>
-                            <p>For one thing they usually step all over the hedges and plants on the side of someone’s
-                                house killing</p>
                         </div>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="testimonial__item">
-                            <div class="testimonial__item__author">
-                                <div class="testimonial__item__author__pic">
-                                    <img src="img/testimonial/testimonial-2.png" alt="">
-                                </div>
-                                <div class="testimonial__item__author__text">
-                                    <div class="rating">
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                    </div>
-                                    <h5>Emma Sandoval /<span> Marketing Manager</span></h5>
-                                </div>
-                            </div>
-                            <p>It seems though that some of the biggest problems with the internet advertising trends
-                                are the lack of</p>
-                        </div>
-                    </div>
+                    @endforelse
                 </div>
             </div>
         </div>
+        
+        <style>
+            .testimonial__item:hover {
+                transform: translateY(-8px) !important;
+                border-color: #dc2626 !important;
+            }
+            
+            .testimonial__item:hover .testimonial__item__author__pic img,
+            .testimonial__item:hover .testimonial__item__author__pic div {
+                transform: scale(1.1);
+            }
+            
+            .testimonial__item:hover > div:last-child {
+                transform: scaleX(1);
+            }
+            
+            @media (max-width: 768px) {
+                .testimonial__item {
+                    padding: 25px !important;
+                }
+                
+                .section-title h2 {
+                    font-size: 32px !important;
+                }
+            }
+        </style>
     </section>
-    <!-- Testimonial Section End -->
 
     <!-- Counter Begin -->
     <div class="counter spad set-bg" data-setbg="img/counter-bg.jpg">

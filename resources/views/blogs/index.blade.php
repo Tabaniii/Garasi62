@@ -438,13 +438,13 @@
                     <i class="fas fa-edit"></i>
                     <span>Edit</span>
                 </a>
-                <form action="{{ route('blogs.admin.destroy', $blog->id) }}" method="POST" class="d-inline flex-fill" onsubmit="return confirm('Apakah Anda yakin ingin menghapus blog ini?');">
+                <button type="button" class="btn-action btn-delete-action w-100" onclick="confirmDeleteBlog({{ $blog->id }}, '{{ addslashes($blog->title) }}')">
+                    <i class="fas fa-trash"></i>
+                    <span>Hapus</span>
+                </button>
+                <form id="delete-blog-form-{{ $blog->id }}" action="{{ route('blogs.admin.destroy', $blog->id) }}" method="POST" style="display: none;">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn-action btn-delete-action w-100">
-                        <i class="fas fa-trash"></i>
-                        <span>Hapus</span>
-                    </button>
                 </form>
             </div>
         </div>
@@ -471,5 +471,120 @@
         <span>Kembali ke Dashboard</span>
     </a>
 </div>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function confirmDeleteBlog(blogId, blogTitle) {
+    Swal.fire({
+        title: '<strong style="color: #1a1a1a;">Hapus Blog?</strong>',
+        html: `<div style="text-align: left; padding: 10px 0;">
+            <p style="color: #6b7280; margin-bottom: 15px;">Anda akan menghapus blog berikut:</p>
+            <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border-left: 4px solid #dc2626; margin-bottom: 15px;">
+                <strong style="color: #1a1a1a; display: block; margin-bottom: 5px;">${blogTitle}</strong>
+            </div>
+            <p style="color: #dc2626; font-size: 14px; margin: 0;">
+                <i class="fas fa-exclamation-triangle"></i> Tindakan ini tidak dapat dibatalkan!
+            </p>
+        </div>`,
+        icon: 'warning',
+        iconColor: '#dc2626',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fas fa-trash me-2"></i>Ya, Hapus Blog',
+        cancelButtonText: '<i class="fas fa-times me-2"></i>Batal',
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        reverseButtons: true,
+        customClass: {
+            popup: 'swal2-popup-custom',
+            confirmButton: 'swal2-confirm-custom',
+            cancelButton: 'swal2-cancel-custom',
+            title: 'swal2-title-custom',
+            htmlContainer: 'swal2-html-container-custom'
+        },
+        buttonsStyling: false,
+        allowOutsideClick: false,
+        allowEscapeKey: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading
+            Swal.fire({
+                title: 'Menghapus...',
+                html: 'Mohon tunggu, blog sedang dihapus.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Submit form
+            document.getElementById('delete-blog-form-' + blogId).submit();
+        }
+    });
+}
+</script>
+
+<style>
+/* SweetAlert2 Custom Styling */
+.swal2-popup-custom {
+    border-radius: 16px !important;
+    padding: 30px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid #e9ecef !important;
+}
+
+.swal2-title-custom {
+    font-size: 24px !important;
+    font-weight: 800 !important;
+    color: #1a1a1a !important;
+    margin-bottom: 20px !important;
+}
+
+.swal2-html-container-custom {
+    font-size: 14px !important;
+    color: #6b7280 !important;
+    line-height: 1.6 !important;
+}
+
+.swal2-confirm-custom {
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+    color: #fff !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    border: none !important;
+    transition: all 0.3s !important;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
+}
+
+.swal2-confirm-custom:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4) !important;
+}
+
+.swal2-cancel-custom {
+    background: linear-gradient(135deg, #fff, #fafafa) !important;
+    color: #6b7280 !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    border: 2px solid #e9ecef !important;
+    transition: all 0.3s !important;
+}
+
+.swal2-cancel-custom:hover {
+    background: linear-gradient(135deg, #f9fafb, #f3f4f6) !important;
+    border-color: #d1d5db !important;
+    transform: translateY(-2px) !important;
+}
+
+.swal2-icon.swal2-warning {
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
+}
+</style>
 @endsection
 

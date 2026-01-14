@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\car;
 use App\Models\User;
 use App\Models\FundRequest;
+use App\Models\Testimonial;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -32,6 +33,9 @@ class DashboardController extends Controller
             'recent_users' => User::orderBy('created_at', 'desc')->limit(5)->get(),
             'cars_for_sale' => car::where('tipe', 'sale')->count(),
             'cars_for_rent' => car::where('tipe', 'rent')->count(),
+            'recent_testimonials' => Testimonial::where('is_active', true)->orderBy('created_at', 'desc')->limit(5)->get(),
+            'total_testimonials' => Testimonial::count(),
+            'active_testimonials' => Testimonial::where('is_active', true)->count(),
         ];
 
         return view('dashboard', compact('stats'));

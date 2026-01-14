@@ -99,48 +99,85 @@ class BlogController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
-            'author' => 'required|string|max:255',
-            'content' => 'required|string',
-            'excerpt' => 'nullable|string|max:500',
-            'category' => 'nullable|string|max:100',
-            'tags' => 'nullable|string',
-            'status' => 'required|in:published,draft',
-            'published_at' => 'nullable|date',
-        ]);
+        try {
+            // Validasi file terlebih dahulu jika ada
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                
+                if (!$file->isValid()) {
+                    return back()->withErrors(['image' => 'File gambar tidak valid.'])->withInput();
+                }
 
-        $data = $request->except(['image', 'published_at']); // <-- abaikan published_at dari input
+                // Cek MIME type
+                $mimeType = $file->getMimeType();
+                $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
+                
+                if (!in_array($mimeType, $allowedMimes)) {
+                    return back()->withErrors(['image' => 'Format file tidak didukung. Gunakan JPG, PNG, GIF, atau WEBP.'])->withInput();
+                }
 
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('blogs', 'public');
-            $data['image'] = $imagePath;
+                // Cek ukuran file (5MB = 5120 KB)
+                if ($file->getSize() > 5120 * 1024) {
+                    return back()->withErrors(['image' => 'Ukuran file terlalu besar. Maksimal 5MB.'])->withInput();
+                }
+            }
+
+            // Validasi field lainnya
+            $request->validate([
+                'title' => 'required|string|max:255',
+                'author' => 'required|string|max:255',
+                'content' => 'required|string',
+                'excerpt' => 'nullable|string|max:500',
+                'category' => 'nullable|string|max:100',
+                'tags' => 'nullable|string',
+                'status' => 'required|in:published,draft',
+                'published_at' => 'nullable|date',
+            ]);
+
+            $data = $request->except(['image', 'published_at']); // <-- abaikan published_at dari input
+
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                // Ensure storage directory exists
+                if (!Storage::disk('public')->exists('blogs')) {
+                    Storage::disk('public')->makeDirectory('blogs');
+                }
+
+                $imagePath = $request->file('image')->store('blogs', 'public');
+                if (!$imagePath) {
+                    throw new \Exception('Gagal mengupload gambar. Pastikan folder storage dapat ditulis.');
+                }
+                $data['image'] = $imagePath;
+            }
+
+            // Generate slug
+            $data['slug'] = Str::slug($data['title']);
+
+            // Handle tags
+            if ($request->filled('tags')) {
+                $tags = array_map('trim', explode(',', $request->tags));
+                $data['tags'] = array_filter($tags);
+            }
+
+            // Jika status published, langsung set published_at = sekarang
+            if ($data['status'] === 'published') {
+                $data['published_at'] = now();
+            } else {
+                $data['published_at'] = null; // pastikan draft tidak punya published_at
+            }
+
+            // Set user_id
+            $data['user_id'] = auth()->id();
+
+            Blog::create($data);
+
+            return redirect()->route('blogs.admin.index')->with('success', 'Blog berhasil ditambahkan!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Error storing blog: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])->withInput();
         }
-
-        // Generate slug
-        $data['slug'] = Str::slug($data['title']);
-
-        // Handle tags
-        if ($request->filled('tags')) {
-            $tags = array_map('trim', explode(',', $request->tags));
-            $data['tags'] = array_filter($tags);
-        }
-
-        // Jika status published, langsung set published_at = sekarang
-        if ($data['status'] === 'published') {
-            $data['published_at'] = now();
-        } else {
-            $data['published_at'] = null; // pastikan draft tidak punya published_at
-        }
-
-        // Set user_id
-        $data['user_id'] = auth()->id();
-
-        Blog::create($data);
-
-        return redirect()->route('blogs.admin.index')->with('success', 'Blog berhasil ditambahkan!');
     }
 
     public function edit($id)

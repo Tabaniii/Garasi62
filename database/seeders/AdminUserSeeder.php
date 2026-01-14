@@ -28,11 +28,13 @@ class AdminUserSeeder extends Seeder
         
         $adminUser->save();
 
-        // Update semua user lain menjadi role user (kecuali admin)
+        // Update semua user lain yang belum punya role menjadi buyer (default)
         Users::where('email', '!=', 'admin@garasi62.com')
-            ->update(['role' => 'user']);
+            ->whereNull('role')
+            ->orWhere('role', '')
+            ->update(['role' => 'buyer']);
 
         $this->command->info('Admin user berhasil dibuat/updated: admin@garasi62.com (password: admin123)');
-        $this->command->info('Semua user lain telah di-set role menjadi user');
+        $this->command->info('Semua user tanpa role telah di-set menjadi buyer (default)');
     }
 }

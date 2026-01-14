@@ -166,11 +166,6 @@
 </style>
 
 <!-- Toast Notification Container -->
-<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
-
-@if(session('success'))
-<div id="success-notification" data-message="{{ session('success') }}" style="display: none;"></div>
-@endif
 
 <div class="page-header-section mb-4">
     <div class="page-header-content">
@@ -285,119 +280,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-.toast-notification {
-    background: linear-gradient(135deg, #10b981, #34d399);
-    color: #fff;
-    padding: 20px 25px;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(16, 185, 129, 0.3);
-    margin-bottom: 15px;
-    min-width: 350px;
-    max-width: 450px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    animation: slideInRight 0.4s ease-out, fadeOut 0.3s ease-in 4.7s forwards;
-    position: relative;
-    overflow: hidden;
-}
-
-.toast-notification::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.3);
-    animation: progressBar 5s linear forwards;
-}
-
-.toast-notification.error {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    box-shadow: 0 10px 40px rgba(220, 38, 38, 0.3);
-}
-
-.toast-notification.warning {
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
-    box-shadow: 0 10px 40px rgba(245, 158, 11, 0.3);
-}
-
-.toast-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-}
-
-.toast-content {
-    flex: 1;
-}
-
-.toast-title {
-    font-weight: 700;
-    font-size: 16px;
-    margin-bottom: 5px;
-}
-
-.toast-message {
-    font-size: 14px;
-    opacity: 0.95;
-    line-height: 1.4;
-}
-
-.toast-close {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: #fff;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s;
-    flex-shrink: 0;
-}
-
-.toast-close:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.1);
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes fadeOut {
-    to {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-}
-
-@keyframes progressBar {
-    from {
-        width: 100%;
-    }
-    to {
-        width: 0%;
-    }
-}
-
 /* SweetAlert2 Custom Styling */
 .swal2-popup {
     border-radius: 16px !important;
@@ -541,55 +423,76 @@
 }
 </style>
 
-<script>
-function showToast(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast-notification ${type}`;
-    
-    const icons = {
-        success: '<i class="fas fa-check-circle"></i>',
-        error: '<i class="fas fa-times-circle"></i>',
-        warning: '<i class="fas fa-exclamation-triangle"></i>'
-    };
-    
-    const titles = {
-        success: 'Berhasil!',
-        error: 'Gagal!',
-        warning: 'Peringatan!'
-    };
-    
-    toast.innerHTML = `
-        <div class="toast-icon">${icons[type] || icons.success}</div>
-        <div class="toast-content">
-            <div class="toast-title">${titles[type] || titles.success}</div>
-            <div class="toast-message">${message}</div>
-        </div>
-        <button class="toast-close" onclick="this.parentElement.remove()">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    
-    container.appendChild(toast);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (toast.parentElement) {
-            toast.style.animation = 'fadeOut 0.3s ease-in forwards';
-            setTimeout(() => toast.remove(), 300);
-        }
-    }, 5000);
+/* Enhanced Delete Confirmation Styling */
+.swal2-popup-custom-delete {
+    border-radius: 20px !important;
+    padding: 35px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid #e9ecef !important;
+    max-width: 550px !important;
 }
 
-// Show notification if there's a success message
+.swal2-title-custom-delete {
+    font-size: 28px !important;
+    font-weight: 900 !important;
+    color: #1a1a1a !important;
+    margin-bottom: 20px !important;
+    letter-spacing: -0.5px !important;
+}
+
+.swal2-html-container-custom-delete {
+    font-size: 14px !important;
+    color: #6b7280 !important;
+    line-height: 1.6 !important;
+    text-align: left !important;
+}
+
+.swal2-confirm-custom-delete {
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+    color: #fff !important;
+    padding: 14px 28px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    border: none !important;
+    transition: all 0.3s !important;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
+}
+
+.swal2-confirm-custom-delete:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4) !important;
+    background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
+}
+
+.swal2-cancel-custom-delete {
+    background: linear-gradient(135deg, #fff, #fafafa) !important;
+    color: #6b7280 !important;
+    padding: 14px 28px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    border: 2px solid #e9ecef !important;
+    transition: all 0.3s !important;
+}
+
+.swal2-cancel-custom-delete:hover {
+    background: linear-gradient(135deg, #f9fafb, #f3f4f6) !important;
+    border-color: #d1d5db !important;
+    transform: translateY(-2px) !important;
+    color: #4b5563 !important;
+}
+
+.swal2-icon-custom-delete.swal2-warning {
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
+    border-width: 4px !important;
+}
+</style>
+
+<script>
+// Handle Approve Button
 document.addEventListener('DOMContentLoaded', function() {
-    const successNotification = document.getElementById('success-notification');
-    if (successNotification) {
-        const message = successNotification.getAttribute('data-message');
-        showToast(message, 'success');
-    }
-    
-    // Handle Approve Button
     document.querySelectorAll('.approve-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const commentId = this.getAttribute('data-comment-id');
@@ -638,7 +541,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(response => response.json())
                     .then(data => {
                         Swal.close();
-                        showToast('Komentar berhasil disetujui!', 'success');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Komentar berhasil disetujui!',
+                            confirmButtonColor: '#dc2626',
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
                         
                         // Update UI without reload
                         setTimeout(() => {
@@ -703,7 +613,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(response => response.json())
                     .then(data => {
                         Swal.close();
-                        showToast('Komentar berhasil ditolak!', 'error');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Berhasil!',
+                            text: 'Komentar berhasil ditolak!',
+                            confirmButtonColor: '#dc2626',
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
                         
                         // Update UI without reload
                         setTimeout(() => {
@@ -807,7 +724,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(response => response.json())
                     .then(data => {
                         Swal.close();
-                        showToast('Komentar berhasil dihapus!', 'error');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Komentar berhasil dihapus!',
+                            confirmButtonColor: '#dc2626',
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
                         
                         // Remove comment card with smooth animation
                         if (commentCard) {

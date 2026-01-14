@@ -803,9 +803,9 @@
                 <i class="fas fa-cog"></i>
                 <span>Pengaturan</span>
             </a>
-            <form action="{{ route('logout') }}" method="POST" class="d-inline">
+            <form action="{{ route('logout') }}" method="POST" class="d-inline" id="logout-form">
                 @csrf
-                <button type="submit" class="sidebar-menu-item w-100 text-start border-0 bg-transparent" style="color: #ccc;">
+                <button type="button" class="sidebar-menu-item w-100 text-start border-0 bg-transparent logout-btn" style="color: #ccc;">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Keluar</span>
                 </button>
@@ -837,11 +837,132 @@
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script>
         // Sidebar Toggle
         document.getElementById('sidebarToggle').addEventListener('click', function() {
             document.getElementById('sidebar').classList.toggle('active');
         });
+
+        // Logout confirmation with SweetAlert
+        (function() {
+            function initLogoutButton() {
+                // Check if SweetAlert is loaded
+                if (typeof Swal === 'undefined') {
+                    setTimeout(initLogoutButton, 100);
+                    return;
+                }
+                
+                const logoutBtn = document.querySelector('.logout-btn');
+                const logoutForm = document.getElementById('logout-form');
+                
+                if (!logoutBtn || !logoutForm) {
+                    return;
+                }
+                
+                // Check if already has listener
+                if (logoutBtn.hasAttribute('data-listener-attached')) {
+                    return;
+                }
+                
+                logoutBtn.setAttribute('data-listener-attached', 'true');
+                
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    if (typeof Swal === 'undefined') {
+                        console.error('SweetAlert not loaded');
+                        logoutForm.submit();
+                        return;
+                    }
+                    
+                    Swal.fire({
+                        title: 'Apakah yakin ingin keluar?',
+                        html: `<div style="text-align: center; padding: 10px 0;">
+                                <p style="margin-bottom: 10px;">Anda akan keluar dari sistem</p>
+                                <p style="color: #6b7280; font-size: 14px;">Pastikan semua pekerjaan Anda sudah disimpan</p>
+                              </div>`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc2626',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: '<i class="fas fa-sign-out-alt me-2"></i>Ya, Keluar',
+                        cancelButtonText: '<i class="fas fa-times me-2"></i>Batal',
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Show loading
+                            Swal.fire({
+                                title: 'Keluar...',
+                                text: 'Mohon tunggu sebentar',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+                            
+                            // Submit logout form
+                            logoutForm.submit();
+                        }
+                    });
+                });
+            }
+            
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(initLogoutButton, 200);
+                });
+            } else {
+                setTimeout(initLogoutButton, 200);
+            }
+        })();
+
+        // SweetAlert untuk session messages
+        @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: '{{ session('success') }}',
+            confirmButtonColor: '#dc2626',
+            timer: 3000,
+            timerProgressBar: true,
+            showConfirmButton: true
+        });
+        @endif
+
+        @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: '{{ session('error') }}',
+            confirmButtonColor: '#dc2626',
+            showConfirmButton: true
+        });
+        @endif
+
+        @if(session('warning'))
+        Swal.fire({
+            icon: 'warning',
+            title: 'Peringatan!',
+            text: '{{ session('warning') }}',
+            confirmButtonColor: '#dc2626',
+            showConfirmButton: true
+        });
+        @endif
+
+        @if(session('info'))
+        Swal.fire({
+            icon: 'info',
+            title: 'Informasi',
+            text: '{{ session('info') }}',
+            confirmButtonColor: '#dc2626',
+            showConfirmButton: true
+        });
+        @endif
     </script>
     
     @stack('scripts')

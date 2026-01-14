@@ -300,7 +300,26 @@
             .card-header h1{font-size:1.5rem}
             .logo-container img{max-width:150px}
         }
+        /* Fade In Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .container {
+            animation: fadeIn 0.6s ease-out;
+        }
+        .card {
+            animation: fadeIn 0.8s ease-out;
+        }
     </style>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="container">
@@ -384,6 +403,18 @@
                             <option value="Perorangan" {{ old('institution') == 'Perorangan' ? 'selected' : '' }}>Perorangan</option>
                             <option value="Dealer" {{ old('institution') == 'Dealer' ? 'selected' : '' }}>Dealer</option>
                         </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <i class="fas fa-user-tag input-icon"></i>
+                        <select name="role" class="form-select" required>
+                            <option value="" disabled selected>Tipe Akun</option>
+                            <option value="buyer" {{ old('role') == 'buyer' ? 'selected' : '' }}>Buyer (Pembeli)</option>
+                            <option value="seller" {{ old('role') == 'seller' ? 'selected' : '' }}>Seller (Penjual)</option>
+                        </select>
+                        <small class="text-muted" style="display: block; margin-top: 5px; font-size: 12px; color: #999;">
+                            <i class="fas fa-info-circle"></i> Pilih tipe akun sesuai kebutuhan Anda
+                        </small>
                     </div>
                     
                     <div class="input-group password-wrapper">
@@ -505,7 +536,32 @@
         });
         phoneInput.addEventListener('input',function(){
             this.value=this.value.replace(/[^0-9+]/g,'')
-        })
+        });
+        
+        // SweetAlert untuk success/error
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Registrasi Berhasil!',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'OK',
+                timer: 3000,
+                timerProgressBar: true
+            }).then(() => {
+                window.location.href = '{{ route('login') }}';
+            });
+        @endif
+        
+        @if($errors->any())
+            Swal.fire({
+                icon: 'error',
+                title: 'Registrasi Gagal',
+                html: '<ul style="text-align: left; padding-left: 20px;">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'OK'
+            });
+        @endif
     </script>
 </body>
 </html>

@@ -27,7 +27,11 @@ Route::get('/about', [AboutController::class, 'index'])->name('about');
 //car
 Route::get('/car', [CarController::class, 'show'])->name('cars');
 Route::get('/car/{id}', [CarController::class, 'showDetail'])->name('car.details');
-Route::view('/contact', 'contact')->name('contact');
+
+// Contact Routes (Auth checked in controller)
+Route::get('/contact', function () {
+    return view('contact');
+})->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 
 // CRUD Mobil (Protected by auth middleware)
@@ -39,8 +43,15 @@ Route::post('/contact', [ContactController::class, 'send'])->name('contact.send'
     Route::put('/cars/{id}', [CarController::class, 'update'])->name('cars.update');
     Route::delete('/cars/{id}', [CarController::class, 'destroy'])->name('cars.destroy');
     
-    // Users
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    // Users Management (Admin Only)
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/create', [UserController::class, 'create'])->name('create');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
+    });
     
     // Blog Management (Admin)
         Route::prefix('admin/blogs')->name('blogs.admin.')->group(function () {

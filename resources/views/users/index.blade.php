@@ -430,89 +430,51 @@
 }
 
 @push('scripts')
-
-@if(session('success'))
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: '{{ session('success') }}',
-            confirmButtonColor: '#dc2626',
-            timer: 3000,
-            timerProgressBar: true,
-            showConfirmButton: true
-        });
-    });
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal!',
-            text: '{{ session('error') }}',
-            confirmButtonColor: '#dc2626',
-            showConfirmButton: true
-        });
-    });
-</script>
-@endif
-
-<script>
-// Handle delete button clicks - wait for both DOM and SweetAlert to be ready
+// Handle delete button clicks
 (function() {
+    let initialized = false;
+    
     function initDeleteButtons() {
-        // Check if SweetAlert is loaded
+        if (initialized) return;
+        
+        // Tunggu SweetAlert2 siap
         if (typeof Swal === 'undefined') {
-            console.log('SweetAlert not loaded yet, retrying...');
             setTimeout(initDeleteButtons, 100);
             return;
         }
         
-        // Check if buttons exist
-        const deleteButtons = document.querySelectorAll('.delete-btn');
+        // Ambil semua tombol delete yang belum punya listener
+        const deleteButtons = document.querySelectorAll('.delete-btn:not([data-listener-attached])');
+        
         if (deleteButtons.length === 0) {
-            console.log('Delete buttons not found');
             return;
         }
         
-        console.log('Initializing delete buttons:', deleteButtons.length);
-        
-        // Handle delete button clicks
+        // Attach event listener ke setiap button
         deleteButtons.forEach(function(button) {
-            // Check if already has listener
-            if (button.hasAttribute('data-listener-attached')) {
-                return;
-            }
-            
+            // Tandai button sudah punya listener
             button.setAttribute('data-listener-attached', 'true');
             
+            // Attach event listener
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                const userName = this.getAttribute('data-user-name');
+                const userName = this.getAttribute('data-user-name') || 'Pengguna ini';
                 const form = this.closest('form');
                 
                 if (!form) {
-                    console.error('Form not found');
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',
                         text: 'Form tidak ditemukan',
                         confirmButtonColor: '#dc2626'
                     });
-                    return;
+                    return false;
                 }
                 
-                if (typeof Swal === 'undefined') {
-                    console.error('SweetAlert not loaded');
-                    return;
-                }
-                
+                // Tampilkan konfirmasi SweetAlert
                 Swal.fire({
                     title: 'Apakah yakin ingin menghapus user?',
                     html: `<div style="text-align: left; padding: 10px 0;">
@@ -538,11 +500,13 @@
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Show loading
+                        // Tampilkan loading
                         Swal.fire({
                             title: 'Menghapus...',
                             text: 'Mohon tunggu sebentar',
                             allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
                             didOpen: () => {
                                 Swal.showLoading();
                             }
@@ -552,17 +516,21 @@
                         form.submit();
                     }
                 });
+                
+                return false;
             });
         });
+        
+        initialized = true;
     }
     
-    // Initialize when DOM is ready
+    // Initialize ketika DOM ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(initDeleteButtons, 200);
+            setTimeout(initDeleteButtons, 500);
         });
     } else {
-        setTimeout(initDeleteButtons, 200);
+        setTimeout(initDeleteButtons, 500);
     }
 })();
 </script>

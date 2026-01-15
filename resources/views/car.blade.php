@@ -137,90 +137,120 @@
                     </div>
                 </div>
                 <div class="row">
-                    @forelse($cars as $car)
-                    <div class="col-lg-4 col-md-4">
-                        <div class="car__item car__item--fixed">
-                            <!-- Card Image -->
-                            <div class="car__item__pic__slider owl-carousel car__item__pic--fixed">
-                                @if($car->image && is_array($car->image) && count($car->image) > 0)
-                                @foreach($car->image as $imagePath)
-                                <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ $car->brand }} {{ $car->nama ?? '' }}">
-                                @endforeach
-                                @else
-                                <img src="{{ asset('garasi62/img/cars/car-8.jpg') }}" alt="{{ $car->brand }} {{ $car->nama ?? '' }}">
-                                @endif
+                    @forelse($cars as $index => $car)
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="car-card-modern animate-fade-in-up" data-animation-delay="{{ $index * 0.1 }}">
+                            <!-- Image Section with Overlay -->
+                            <div class="car-card-image-wrapper">
+                                <div class="car-card-image-slider">
+                                    @if($car->image && is_array($car->image) && count($car->image) > 0)
+                                        <img src="{{ asset('storage/' . $car->image[0]) }}" alt="{{ $car->brand }} {{ $car->nama ?? '' }}" class="car-card-main-image">
+                                        @if(count($car->image) > 1)
+                                            <div class="image-count-badge">
+                                                <i class="fa fa-images"></i> {{ count($car->image) }}
+                                            </div>
+                                        @endif
+                                    @else
+                                        <img src="{{ asset('garasi62/img/cars/car-8.jpg') }}" alt="{{ $car->brand }} {{ $car->nama ?? '' }}" class="car-card-main-image">
+                                    @endif
+                                </div>
+                                <!-- Overlay Badges -->
+                                <div class="car-card-overlay">
+                                    <span class="car-type-badge {{ $car->tipe == 'buy' ? 'badge-sale' : 'badge-rent' }}">
+                                        {{ $car->tipe == 'rent' ? 'For Rent' : 'For Sale' }}
+                                    </span>
+                                    @if($car->stock)
+                                    <span class="stock-badge {{ strtolower($car->stock) === 'tersedia' ? 'stock-available' : 'stock-limited' }}">
+                                        {{ $car->stock }}
+                                    </span>
+                                    @endif
+                                </div>
                             </div>
 
                             <!-- Card Content -->
-                            <div class="car__item__text car__item__text--fixed">
-                                <div class="car__item__text__inner">
-                                    <!-- Title -->
-                                    <h5 class="car-title">
+                            <div class="car-card-content">
+                                <!-- Header -->
+                                <div class="car-card-header">
+                                    <h5 class="car-card-title">
                                         <a href="{{ route('car.details', $car->id) }}">
                                             {{ $car->brand }}@if($car->nama) {{ $car->nama }}@endif
                                         </a>
                                     </h5>
-
-                                    <!-- Badges: Tahun & Stock -->
-                                    <div class="car__header">
-                                        <div class="label-date">{{ $car->tahun }}</div>
-                                        @if($car->stock)
-                                        <div class="label-stock {{ strtolower($car->stock) === 'tersedia' ? 'available' : 'limited' }}">
-                                            {{ $car->stock }}
-                                        </div>
-                                        @endif
-                                    </div>
-
-                                    <!-- Location -->
-                                    @if($car->location)
-                                    <div class="car__location">
-                                        <i class="fa fa-map-marker"></i>
-                                        <span>{{ $car->location }}</span>
-                                    </div>
-                                    @endif
-
-                                    <!-- Specifications -->
-                                    <ul class="car__specs">
-                                        <li class="spec-item">
-                                            <i class="fa fa-tachometer"></i>
-                                            <span>{{ number_format($car->kilometer ?? 0, 0, ',', '.') }} km</span>
-                                        </li>
-                                        <li class="spec-item">
-                                            <i class="fa fa-cog"></i>
-                                            <span>{{ $car->transmisi ?? '-' }}</span>
-                                        </li>
-                                        <li class="spec-item">
-                                            <i class="fa fa-car"></i>
-                                            <span>{{ $car->kapasitasmesin ?? '-' }}</span>
-                                        </li>
-                                    </ul>
-
-                                    <!-- Description -->
-                                    @if($car->description)
-                                    <div class="car__description">
-                                        <p>
-                                            {{ mb_substr(strip_tags($car->description), 0, 100) }}
-                                            @if(mb_strlen(strip_tags($car->description)) > 100)
-                                            ...
-                                            @endif
-                                        </p>
-                                    </div>
-                                    @endif
+                                    <div class="car-year-badge">{{ $car->tahun }}</div>
                                 </div>
 
-                                <!-- Price Section -->
-                                <div class="car__item__price">
-                                    <div class="car__price__header">
-                                        <span class="car-option {{ $car->tipe == 'buy' ? 'sale' : '' }}">
-                                            {{ $car->tipe == 'rent' ? 'For Rent' : 'For Sale' }}
-                                        </span>
+                                <!-- Location -->
+                                @if($car->location)
+                                <div class="car-card-location">
+                                    <i class="fa fa-map-marker"></i>
+                                    <span>{{ $car->location }}</span>
+                                </div>
+                                @endif
+
+                                <!-- Specifications -->
+                                <div class="car-card-specs">
+                                    <div class="spec-item-modern">
+                                        <div class="spec-icon">
+                                            <i class="fa fa-tachometer"></i>
+                                        </div>
+                                        <div class="spec-content">
+                                            <span class="spec-label">Kilometer</span>
+                                            <span class="spec-value">{{ number_format($car->kilometer ?? 0, 0, ',', '.') }} km</span>
+                                        </div>
                                     </div>
-                                    <h6 class="car__price__value">
+                                    <div class="spec-item-modern">
+                                        <div class="spec-icon">
+                                            <i class="fa fa-cog"></i>
+                                        </div>
+                                        <div class="spec-content">
+                                            <span class="spec-label">Transmisi</span>
+                                            <span class="spec-value">{{ $car->transmisi ?? '-' }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="spec-item-modern">
+                                        <div class="spec-icon">
+                                            <i class="fa fa-car"></i>
+                                        </div>
+                                        <div class="spec-content">
+                                            <span class="spec-label">Mesin</span>
+                                            <span class="spec-value">{{ $car->kapasitasmesin ?? '-' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Price -->
+                                <div class="car-card-price">
+                                    <div class="price-label">Harga</div>
+                                    <div class="price-value">
                                         Rp {{ number_format($car->harga ?? 0, 0, ',', '.') }}
                                         @if($car->tipe == 'rent' && $car->metode)
-                                        <span>/{{ $car->metode }}</span>
+                                            <span class="price-period">/{{ $car->metode }}</span>
                                         @endif
-                                    </h6>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="car-card-actions">
+                                    <a href="{{ route('car.details', $car->id) }}" class="btn-detail">
+                                        <i class="fa fa-eye"></i>
+                                        <span>Lihat Detail</span>
+                                    </a>
+                                    @auth
+                                        @if(auth()->user()->role === 'buyer')
+                                            <form action="{{ route('cart.store', $car->id) }}" method="POST" class="cart-form">
+                                                @csrf
+                                                <button type="submit" class="btn-cart">
+                                                    <i class="fa fa-shopping-cart"></i>
+                                                    <span>Tambah ke Keranjang</span>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @else
+                                        <a href="{{ route('login') }}" class="btn-cart">
+                                            <i class="fa fa-shopping-cart"></i>
+                                            <span>Login untuk Keranjang</span>
+                                        </a>
+                                    @endauth
                                 </div>
                             </div>
                         </div>
@@ -310,28 +340,449 @@
     }
 
     /* ============================================
-   CARD CONTAINER - Fixed Size Styling
+   MODERN CARD DESIGN
    ============================================ */
-    .car__item--fixed {
-        width: 100%;
-        max-width: 280px;
-        min-height: 615px;
-        height: auto;
-        margin: 0 auto 30px;
+    .car-card-modern {
+        background: #ffffff;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        height: 100%;
         display: flex;
         flex-direction: column;
-        background: #fff;
+        position: relative;
+    }
+
+    .car-card-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 20px;
+        padding: 2px;
+        background: linear-gradient(135deg, #df2d24, #ff6b6b, #df2d24);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.4s;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .car-card-modern:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(223, 45, 36, 0.25);
+        border-color: transparent;
+    }
+
+    .car-card-modern:hover::before {
+        opacity: 1;
+    }
+
+    /* Image Wrapper */
+    .car-card-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 220px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+    }
+
+    .car-card-image-slider {
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+
+    .car-card-main-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .car-card-modern:hover .car-card-main-image {
+        transform: scale(1.1);
+    }
+
+    .image-count-badge {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(10px);
+        color: #fff;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 2;
+    }
+
+    .image-count-badge i {
+        font-size: 12px;
+    }
+
+    /* Overlay Badges */
+    .car-card-overlay {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        right: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        z-index: 2;
+    }
+
+    .car-type-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+    }
+
+    .badge-rent {
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        color: #fff;
+    }
+
+    .badge-sale {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: #fff;
+    }
+
+    .stock-badge {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .stock-available {
+        background: rgba(46, 125, 50, 0.9);
+        color: #fff;
+    }
+
+    .stock-limited {
+        background: rgba(230, 81, 0, 0.9);
+        color: #fff;
+    }
+
+    /* Card Content */
+    .car-card-content {
+        padding: 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(to bottom, #ffffff, #fafbfc);
+    }
+
+    /* Header */
+    .car-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+        gap: 10px;
+    }
+
+    .car-card-title {
+        flex: 1;
+        margin: 0;
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1.3;
+    }
+
+    .car-card-title a {
+        color: #1a1a1a;
+        text-decoration: none;
+        transition: color 0.3s;
+        background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .car-card-title a:hover {
+        background: linear-gradient(135deg, #df2d24, #ff6b6b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .car-year-badge {
+        padding: 6px 12px;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        color: #1a1a1a;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid #e0e0e0;
+        white-space: nowrap;
+    }
+
+    /* Location */
+    .car-card-location {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 16px;
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .car-card-location i {
+        color: #df2d24;
+        font-size: 14px;
+    }
+
+    /* Specifications */
+    .car-card-specs {
+        margin-bottom: 16px;
+        padding: 12px;
+        background: linear-gradient(135deg, #fafbfc, #ffffff);
         border-radius: 12px;
         border: 1px solid #f0f0f0;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .spec-item-modern {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 8px 0;
+    }
+
+    .spec-item-modern:not(:last-child) {
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .spec-icon {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #fff, #f8f9fa);
+        border-radius: 10px;
+        color: #df2d24;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        flex-shrink: 0;
+    }
+
+    .spec-content {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .spec-label {
+        font-size: 11px;
+        color: #9ca3af;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .spec-value {
+        font-size: 13px;
+        color: #1a1a1a;
+        font-weight: 700;
+    }
+
+    /* Price */
+    .car-card-price {
+        margin-top: auto;
+        padding: 16px;
+        background: linear-gradient(135deg, #fff, #fafbfc);
+        border-radius: 12px;
+        border: 2px solid #f0f0f0;
+        margin-bottom: 16px;
+        text-align: center;
+    }
+
+    .price-label {
+        font-size: 11px;
+        color: #9ca3af;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 6px;
+    }
+
+    .price-value {
+        font-size: 24px;
+        font-weight: 900;
+        background: linear-gradient(135deg, #df2d24, #ff6b6b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.2;
+    }
+
+    .price-period {
+        font-size: 14px;
+        font-weight: 500;
+        color: #9ca3af;
+        -webkit-text-fill-color: #9ca3af;
+    }
+
+    /* Action Buttons */
+    .car-card-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-detail,
+    .btn-cart,
+    .cart-form {
+        flex: 1;
+    }
+
+    .btn-detail,
+    .btn-cart {
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 700;
+        text-align: center;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        cursor: pointer;
+        position: relative;
         overflow: hidden;
     }
 
-    .car__item--fixed:hover {
+    .btn-detail {
+        background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-detail:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        border-color: #e0e0e0;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        background: linear-gradient(135deg, #2a2a2a, #5a5a5a);
+    }
+
+    .btn-cart {
+        background: linear-gradient(135deg, #ff6b6b, #ff5252);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+
+    .btn-cart:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        background: linear-gradient(135deg, #ff5252, #ff1744);
+    }
+
+    .btn-detail i,
+    .btn-cart i {
+        font-size: 14px;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes scaleIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .animate-fade-in-up {
+        opacity: 0;
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .animate-fade-in-up[data-animation-delay] {
+        animation-delay: calc(var(--delay, 0) * 1s);
+    }
+
+    /* Responsive */
+    @media (max-width: 991px) {
+        .car-card-modern {
+            margin-bottom: 30px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .car-card-image-wrapper {
+            height: 200px;
+        }
+
+        .car-card-title {
+            font-size: 18px;
+        }
+
+        .car-card-actions {
+            flex-direction: column;
+        }
+
+        .btn-detail,
+        .btn-cart {
+            width: 100%;
+        }
     }
 
     /* ============================================
@@ -720,6 +1171,87 @@
         document.getElementById('sortOrder').value = sortOrder;
         document.getElementById('sortForm').submit();
     }
+
+    // Animation on scroll
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.animate-fade-in-up');
+        cards.forEach((card, index) => {
+            const delay = card.getAttribute('data-animation-delay') || 0;
+            card.style.setProperty('--delay', delay);
+        });
+    });
+
+    // Handle Add to Cart with SweetAlert
+    document.addEventListener('DOMContentLoaded', function() {
+        const cartForms = document.querySelectorAll('form[action*="cart.store"], .cart-form');
+        
+        cartForms.forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(form);
+                const url = form.getAttribute('action');
+                const button = form.querySelector('button[type="submit"]');
+                const originalText = button ? button.innerHTML : '';
+                
+                // Disable button
+                if (button) {
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menambahkan...';
+                }
+                
+                fetch(url, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || formData.get('_token')
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Network response was not ok');
+                })
+                .then(data => {
+                    // Show SweetAlert success
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: data.message || 'Mobil berhasil ditambahkan ke keranjang!',
+                        showConfirmButton: true,
+                        confirmButtonColor: '#df2d24',
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    
+                    // Update cart badge if exists
+                    const cartBadge = document.querySelector('.cart-badge');
+                    if (cartBadge && data.cart_count) {
+                        cartBadge.textContent = data.cart_count;
+                        cartBadge.style.display = 'inline-block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Terjadi kesalahan saat menambahkan ke keranjang.',
+                        confirmButtonColor: '#df2d24'
+                    });
+                })
+                .finally(() => {
+                    // Re-enable button
+                    if (button) {
+                        button.disabled = false;
+                        button.innerHTML = originalText;
+                    }
+                });
+            });
+        });
+    });
 </script>
 
 @endsection

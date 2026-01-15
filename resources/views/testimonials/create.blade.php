@@ -155,17 +155,6 @@
                     <div id="imagePreview" class="image-preview-container mt-3"></div>
                 </div>
 
-                <div class="form-switch-custom mb-4">
-                    <div class="switch-wrapper">
-                        <input class="switch-input" type="checkbox" id="is_active" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
-                        <label class="switch-label" for="is_active">
-                            <span class="switch-slider"></span>
-                            <span class="switch-text">
-                                <i class="fas fa-eye me-2"></i>Tampilkan di halaman About
-                            </span>
-                        </label>
-                    </div>
-                </div>
             </div>
         </div>
 

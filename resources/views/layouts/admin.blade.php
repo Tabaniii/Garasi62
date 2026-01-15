@@ -385,6 +385,22 @@
             background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 50%, #000000 100%);
         }
 
+        .stat-card-icon.yellow {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+        }
+
+        .stat-card-icon.green {
+            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+        }
+
+        .stat-card-icon.blue {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
+        }
+
+        .stat-card-icon.purple {
+            background: linear-gradient(135deg, #a855f7 0%, #9333ea 50%, #7e22ce 100%);
+        }
+
         .stat-card-value {
             font-size: 36px;
             font-weight: 800;
@@ -761,40 +777,90 @@
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="{{ route('cars.index') }}" class="sidebar-menu-item {{ request()->routeIs('cars.*') ? 'active' : '' }}">
-                <i class="fas fa-car"></i>
-                <span>Mobil</span>
-            </a>
-            <a href="{{ route('blogs.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('blogs.admin.*') ? 'active' : '' }}">
-                <i class="fas fa-blog"></i>
-                <span>Blog</span>
-            </a>
-            <a href="{{ route('testimonials.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('testimonials.admin.*') ? 'active' : '' }}">
-                <i class="fas fa-quote-right"></i>
-                <span>Testimoni</span>
-            </a>
-            <a href="{{ route('comments.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('comments.admin.*') ? 'active' : '' }}">
-                <i class="fas fa-comments"></i>
-                <span>Komentar</span>
-                @php
-                    $pendingComments = \App\Models\Comment::where('status', 'pending')->count();
-                @endphp
-                @if($pendingComments > 0)
-                <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: auto;">{{ $pendingComments }}</span>
-                @endif
-            </a>
-            <a href="{{ route('users.index') }}" class="sidebar-menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                <i class="fas fa-users"></i>
-                <span>Pengguna</span>
-            </a>
-            <a href="{{ route('about') }}" class="sidebar-menu-item">
-                <i class="fas fa-info-circle"></i>
-                <span>Tentang</span>
-            </a>
-            <a href="{{ route('contact') }}" class="sidebar-menu-item">
-                <i class="fas fa-envelope"></i>
-                <span>Kontak</span>
-            </a>
+            
+            @if(Auth::user()->role === 'admin')
+                {{-- Admin Menu --}}
+                <a href="{{ route('cars.index') }}" class="sidebar-menu-item {{ request()->routeIs('cars.*') ? 'active' : '' }}">
+                    <i class="fas fa-car"></i>
+                    <span>Mobil</span>
+                </a>
+                <a href="{{ route('admin.car-approvals.index') }}" class="sidebar-menu-item {{ request()->routeIs('admin.car-approvals.*') ? 'active' : '' }}">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Persetujuan Mobil</span>
+                    @php
+                        $pendingCars = \App\Models\car::where('status', 'pending')->count();
+                    @endphp
+                    @if($pendingCars > 0)
+                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: auto;">{{ $pendingCars }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('blogs.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('blogs.admin.*') ? 'active' : '' }}">
+                    <i class="fas fa-blog"></i>
+                    <span>Blog</span>
+                </a>
+                <a href="{{ route('testimonials.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('testimonials.admin.*') ? 'active' : '' }}">
+                    <i class="fas fa-quote-right"></i>
+                    <span>Testimoni</span>
+                </a>
+                <a href="{{ route('comments.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('comments.admin.*') ? 'active' : '' }}">
+                    <i class="fas fa-comments"></i>
+                    <span>Komentar</span>
+                    @php
+                        $pendingComments = \App\Models\Comment::where('status', 'pending')->count();
+                    @endphp
+                    @if($pendingComments > 0)
+                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: auto;">{{ $pendingComments }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('users.index') }}" class="sidebar-menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                    <i class="fas fa-users"></i>
+                    <span>Pengguna</span>
+                </a>
+                <a href="{{ route('admin.reports.index') }}" class="sidebar-menu-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                    <i class="fas fa-flag"></i>
+                    <span>Laporan Mobil</span>
+                    @php
+                        $pendingReports = \App\Models\Report::where('status', 'pending')->count();
+                    @endphp
+                    @if($pendingReports > 0)
+                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: auto;">{{ $pendingReports }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('about') }}" class="sidebar-menu-item">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Tentang</span>
+                </a>
+                <a href="{{ route('contact') }}" class="sidebar-menu-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>Kontak</span>
+                </a>
+            @elseif(Auth::user()->role === 'seller')
+                {{-- Seller Menu --}}
+                <a href="{{ route('cars.index') }}" class="sidebar-menu-item {{ request()->routeIs('cars.*') ? 'active' : '' }}">
+                    <i class="fas fa-car"></i>
+                    <span>Mobil Saya</span>
+                </a>
+                <a href="{{ route('cars.create') }}" class="sidebar-menu-item {{ request()->routeIs('cars.create') ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Tambah Mobil</span>
+                </a>
+                <a href="{{ route('seller.reports.index') }}" class="sidebar-menu-item {{ request()->routeIs('seller.reports.*') ? 'active' : '' }}">
+                    <i class="fas fa-flag"></i>
+                    <span>Laporan Mobil</span>
+                    @php
+                        $sellerPendingReports = \App\Models\Report::where('seller_id', Auth::id())->where('status', 'pending')->count();
+                    @endphp
+                    @if($sellerPendingReports > 0)
+                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: auto;">{{ $sellerPendingReports }}</span>
+                    @endif
+                </a>
+            @elseif(Auth::user()->role === 'buyer')
+                {{-- Buyer Menu --}}
+                <a href="{{ route('cars') }}" class="sidebar-menu-item">
+                    <i class="fas fa-search"></i>
+                    <span>Cari Mobil</span>
+                </a>
+            @endif
         </div>
 
         <div class="sidebar-menu">

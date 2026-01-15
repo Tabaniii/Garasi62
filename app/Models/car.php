@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CarApproval;
 
 class car extends Model
 {
@@ -29,6 +30,8 @@ class car extends Model
         'extra_features',
         'technical_specs',
         'location',
+        'seller_id',
+        'status',
     ];
 
     protected $casts = [
@@ -37,4 +40,84 @@ class car extends Model
         'safety_features' => 'array',
         'extra_features' => 'array',
     ];
+
+    /**
+     * Relationship dengan User (seller)
+     */
+    public function seller()
+    {
+        return $this->belongsTo(User::class, 'seller_id');
+    }
+
+    /**
+     * Relationship dengan CarApproval
+     */
+    public function approvals()
+    {
+        return $this->hasMany(CarApproval::class);
+    }
+
+    /**
+     * Relationship dengan Wishlist
+     */
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    /**
+     * Relationship dengan Report
+     */
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
+
+    /**
+     * Scope untuk mobil yang sudah disetujui
+     */
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'approved');
+    }
+
+    /**
+     * Scope untuk mobil yang pending approval
+     */
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    /**
+     * Scope untuk mobil yang ditolak
+     */
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'rejected');
+    }
+
+    /**
+     * Check if car is approved
+     */
+    public function isApproved()
+    {
+        return $this->status === 'approved';
+    }
+
+    /**
+     * Check if car is pending approval
+     */
+    public function isPending()
+    {
+        return $this->status === 'pending';
+    }
+
+    /**
+     * Check if car is rejected
+     */
+    public function isRejected()
+    {
+        return $this->status === 'rejected';
+    }
 }

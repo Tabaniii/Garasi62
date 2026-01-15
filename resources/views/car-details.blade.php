@@ -261,6 +261,33 @@
                             </ul>
                             <a href="#" class="primary-btn">Get Today Is Price</a>
                             <p>Pricing in {{ date('m/d/Y') }}</p>
+                            @auth
+                                @if(Auth::user()->role === 'buyer')
+                                    @php
+                                        $isInWishlist = \App\Models\Wishlist::where('user_id', Auth::id())
+                                            ->where('car_id', $car->id)
+                                            ->exists();
+                                    @endphp
+                                    @if($isInWishlist)
+                                        <form action="{{ route('wishlist.destroy', $car->id) }}" method="POST" class="mt-3">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="primary-btn sidebar-btn w-100" style="background: #dc2626;">
+                                                <i class="fa fa-heart-broken"></i> Hapus dari Wishlist
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('wishlist.store', $car->id) }}" method="POST" class="mt-3">
+                                            @csrf
+                                            <button type="submit" class="primary-btn sidebar-btn w-100" style="background: #a855f7;">
+                                                <i class="fa fa-heart"></i> Tambah ke Wishlist
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endif
+                            @endauth
+                            
+                            <!-- Report Form -->
                         </div>
                         <div class="car__details__sidebar__payment">
                             <ul>
@@ -277,11 +304,70 @@
                             <a href="#" class="primary-btn sidebar-btn"><i class="fa fa-money"></i> Value Trade</a>
                         </div>
                     </div>
+                    @auth
+                        @if(Auth::user()->role !== 'seller' || Auth::id() != $car->seller_id)
+                        <div class="mt-4" style="border-top: 1px solid #e8e8e8; padding-top: 20px;">
+                            <h6 style="margin-bottom: 15px; font-weight: 600;">Laporkan Mobil</h6>
+                            <button type="button" class="primary-btn sidebar-btn w-100" style="background: #ef4444;" data-toggle="modal" data-target="#reportModal">
+                                <i class="fa fa-flag"></i> Laporkan Mobil Ini
+                            </button>
+                        </div>
+                        @endif
+                    @endauth
                 </div>
             </div>
         </div>
     </section>
     <!-- Car Details Section End -->
+    
+    <!-- Report Modal -->
+    @auth
+    <div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-labelledby="reportModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalLabel">
+                        <i class="fa fa-flag"></i> Laporkan Mobil
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ route('reports.store', $car->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <p class="mb-3">Anda akan melaporkan mobil <strong>{{ $car->brand }} {{ $car->nama }}</strong>. Laporan ini akan dikirim ke admin dan seller pemilik mobil.</p>
+                        
+                        <div class="mb-3">
+                            <label for="reason" class="form-label">Alasan Pelaporan <span class="text-danger">*</span></label>
+                            <select class="form-control" id="reason" name="reason" required>
+                                <option value="">Pilih Alasan</option>
+                                <option value="false_information">Informasi Palsu</option>
+                                <option value="inappropriate_content">Konten Tidak Pantas</option>
+                                <option value="spam">Spam</option>
+                                <option value="duplicate">Duplikat</option>
+                                <option value="scam">Penipuan</option>
+                                <option value="other">Lainnya</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Detail Laporan <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="message" name="message" rows="4" placeholder="Jelaskan secara detail mengapa Anda melaporkan mobil ini..." required minlength="10" maxlength="1000"></textarea>
+                            <small class="form-text text-muted">Minimal 10 karakter, maksimal 1000 karakter</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fa fa-flag"></i> Kirim Laporan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endauth
 
     <script>
         // Handle thumbnail click untuk mengubah gambar besar

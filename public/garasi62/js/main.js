@@ -83,23 +83,44 @@
     });
 
     /*--------------------------
-        Testimonial Slider
+        Testimonial Slider - Unlimited Scroll
     ----------------------------*/
     var testimonialSlider = $(".testimonial__slider");
     testimonialSlider.each(function () {
         var $this = $(this);
-        var itemCount = $this.find(".testimonial__item").length;
+        var itemCount = $this.find(".testimonial__item, .col-lg-6, .testimonial__item__wrapper").length;
 
         $this.owlCarousel({
-            loop: itemCount > 1,
-            margin: 0,
-            items: 1,
-            dots: itemCount > 1,
-            nav: itemCount > 1,
+            loop: itemCount > 2,
+            margin: 30,
+            items: 2,
+            slideBy: 1,
+            dots: itemCount > 2,
+            nav: itemCount > 2,
             navText: ["<i class='fa fa-angle-left'></i>", "<i class='fa fa-angle-right'></i>"],
-            smartSpeed: 1200,
-            autoHeight: true,
-            autoplay: false
+            smartSpeed: 500,
+            autoHeight: false,
+            autoplay: true,
+            autoplayTimeout: 3000,
+            autoplayHoverPause: false,
+            autoplaySpeed: 500,
+            rtl: false,
+            rewind: false,
+            mouseDrag: true,
+            touchDrag: true,
+            pullDrag: true,
+            responsive: {
+                768: {
+                    items: 2,
+                    slideBy: 1,
+                    margin: 30
+                },
+                0: {
+                    items: 1,
+                    slideBy: 1,
+                    margin: 20
+                }
+            }
         });
     });
 

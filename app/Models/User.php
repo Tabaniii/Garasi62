@@ -49,4 +49,28 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Relationship dengan Wishlist
+     */
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    /**
+     * Relationship dengan Report (sebagai reporter)
+     */
+    public function reports()
+    {
+        return $this->hasMany(Report::class, 'reporter_id');
+    }
+
+    /**
+     * Relationship dengan Report (sebagai seller yang di-report)
+     */
+    public function reportedCars()
+    {
+        return $this->hasMany(Report::class, 'seller_id');
+    }
 }

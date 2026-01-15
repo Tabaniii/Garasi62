@@ -340,6 +340,29 @@
                                             @csrf
                                             <button type="submit" class="btn-sidebar-action btn-cart-add">
                                                 <i class="fa fa-shopping-cart"></i> Tambah ke Keranjang
+                            </ul>
+                            <a href="#" class="primary-btn">Get Today Is Price</a>
+                            <p>Pricing in {{ date('m/d/Y') }}</p>
+                            @auth
+                                @if(Auth::user()->role === 'buyer')
+                                    @php
+                                        $isInWishlist = \App\Models\Wishlist::where('user_id', Auth::id())
+                                            ->where('car_id', $car->id)
+                                            ->exists();
+                                    @endphp
+                                    @if($isInWishlist)
+                                        <form action="{{ route('wishlist.destroy', $car->id) }}" method="POST" class="mt-3">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="primary-btn sidebar-btn w-100" style="background: #dc2626;">
+                                                <i class="fa fa-heart-broken"></i> Hapus dari Wishlist
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('wishlist.store', $car->id) }}" method="POST" class="mt-3">
+                                            @csrf
+                                            <button type="submit" class="primary-btn sidebar-btn w-100" style="background: #a855f7;">
+                                                <i class="fa fa-heart"></i> Tambah ke Wishlist
                                             </button>
                                         </form>
                                     @endif
@@ -395,6 +418,16 @@
                             @endif
                         @endauth
                     </div>
+                    @auth
+                        @if(Auth::user()->role !== 'seller' || Auth::id() != $car->seller_id)
+                        <div class="mt-4" style="border-top: 1px solid #e8e8e8; padding-top: 20px;">
+                            <h6 style="margin-bottom: 15px; font-weight: 600;">Laporkan Mobil</h6>
+                            <button type="button" class="primary-btn sidebar-btn w-100" style="background: #ef4444;" data-toggle="modal" data-target="#reportModal">
+                                <i class="fa fa-flag"></i> Laporkan Mobil Ini
+                            </button>
+                        </div>
+                        @endif
+                    @endauth
                 </div>
             </div>
         </div>

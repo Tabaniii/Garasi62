@@ -42,6 +42,34 @@ class car extends Model
     ];
 
     /**
+     * Accessor untuk image - normalisasi path separator
+     * Karena image sudah di-cast sebagai array, value yang diterima sudah berupa array
+     */
+    public function getImageAttribute($value)
+    {
+        if (empty($value)) {
+            return null;
+        }
+        
+        // Jika masih string (belum di-cast), decode dulu
+        if (is_string($value)) {
+            $value = json_decode($value, true);
+        }
+        
+        if (!is_array($value)) {
+            return null;
+        }
+        
+        // Normalisasi path separator (backslash ke forward slash untuk URL web)
+        return array_map(function($path) {
+            if (is_string($path)) {
+                return str_replace('\\', '/', $path);
+            }
+            return $path;
+        }, $value);
+    }
+
+    /**
      * Relationship dengan User (seller)
      */
     public function seller()
@@ -71,6 +99,14 @@ class car extends Model
     public function reports()
     {
         return $this->hasMany(Report::class);
+    }
+
+    /**
+     * Relationship dengan Cart
+     */
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
     }
 
     /**

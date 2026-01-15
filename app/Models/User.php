@@ -73,4 +73,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Report::class, 'seller_id');
     }
+
+    /**
+     * Relationship dengan Cart (sebagai buyer)
+     */
+    public function carts()
+    {
+        return $this->hasMany(Cart::class, 'buyer_id');
+    }
 }

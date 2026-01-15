@@ -90,20 +90,48 @@ class CarController extends Controller
     }
 
     // CRUD Methods untuk Dashboard
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
+        // Query builder dengan select hanya kolom yang diperlukan untuk performa lebih baik
+        $query = car::select([
+            'id',
+            'nama',
+            'brand',
+            'tahun',
+            'kilometer',
+            'transmisi',
+            'kapasitasmesin',
+            'harga',
+            'metode',
+            'tipe',
+            'image',
+            'status',
+            'seller_id',
+            'created_at',
+            'updated_at'
+        ]);
+
         if ($user->role === 'admin') {
             // Admin can see all cars with status info
-            $cars = car::with('seller')->orderBy('created_at', 'desc')->get();
+            // Tidak perlu eager load seller karena tidak digunakan di view
         } elseif ($user->role === 'seller') {
             // Seller can only see their own cars
-            $cars = car::where('seller_id', $user->id)->orderBy('created_at', 'desc')->get();
+            $query->where('seller_id', $user->id);
         } else {
             // Buyer cannot access this page
             return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        // Pagination - hanya load 12 item per halaman untuk performa lebih baik
+        $perPage = $request->get('per_page', 12);
+        $cars = $query->paginate($perPage)->withQueryString();
 
         return view('cars.index', compact('cars'));
     }

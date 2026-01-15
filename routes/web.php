@@ -15,6 +15,7 @@ use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\CarApprovalController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\CartController;
 
 Route::get('/', [IndexController::class, 'index'])->name('home');
 Route::get('/index', [IndexController::class, 'index'])->name('index');
@@ -102,6 +103,15 @@ Route::post('/contact', [ContactController::class, 'send'])->name('contact.send'
     Route::prefix('wishlist')->name('wishlist.')->middleware('role:buyer')->group(function () {
         Route::post('/{car}', [WishlistController::class, 'store'])->name('store');
         Route::delete('/{car}', [WishlistController::class, 'destroy'])->name('destroy');
+    });
+
+    // Cart Management (Buyer Only)
+    Route::prefix('cart')->name('cart.')->middleware('role:buyer')->group(function () {
+        Route::get('/', [CartController::class, 'index'])->name('index');
+        Route::post('/{car}', [CartController::class, 'store'])->name('store');
+        Route::put('/{id}', [CartController::class, 'update'])->name('update');
+        Route::delete('/{id}', [CartController::class, 'destroy'])->name('destroy');
+        Route::delete('/', [CartController::class, 'clear'])->name('clear');
     });
 
     // Reports Management

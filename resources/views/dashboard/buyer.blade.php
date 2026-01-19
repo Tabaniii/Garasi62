@@ -60,6 +60,9 @@
                 <a href="{{ route('cars') }}?tipe=rent" class="btn btn-outline-primary btn-animate" style="padding: 12px 20px;">
                     <i class="fas fa-calendar-alt me-2"></i>Lihat Mobil Disewa
                 </a>
+                <a href="{{ route('reports.my-reports') }}" class="btn btn-outline-warning btn-animate" style="padding: 12px 20px;">
+                    <i class="fas fa-flag me-2"></i>Laporan Saya
+                </a>
                 <a href="{{ route('index') }}" class="btn btn-outline-dark btn-animate" style="padding: 12px 20px;">
                     <i class="fas fa-home me-2"></i>Kunjungi Halaman Utama
                 </a>
@@ -260,7 +263,7 @@
 
 .recent-car-card {
     background: #fff;
-    border-radius: 12px;
+    border-radius: 5px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border: 1px solid #e9ecef;
@@ -311,7 +314,7 @@
     top: 12px;
     right: 12px;
     padding: 6px 12px;
-    border-radius: 12px;
+    border-radius: 5px;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -448,7 +451,7 @@
 .stat-card-icon {
     width: 70px !important;
     height: 70px !important;
-    border-radius: 16px !important;
+    border-radius: 5px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -476,7 +479,7 @@
 
 .category-card {
     background: #fff;
-    border-radius: 12px;
+    border-radius: 5px;
     padding: 24px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border: 1px solid #e9ecef;
@@ -499,7 +502,7 @@
 .category-icon {
     width: 60px;
     height: 60px;
-    border-radius: 12px;
+    border-radius: 5px;
     background: linear-gradient(135deg, #dc2626, #991b1b);
     display: flex;
     align-items: center;

@@ -241,7 +241,7 @@
 .report-message {
     background: #f8f9fa;
     padding: 16px;
-    border-radius: 8px;
+    border-radius: 5px;
     border-left: 4px solid #dc2626;
     color: #4b5563;
     line-height: 1.6;
@@ -251,7 +251,7 @@
 .admin-notes {
     background: #fef3c7;
     padding: 16px;
-    border-radius: 8px;
+    border-radius: 5px;
     border-left: 4px solid #f59e0b;
     color: #4b5563;
     line-height: 1.6;

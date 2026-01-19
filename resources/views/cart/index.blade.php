@@ -49,15 +49,15 @@
                     </div>
 
                     @foreach($carts as $cart)
-                    <div class="cart-item mb-4" style="border: 1px solid #e8e8e8; border-radius: 8px; padding: 20px; background: #fff;">
+                    <div class="cart-item mb-4" style="border: 1px solid #e8e8e8; border-radius: 5px; padding: 20px; background: #fff;">
                         <div class="row align-items-center">
                             <div class="col-md-3">
                                 @if($cart->car && $cart->car->image && is_array($cart->car->image) && count($cart->car->image) > 0)
                                     <a href="{{ route('car.details', $cart->car->id) }}">
-                                        <img src="{{ asset('storage/' . $cart->car->image[0]) }}" alt="{{ $cart->car->brand }}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px;">
+                                        <img src="{{ asset('storage/' . $cart->car->image[0]) }}" alt="{{ $cart->car->brand }}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 5px;">
                                     </a>
                                 @else
-                                    <img src="{{ asset('garasi62/img/cars/car-8.jpg') }}" alt="No Image" style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px;">
+                                    <img src="{{ asset('garasi62/img/cars/car-8.jpg') }}" alt="No Image" style="width: 100%; height: 150px; object-fit: cover; border-radius: 5px;">
                                 @endif
                             </div>
                             <div class="col-md-6">
@@ -114,7 +114,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="cart-summary" style="border: 1px solid #e8e8e8; border-radius: 8px; padding: 20px; background: #fff; position: sticky; top: 20px;">
+                <div class="cart-summary" style="border: 1px solid #e8e8e8; border-radius: 5px; padding: 20px; background: #fff; position: sticky; top: 20px;">
                     <h4 class="mb-4"><i class="fa fa-calculator"></i> Ringkasan</h4>
                     
                     <div class="summary-item mb-3" style="border-bottom: 1px solid #e8e8e8; padding-bottom: 15px;">

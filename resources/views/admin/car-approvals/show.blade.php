@@ -239,7 +239,7 @@
 .main-image {
     width: 100%;
     height: 400px;
-    border-radius: 12px;
+    border-radius: 5px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     margin-bottom: 15px;
@@ -261,7 +261,7 @@
     width: 80px;
     height: 60px;
     object-fit: cover;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     border: 2px solid transparent;
     transition: all 0.3s;
@@ -277,7 +277,7 @@
     height: 300px;
     background: #f8f9fa;
     border: 2px dashed #dee2e6;
-    border-radius: 12px;
+    border-radius: 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -318,7 +318,7 @@
 
 .car-type-badge {
     padding: 8px 16px;
-    border-radius: 20px;
+    border-radius: 5px;
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
@@ -347,7 +347,7 @@
     gap: 8px;
     padding: 12px;
     background: #f8f9fa;
-    border-radius: 8px;
+    border-radius: 5px;
 }
 
 .spec-item i {

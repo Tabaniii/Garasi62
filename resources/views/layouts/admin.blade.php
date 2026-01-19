@@ -186,7 +186,7 @@
             background: linear-gradient(135deg, #dc2626, #991b1b);
             color: #fff;
             text-decoration: none;
-            border-radius: 8px;
+            border-radius: 5px;
             font-weight: 600;
             font-size: 14px;
             transition: all 0.3s;
@@ -210,7 +210,7 @@
             color: #fff;
             width: 40px;
             height: 40px;
-            border-radius: 8px;
+            border-radius: 5px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -244,7 +244,7 @@
             color: #ccc;
             cursor: pointer;
             transition: all 0.3s;
-            border-radius: 8px;
+            border-radius: 5px;
         }
 
         .header-icon:hover {
@@ -274,7 +274,7 @@
             gap: 10px;
             cursor: pointer;
             padding: 5px 10px;
-            border-radius: 8px;
+            border-radius: 5px;
             transition: all 0.3s;
         }
 
@@ -320,13 +320,13 @@
             width: 60px;
             height: 4px;
             background: linear-gradient(90deg, #dc2626, #991b1b);
-            border-radius: 2px;
+            border-radius: 5px;
         }
 
         /* Stat Cards */
         .stat-card {
             background: #fff;
-            border-radius: 16px;
+            border-radius: 5px;
             padding: 28px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -361,7 +361,7 @@
         .stat-card-icon {
             width: 70px;
             height: 70px;
-            border-radius: 16px;
+            border-radius: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -421,7 +421,7 @@
         /* Info Cards */
         .info-card {
             background: #fff;
-            border-radius: 16px;
+            border-radius: 5px;
             padding: 28px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06);
             height: 100%;
@@ -465,7 +465,7 @@
         /* Chart Card */
         .chart-card {
             background: #fff;
-            border-radius: 16px;
+            border-radius: 5px;
             padding: 28px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06);
             border: 1px solid rgba(0,0,0,0.05);
@@ -506,7 +506,7 @@
 
         /* Alert */
         .alert-custom {
-            border-radius: 8px;
+            border-radius: 5px;
             border-left: 4px solid #dc2626;
         }
 
@@ -644,7 +644,7 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
-            border-radius: 10px;
+            border-radius: 5px;
             font-weight: 600;
             letter-spacing: 0.3px;
         }
@@ -755,7 +755,7 @@
             <a href="{{ route('dashboard') }}" class="sidebar-logo">
                 <div class="sidebar-logo-icon">
                     <img src="{{ asset('img/logo.svg') }}" alt="Garasi62" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div style="display:none; width: 100%; height: 100%; background: linear-gradient(135deg, #dc2626, #991b1b); border-radius: 8px; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 20px;">G</div>
+                    <div style="display:none; width: 100%; height: 100%; background: linear-gradient(135deg, #dc2626, #991b1b); border-radius: 5px; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 20px;">G</div>
                 </div>
                 <span>Garasi62</span>
             </a>
@@ -791,7 +791,7 @@
                         $pendingCars = \App\Models\car::where('status', 'pending')->count();
                     @endphp
                     @if($pendingCars > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: auto;">{{ $pendingCars }}</span>
+                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $pendingCars }}</span>
                     @endif
                 </a>
                 <a href="{{ route('blogs.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('blogs.admin.*') ? 'active' : '' }}">
@@ -809,7 +809,7 @@
                         $pendingComments = \App\Models\Comment::where('status', 'pending')->count();
                     @endphp
                     @if($pendingComments > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: auto;">{{ $pendingComments }}</span>
+                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $pendingComments }}</span>
                     @endif
                 </a>
                 <a href="{{ route('users.index') }}" class="sidebar-menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
@@ -823,7 +823,7 @@
                         $pendingReports = \App\Models\Report::where('status', 'pending')->count();
                     @endphp
                     @if($pendingReports > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: auto;">{{ $pendingReports }}</span>
+                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $pendingReports }}</span>
                     @endif
                 </a>
                 <a href="{{ route('about') }}" class="sidebar-menu-item">
@@ -844,6 +844,21 @@
                     <i class="fas fa-plus-circle"></i>
                     <span>Tambah Mobil</span>
                 </a>
+                <a href="{{ route('chat.seller.index') }}" class="sidebar-menu-item {{ request()->routeIs('chat.*') ? 'active' : '' }}">
+                    <i class="fas fa-comments"></i>
+                    <span>Obrolan</span>
+                    @php
+                        $unreadChats = \App\Models\Chat::where('seller_id', Auth::id())
+                            ->whereHas('messages', function($query) {
+                                $query->where('sender_id', '!=', Auth::id())
+                                      ->where('is_read', false);
+                            })
+                            ->count();
+                    @endphp
+                    @if($unreadChats > 0)
+                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $unreadChats }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('seller.reports.index') }}" class="sidebar-menu-item {{ request()->routeIs('seller.reports.*') ? 'active' : '' }}">
                     <i class="fas fa-flag"></i>
                     <span>Laporan Mobil</span>
@@ -851,7 +866,7 @@
                         $sellerPendingReports = \App\Models\Report::where('seller_id', Auth::id())->where('status', 'pending')->count();
                     @endphp
                     @if($sellerPendingReports > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 10px; margin-left: auto;">{{ $sellerPendingReports }}</span>
+                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $sellerPendingReports }}</span>
                     @endif
                 </a>
             @elseif(Auth::user()->role === 'buyer')
@@ -859,6 +874,21 @@
                 <a href="{{ route('cars') }}" class="sidebar-menu-item">
                     <i class="fas fa-search"></i>
                     <span>Cari Mobil</span>
+                </a>
+                <a href="{{ route('chat.index') }}" class="sidebar-menu-item {{ request()->routeIs('chat.*') ? 'active' : '' }}">
+                    <i class="fas fa-comments"></i>
+                    <span>Obrolan</span>
+                    @php
+                        $unreadChats = \App\Models\Chat::where('buyer_id', Auth::id())
+                            ->whereHas('messages', function($query) {
+                                $query->where('sender_id', '!=', Auth::id())
+                                      ->where('is_read', false);
+                            })
+                            ->count();
+                    @endphp
+                    @if($unreadChats > 0)
+                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $unreadChats }}</span>
+                    @endif
                 </a>
             @endif
         </div>

@@ -207,7 +207,7 @@
     width: 60px;
     height: 45px;
     object-fit: cover;
-    border-radius: 6px;
+    border-radius: 5px;
     border: 1px solid #e9ecef;
 }
 
@@ -216,7 +216,7 @@
     height: 45px;
     background: #f8f9fa;
     border: 1px solid #e9ecef;
-    border-radius: 6px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;

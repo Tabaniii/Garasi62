@@ -150,7 +150,7 @@
 <style>
 .testimonial-admin-card {
     border: none;
-    border-radius: 16px;
+    border-radius: 5px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     overflow: hidden;
 }
@@ -166,7 +166,7 @@
     background: linear-gradient(135deg, #dc2626, #991b1b);
     color: white;
     padding: 10px 20px;
-    border-radius: 12px;
+    border-radius: 5px;
     font-size: 14px;
     font-weight: 600;
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
@@ -217,7 +217,7 @@
 .testimonial-card-admin {
     background: #ffffff;
     border: 1px solid #e9ecef;
-    border-radius: 16px;
+    border-radius: 5px;
     padding: 24px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
@@ -294,7 +294,7 @@
 
 .badge-status {
     padding: 6px 12px;
-    border-radius: 20px;
+    border-radius: 5px;
     font-size: 12px;
     font-weight: 600;
     display: inline-flex;
@@ -385,7 +385,7 @@
 .btn-action {
     flex: 1;
     padding: 10px 16px;
-    border-radius: 10px;
+    border-radius: 5px;
     border: none;
     font-size: 14px;
     font-weight: 600;
@@ -432,7 +432,7 @@
     background: linear-gradient(135deg, #dc2626, #991b1b);
     color: white;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     overflow: hidden;
@@ -474,7 +474,7 @@
     width: 32px;
     height: 32px;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;

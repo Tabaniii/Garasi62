@@ -16,6 +16,7 @@ use App\Http\Controllers\CarApprovalController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ChatController;
 
 Route::get('/', [IndexController::class, 'index'])->name('home');
 Route::get('/index', [IndexController::class, 'index'])->name('index');
@@ -99,6 +100,25 @@ Route::post('/contact', [ContactController::class, 'send'])->name('contact.send'
         Route::post('/{car}/reject', [CarApprovalController::class, 'reject'])->name('reject');
     });
 
+    // Chat Management
+    Route::prefix('chat')->name('chat.')->group(function () {
+        // Buyer routes
+        Route::middleware('role:buyer')->group(function () {
+            Route::get('/', [ChatController::class, 'index'])->name('index');
+            Route::get('/seller/{sellerId}', [ChatController::class, 'showSeller'])->name('seller');
+        });
+        
+        // Seller routes
+        Route::middleware('role:seller')->group(function () {
+            Route::get('/seller-chats', [ChatController::class, 'sellerIndex'])->name('seller.index');
+        });
+        
+        // Common routes (both buyer and seller)
+        Route::get('/{chatId}', [ChatController::class, 'show'])->name('show');
+        Route::post('/{chatId}/message', [ChatController::class, 'store'])->name('store');
+        Route::get('/{chatId}/messages', [ChatController::class, 'getMessages'])->name('messages');
+    });
+
     // Wishlist Management (Buyer Only)
     Route::prefix('wishlist')->name('wishlist.')->middleware('role:buyer')->group(function () {
         Route::post('/{car}', [WishlistController::class, 'store'])->name('store');
@@ -117,6 +137,7 @@ Route::post('/contact', [ContactController::class, 'send'])->name('contact.send'
     // Reports Management
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::post('/{car}', [ReportController::class, 'store'])->name('store');
+        Route::get('/my-reports', [ReportController::class, 'myReports'])->name('my-reports');
     });
 
     // Reports Management (Admin Only)

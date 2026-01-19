@@ -57,6 +57,20 @@
                 <a href="{{ route('cars.index') }}" class="btn btn-outline-danger btn-animate" style="padding: 12px 20px;">
                     <i class="fas fa-list me-2"></i>Lihat Semua Mobil Saya
                 </a>
+                <a href="{{ route('chat.seller.index') }}" class="btn btn-outline-primary btn-animate" style="padding: 12px 20px;">
+                    <i class="fas fa-comments me-2"></i>Obrolan
+                    @php
+                        $unreadChats = \App\Models\Chat::where('seller_id', Auth::id())
+                            ->whereHas('messages', function($query) {
+                                $query->where('sender_id', '!=', Auth::id())
+                                      ->where('is_read', false);
+                            })
+                            ->count();
+                    @endphp
+                    @if($unreadChats > 0)
+                        <span class="badge bg-danger ms-2">{{ $unreadChats }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('index') }}" class="btn btn-outline-dark btn-animate" style="padding: 12px 20px;">
                     <i class="fas fa-home me-2"></i>Kunjungi Halaman Utama
                 </a>
@@ -64,6 +78,67 @@
         </div>
     </div>
 </div>
+
+<!-- Recent Chats Section -->
+@php
+    $recentChats = \App\Models\Chat::where('seller_id', Auth::id())
+        ->with(['buyer', 'car', 'messages' => function($query) {
+            $query->latest()->limit(1);
+        }])
+        ->orderBy('last_message_at', 'desc')
+        ->limit(5)
+        ->get();
+@endphp
+@if($recentChats->count() > 0)
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <div class="info-card animate-fade-in">
+            <div class="info-card-header">
+                <h5 class="info-card-title">
+                    <i class="fas fa-comments me-2"></i>Obrolan Terbaru
+                </h5>
+                <a href="{{ route('chat.seller.index') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-eye me-1"></i>Lihat Semua
+                </a>
+            </div>
+            <div class="recent-chats-list">
+                @foreach($recentChats as $chat)
+                    @php
+                        $otherUser = $chat->buyer;
+                        $lastMessage = $chat->messages->first();
+                        $unreadCount = $chat->getUnreadCount(Auth::id());
+                    @endphp
+                    <a href="{{ route('chat.show', $chat->id) }}" class="recent-chat-item {{ $unreadCount > 0 ? 'recent-chat-unread' : '' }}">
+                        <div class="recent-chat-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="recent-chat-content">
+                            <div class="recent-chat-header">
+                                <span class="recent-chat-name">{{ $otherUser->name }}</span>
+                                @if($lastMessage)
+                                    <span class="recent-chat-time">{{ $lastMessage->created_at->diffForHumans() }}</span>
+                                @endif
+                            </div>
+                            <div class="recent-chat-preview">
+                                @if($lastMessage)
+                                    <span class="recent-chat-message">
+                                        {{ Str::limit($lastMessage->message, 40) }}
+                                    </span>
+                                @else
+                                    <span class="recent-chat-message text-muted">Belum ada pesan</span>
+                                @endif
+                                @if($unreadCount > 0)
+                                    <span class="recent-chat-badge">{{ $unreadCount }}</span>
+                                @endif
+                            </div>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 
 <!-- Status Information -->
 @if($stats['pending_cars'] > 0)
@@ -154,7 +229,7 @@
 
 .recent-car-card {
     background: #fff;
-    border-radius: 12px;
+    border-radius: 5px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border: 1px solid #e9ecef;
@@ -206,7 +281,7 @@
     top: 8px;
     left: 8px;
     padding: 4px 10px;
-    border-radius: 12px;
+    border-radius: 5px;
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
@@ -227,7 +302,7 @@
     bottom: 8px;
     left: 8px;
     padding: 4px 8px;
-    border-radius: 8px;
+    border-radius: 5px;
     font-size: 9px;
     font-weight: 600;
     display: flex;
@@ -313,7 +388,7 @@
 .stat-card-icon {
     width: 70px !important;
     height: 70px !important;
-    border-radius: 16px !important;
+    border-radius: 5px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -333,10 +408,128 @@
     box-shadow: 0 6px 20px rgba(0,0,0,0.2) !important;
 }
 
+/* Recent Chats Styles */
+.recent-chats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.recent-chat-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+}
+
+.recent-chat-item:hover {
+    background: #f8f9fa;
+    text-decoration: none;
+    color: inherit;
+}
+
+.recent-chat-item:last-child {
+    border-bottom: none;
+}
+
+.recent-chat-unread {
+    background: #f0f7ff;
+    font-weight: 600;
+}
+
+.recent-chat-unread:hover {
+    background: #e6f2ff;
+}
+
+.recent-chat-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.recent-chat-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.recent-chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.recent-chat-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.recent-chat-time {
+    font-size: 11px;
+    color: #6c757d;
+    white-space: nowrap;
+    margin-left: 8px;
+}
+
+.recent-chat-preview {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.recent-chat-message {
+    font-size: 12px;
+    color: #6c757d;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.recent-chat-unread .recent-chat-message {
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+.recent-chat-badge {
+    background: #df2d24;
+    color: #fff;
+    border-radius: 5px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
     .recent-cars-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         gap: 15px;
+    }
+
+    .recent-chat-item {
+        padding: 10px 12px;
+    }
+
+    .recent-chat-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
     }
 }
 </style>

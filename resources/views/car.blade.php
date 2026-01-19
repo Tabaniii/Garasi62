@@ -79,15 +79,17 @@
                             </select>
 
                             <div class="filter-price">
-                                <p>Price:</p>
+                                <p style="margin-bottom: 15px; font-weight: 600; color: #1a1a1a;">Harga:</p>
                                 <div class="price-range-wrap">
-                                    <div class="filter-price-range" id="priceRange"></div>
-                                    <div class="range-slider">
-                                        <div class="price-input">
-                                            <input type="text" id="filterAmount" readonly>
-                                            <input type="hidden" name="min_price" id="minPrice" value="{{ request('min_price', $minPrice ?? 0) }}">
-                                            <input type="hidden" name="max_price" id="maxPrice" value="{{ request('max_price', $maxPrice ?? 0) }}">
+                                    <div class="price-display" style="margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 5px; text-align: center;">
+                                        <div id="filterAmount" style="font-size: 14px; font-weight: 700; color: #dc2626;">
+                                            Rp {{ number_format($minPrice ?? 0, 0, ',', '.') }} - Rp {{ number_format($maxPrice ?? 1000000000, 0, ',', '.') }}
                                         </div>
+                                    </div>
+                                    <div class="filter-price-range" id="priceRange" style="margin-bottom: 10px;"></div>
+                                    <div class="range-slider">
+                                        <input type="hidden" name="min_price" id="minPrice" value="{{ request('min_price', $minPrice ?? 0) }}">
+                                        <input type="hidden" name="max_price" id="maxPrice" value="{{ request('max_price', $maxPrice ?? 1000000000) }}">
                                     </div>
                                 </div>
                             </div>
@@ -237,18 +239,20 @@
                                     </a>
                                     @auth
                                         @if(auth()->user()->role === 'buyer')
-                                            <form action="{{ route('cart.store', $car->id) }}" method="POST" class="cart-form">
-                                                @csrf
-                                                <button type="submit" class="btn-cart">
-                                                    <i class="fa fa-shopping-cart"></i>
-                                                    <span>Tambah ke Keranjang</span>
-                                                </button>
-                                            </form>
+                                            @php
+                                                $seller = $car->seller;
+                                            @endphp
+                                            @if($seller)
+                                                <a href="{{ route('chat.seller', $seller->id) }}?car_id={{ $car->id }}" class="btn-chat">
+                                                    <i class="fa fa-comments"></i>
+                                                    <span>Chat ke Penjual</span>
+                                                </a>
+                                            @endif
                                         @endif
                                     @else
-                                        <a href="{{ route('login') }}" class="btn-cart">
-                                            <i class="fa fa-shopping-cart"></i>
-                                            <span>Login untuk Keranjang</span>
+                                        <a href="{{ route('login') }}" class="btn-chat">
+                                            <i class="fa fa-comments"></i>
+                                            <span>Login untuk Chat</span>
                                         </a>
                                     @endauth
                                 </div>
@@ -344,7 +348,7 @@
    ============================================ */
     .car-card-modern {
         background: #ffffff;
-        border-radius: 20px;
+        border-radius: 5px;
         overflow: hidden;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -362,7 +366,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        border-radius: 20px;
+        border-radius: 5px;
         padding: 2px;
         background: linear-gradient(135deg, #df2d24, #ff6b6b, #df2d24);
         -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -420,7 +424,7 @@
         backdrop-filter: blur(10px);
         color: #fff;
         padding: 6px 12px;
-        border-radius: 20px;
+        border-radius: 5px;
         font-size: 11px;
         font-weight: 700;
         display: flex;
@@ -448,7 +452,7 @@
 
     .car-type-badge {
         padding: 6px 14px;
-        border-radius: 20px;
+        border-radius: 5px;
         font-size: 10px;
         font-weight: 800;
         text-transform: uppercase;
@@ -469,7 +473,7 @@
 
     .stock-badge {
         padding: 6px 12px;
-        border-radius: 20px;
+        border-radius: 5px;
         font-size: 10px;
         font-weight: 700;
         backdrop-filter: blur(10px);
@@ -533,7 +537,7 @@
         padding: 6px 12px;
         background: linear-gradient(135deg, #f8f9fa, #e9ecef);
         color: #1a1a1a;
-        border-radius: 12px;
+        border-radius: 5px;
         font-size: 12px;
         font-weight: 700;
         border: 1px solid #e0e0e0;
@@ -560,7 +564,7 @@
         margin-bottom: 16px;
         padding: 12px;
         background: linear-gradient(135deg, #fafbfc, #ffffff);
-        border-radius: 12px;
+        border-radius: 5px;
         border: 1px solid #f0f0f0;
     }
 
@@ -582,7 +586,7 @@
         align-items: center;
         justify-content: center;
         background: linear-gradient(135deg, #fff, #f8f9fa);
-        border-radius: 10px;
+        border-radius: 5px;
         color: #df2d24;
         font-size: 14px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -592,8 +596,9 @@
     .spec-content {
         flex: 1;
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
     }
 
     .spec-label {
@@ -608,6 +613,9 @@
         font-size: 13px;
         color: #1a1a1a;
         font-weight: 700;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.4;
     }
 
     /* Price */
@@ -615,7 +623,7 @@
         margin-top: auto;
         padding: 16px;
         background: linear-gradient(135deg, #fff, #fafbfc);
-        border-radius: 12px;
+        border-radius: 5px;
         border: 2px solid #f0f0f0;
         margin-bottom: 16px;
         text-align: center;
@@ -650,19 +658,19 @@
     /* Action Buttons */
     .car-card-actions {
         display: flex;
+        flex-direction: column;
         gap: 10px;
     }
 
     .btn-detail,
-    .btn-cart,
-    .cart-form {
-        flex: 1;
+    .btn-chat {
+        width: 100%;
     }
 
     .btn-detail,
-    .btn-cart {
+    .btn-chat {
         padding: 12px 16px;
-        border-radius: 12px;
+        border-radius: 5px;
         font-size: 13px;
         font-weight: 700;
         text-align: center;
@@ -690,20 +698,21 @@
         background: linear-gradient(135deg, #2a2a2a, #5a5a5a);
     }
 
-    .btn-cart {
-        background: linear-gradient(135deg, #ff6b6b, #ff5252);
+    .btn-chat {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
         color: #fff;
-        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
 
-    .btn-cart:hover {
+    .btn-chat:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
-        background: linear-gradient(135deg, #ff5252, #ff1744);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #fff;
     }
 
     .btn-detail i,
-    .btn-cart i {
+    .btn-chat i {
         font-size: 14px;
     }
 
@@ -775,6 +784,8 @@
             font-size: 18px;
         }
 
+        .spec-value {
+            font-size: 12px;
         .car-card-actions {
             flex-direction: column;
         }
@@ -793,7 +804,7 @@
         height: 180px;
         overflow: hidden;
         position: relative;
-        border-radius: 12px 12px 0 0;
+        border-radius: 5px 5px 0 0;
         background: #f5f5f5;
         flex-shrink: 0;
     }
@@ -886,7 +897,7 @@
         color: #19191a;
         font-size: 11px;
         font-weight: 700;
-        border-radius: 6px;
+        border-radius: 5px;
         letter-spacing: 0.5px;
         border: 1px solid #e8e8e8;
         line-height: 1.2;
@@ -898,7 +909,7 @@
         padding: 5px 11px;
         font-size: 11px;
         font-weight: 700;
-        border-radius: 6px;
+        border-radius: 5px;
         letter-spacing: 0.5px;
         border: 1px solid;
         line-height: 1.2;
@@ -1118,6 +1129,29 @@
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
+        // Pastikan min selalu lebih kecil dari max
+        function ensureMinMaxOrder(min, max) {
+            if (min > max) {
+                var temp = min;
+                min = max;
+                max = temp;
+            }
+            return { min: min, max: max };
+        }
+
+        // Update price displays
+        function updatePriceDisplays(minVal, maxVal) {
+            var ordered = ensureMinMaxOrder(minVal, maxVal);
+            minVal = ordered.min;
+            maxVal = ordered.max;
+            
+            $("#filterAmount").html("Rp " + formatNumber(minVal) + " - Rp " + formatNumber(maxVal));
+            $("#minPriceDisplay").val("Rp " + formatNumber(minVal));
+            $("#maxPriceDisplay").val("Rp " + formatNumber(maxVal));
+            $("#minPrice").val(minVal);
+            $("#maxPrice").val(maxVal);
+        }
+
         // Tunggu hingga jQuery UI ter-load (setelah main.js)
         function initPriceSlider() {
             if (typeof $ === 'undefined' || !$.fn.slider) {
@@ -1129,6 +1163,11 @@
             if ($("#priceRange").hasClass('ui-slider')) {
                 $("#priceRange").slider('destroy');
             }
+
+            // Pastikan currentMin dan currentMax dalam urutan yang benar
+            var ordered = ensureMinMaxOrder(currentMin, currentMax);
+            currentMin = ordered.min;
+            currentMax = ordered.max;
             
             $("#priceRange").slider({
                 range: true,
@@ -1136,11 +1175,10 @@
                 max: maxPrice,
                 values: [currentMin, currentMax],
                 slide: function(event, ui) {
-                    $("#filterAmount").val("Rp " + formatNumber(ui.values[0]) + " - Rp " + formatNumber(ui.values[1]));
-                    $("#minPrice").val(ui.values[0]);
-                    $("#maxPrice").val(ui.values[1]);
+                    updatePriceDisplays(ui.values[0], ui.values[1]);
                 },
                 change: function(event, ui) {
+                    updatePriceDisplays(ui.values[0], ui.values[1]);
                     // Auto submit on change
                     setTimeout(function() {
                         document.getElementById('filterForm').submit();
@@ -1148,8 +1186,8 @@
                 }
             });
 
-            // Pastikan format Rupiah digunakan, override format dari main.js
-            $("#filterAmount").val("Rp " + formatNumber(currentMin) + " - Rp " + formatNumber(currentMax));
+            // Set initial display
+            updatePriceDisplays(currentMin, currentMax);
         }
 
         // Tunggu window load untuk memastikan main.js sudah ter-load
@@ -1181,77 +1219,6 @@
         });
     });
 
-    // Handle Add to Cart with SweetAlert
-    document.addEventListener('DOMContentLoaded', function() {
-        const cartForms = document.querySelectorAll('form[action*="cart.store"], .cart-form');
-        
-        cartForms.forEach(function(form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const formData = new FormData(form);
-                const url = form.getAttribute('action');
-                const button = form.querySelector('button[type="submit"]');
-                const originalText = button ? button.innerHTML : '';
-                
-                // Disable button
-                if (button) {
-                    button.disabled = true;
-                    button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menambahkan...';
-                }
-                
-                fetch(url, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || formData.get('_token')
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    }
-                    throw new Error('Network response was not ok');
-                })
-                .then(data => {
-                    // Show SweetAlert success
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: data.message || 'Mobil berhasil ditambahkan ke keranjang!',
-                        showConfirmButton: true,
-                        confirmButtonColor: '#df2d24',
-                        timer: 3000,
-                        timerProgressBar: true
-                    });
-                    
-                    // Update cart badge if exists
-                    const cartBadge = document.querySelector('.cart-badge');
-                    if (cartBadge && data.cart_count) {
-                        cartBadge.textContent = data.cart_count;
-                        cartBadge.style.display = 'inline-block';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'Terjadi kesalahan saat menambahkan ke keranjang.',
-                        confirmButtonColor: '#df2d24'
-                    });
-                })
-                .finally(() => {
-                    // Re-enable button
-                    if (button) {
-                        button.disabled = false;
-                        button.innerHTML = originalText;
-                    }
-                });
-            });
-        });
-    });
 </script>
 
 @endsection

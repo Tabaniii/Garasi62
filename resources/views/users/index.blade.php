@@ -137,7 +137,7 @@
 .page-header-section {
     background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%) !important;
     padding: 45px 40px !important;
-    border-radius: 24px !important;
+    border-radius: 5px !important;
     border: 1px solid #e9ecef !important;
     margin-bottom: 40px !important;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02) !important;
@@ -194,7 +194,7 @@
     padding: 8px 18px;
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
-    border-radius: 25px;
+    border-radius: 5px;
     font-size: 13px;
     font-weight: 700;
     box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4), 0 0 0 0 rgba(220, 38, 38, 0.5);
@@ -271,7 +271,7 @@
     padding: 6px 12px;
     font-size: 11px;
     font-weight: 600;
-    border-radius: 6px;
+    border-radius: 5px;
 }
 
 .info-card-header {
@@ -299,7 +299,7 @@
 }
 
 .pagination-wrapper .page-link {
-    border-radius: 8px;
+    border-radius: 5px;
     border: 1px solid #e9ecef;
     color: #6b7280;
     padding: 10px 16px;
@@ -329,7 +329,7 @@
     background: linear-gradient(135deg, #1a1a1a, #374151);
     color: #fff;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -352,7 +352,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -380,7 +380,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 5px;
     border: none;
     cursor: pointer;
     transition: all 0.3s;
@@ -537,7 +537,7 @@
 
 <style>
 .swal2-popup-custom-delete {
-    border-radius: 20px !important;
+    border-radius: 5px !important;
     padding: 35px !important;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
     border: 1px solid #e9ecef !important;
@@ -563,7 +563,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444) !important;
     color: #fff !important;
     padding: 14px 28px !important;
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 14px !important;
     border: none !important;
@@ -581,7 +581,7 @@
     background: linear-gradient(135deg, #fff, #fafafa) !important;
     color: #6b7280 !important;
     padding: 14px 28px !important;
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 14px !important;
     border: 2px solid #e9ecef !important;

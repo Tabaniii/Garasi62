@@ -314,59 +314,6 @@
                                         </form>
                                     @endif
                                 @endif
-                            @endauth
-                            </div>
-                            
-                            <!-- Cart Button -->
-                            <div class="cart-button-wrapper">
-                            @auth
-                                @if(Auth::user()->role === 'buyer')
-                                    @php
-                                        $cartItem = \App\Models\Cart::where('buyer_id', Auth::id())
-                                            ->where('car_id', $car->id)
-                                            ->first();
-                                        $isInCart = $cartItem !== null;
-                                    @endphp
-                                    @if($isInCart)
-                                        <form action="{{ route('cart.destroy', $cartItem->id) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn-sidebar-action btn-cart-remove">
-                                                <i class="fa fa-shopping-cart"></i> Hapus dari Keranjang
-                                            </button>
-                                        </form>
-                                    @else
-                                        <form action="{{ route('cart.store', $car->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn-sidebar-action btn-cart-add">
-                                                <i class="fa fa-shopping-cart"></i> Tambah ke Keranjang
-                            </ul>
-                            <a href="#" class="primary-btn">Get Today Is Price</a>
-                            <p>Pricing in {{ date('m/d/Y') }}</p>
-                            @auth
-                                @if(Auth::user()->role === 'buyer')
-                                    @php
-                                        $isInWishlist = \App\Models\Wishlist::where('user_id', Auth::id())
-                                            ->where('car_id', $car->id)
-                                            ->exists();
-                                    @endphp
-                                    @if($isInWishlist)
-                                        <form action="{{ route('wishlist.destroy', $car->id) }}" method="POST" class="mt-3">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="primary-btn sidebar-btn w-100" style="background: #dc2626;">
-                                                <i class="fa fa-heart-broken"></i> Hapus dari Wishlist
-                                            </button>
-                                        </form>
-                                    @else
-                                        <form action="{{ route('wishlist.store', $car->id) }}" method="POST" class="mt-3">
-                                            @csrf
-                                            <button type="submit" class="primary-btn sidebar-btn w-100" style="background: #a855f7;">
-                                                <i class="fa fa-heart"></i> Tambah ke Wishlist
-                                            </button>
-                                        </form>
-                                    @endif
-                                @endif
                             @else
                                 <a href="{{ route('login') }}" class="btn-sidebar-action btn-cart-login">
                                     <i class="fa fa-shopping-cart"></i> Login untuk Tambah ke Keranjang
@@ -392,19 +339,53 @@
                                 </div>
                                 @endif
                                 <div class="price-item final-price">
-                                    <span class="price-label">Harga</span>
                                     <span class="price-amount main-price">Rp {{ number_format($car->harga, 0, ',', '.') }}</span>
                                 </div>
                             </div>
-                            <div class="sidebar-actions">
-                                <a href="#" class="btn-sidebar-primary">
-                                    <i class="fa fa-credit-card"></i> Express Purchase
-                                </a>
-                                <a href="#" class="btn-sidebar-secondary">
-                                    <i class="fa fa-sliders"></i> Build Payment
-                                </a>
+                        </div>
+                        @if($car->seller)
+                        <div class="sidebar-card seller-card">
+                            <div class="sidebar-header">
+                                <h5><i class="fa fa-user"></i> Penjual</h5>
+                            </div>
+                            <div class="seller-info">
+                                <div class="seller-avatar">
+                                    <i class="fa fa-user-circle"></i>
+                                </div>
+                                <div class="seller-details">
+                                    <div class="seller-name">{{ $car->seller->name }}</div>
+                                    @if($car->seller->email)
+                                    <div class="seller-email">
+                                        <i class="fa fa-envelope"></i> {{ $car->seller->email }}
+                                    </div>
+                                    @endif
+                                    @if($car->seller->phone)
+                                    <div class="seller-phone">
+                                        <i class="fa fa-phone"></i> {{ $car->seller->phone }}
+                                    </div>
+                                    @endif
+                                    @if($car->seller->city)
+                                    <div class="seller-location">
+                                        <i class="fa fa-map-marker"></i> {{ $car->seller->city }}
+                                    </div>
+                                    @endif
+                                </div>
+                                <div class="seller-chat-button">
+                                    @auth
+                                        @if(Auth::user()->role === 'buyer')
+                                            <a href="{{ route('chat.seller', $car->seller->id) }}?car_id={{ $car->id }}" class="btn-sidebar-action btn-chat-seller">
+                                                <i class="fa fa-comments"></i> Chat ke Penjual
+                                            </a>
+                                        @endif
+                                    @else
+                                        <a href="{{ route('login') }}" class="btn-sidebar-action btn-chat-login">
+                                            <i class="fa fa-comments"></i> Login untuk Chat
+                                        </a>
+                                    @endauth
+                                </div>
                             </div>
                         </div>
+                        @endif
                         @auth
                             @if(Auth::user()->role !== 'seller' || Auth::id() != $car->seller_id)
                             <div class="sidebar-card report-card">
@@ -450,7 +431,15 @@
                 <form action="{{ route('reports.store', $car->id) }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <p class="mb-3">Anda akan melaporkan mobil <strong>{{ $car->brand }} {{ $car->nama }}</strong>. Laporan ini akan dikirim ke admin dan seller pemilik mobil.</p>
+                        <div class="alert alert-info" style="border-radius: 5px; border-left: 4px solid #3b82f6;">
+                            <h6 style="margin: 0 0 8px 0; font-weight: 700; color: #1e40af;">
+                                <i class="fa fa-info-circle"></i> Informasi Penting
+                            </h6>
+                            <p style="margin: 0; font-size: 13px; line-height: 1.6;">
+                                Anda akan melaporkan mobil <strong>{{ $car->brand }} {{ $car->nama }}</strong>. 
+                                Laporan ini akan dikirim ke admin untuk ditinjau.
+                            </p>
+                        </div>
                         
                         <div class="mb-3">
                             <label for="reason" class="form-label">Alasan Pelaporan <span class="text-danger">*</span></label>
@@ -470,6 +459,21 @@
                             <textarea class="form-control" id="message" name="message" rows="4" placeholder="Jelaskan secara detail mengapa Anda melaporkan mobil ini..." required minlength="10" maxlength="1000"></textarea>
                             <small class="form-text text-muted">Minimal 10 karakter, maksimal 1000 karakter</small>
                         </div>
+
+                        <div class="report-process-info" style="background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #10b981; margin-top: 20px;">
+                            <h6 style="margin: 0 0 10px 0; font-weight: 700; color: #059669; font-size: 14px;">
+                                <i class="fa fa-check-circle"></i> Proses Setelah Laporan Dikirim:
+                            </h6>
+                            <ol style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8; color: #374151;">
+                                <li><strong>Laporan Dikirim</strong> - Laporan Anda akan masuk ke sistem</li>
+                                <li><strong>Review Admin</strong> - Admin akan meninjau laporan dalam 1-3 hari kerja</li>
+                                <li><strong>Update Status</strong> - Anda akan melihat status di halaman "Laporan Saya"</li>
+                                <li><strong>Tindak Lanjut</strong> - Admin akan mengambil tindakan sesuai hasil review</li>
+                            </ol>
+                            <p style="margin: 10px 0 0 0; font-size: 12px; color: #6b7280;">
+                                <i class="fa fa-clock-o"></i> Anda dapat melihat status laporan di <a href="{{ route('reports.my-reports') }}" target="_blank" style="color: #3b82f6; font-weight: 600;">halaman Laporan Saya</a>
+                            </p>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -487,7 +491,7 @@
         /* Car Details Modern Design */
         .car-details-gallery {
             margin-bottom: 30px;
-            border-radius: 20px;
+            border-radius: 5px;
             overflow: hidden;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
             background: #fff;
@@ -521,7 +525,7 @@
 
         .car-type-overlay {
             padding: 10px 20px;
-            border-radius: 25px;
+            border-radius: 5px;
             font-size: 12px;
             font-weight: 800;
             text-transform: uppercase;
@@ -554,7 +558,7 @@
         .thumb-item {
             position: relative;
             height: 80px;
-            border-radius: 10px;
+            border-radius: 5px;
             overflow: hidden;
             cursor: pointer;
             border: 2px solid transparent;
@@ -660,12 +664,12 @@
         
         .car-details-sidebar::-webkit-scrollbar-track {
             background: #f1f1f1;
-            border-radius: 10px;
+            border-radius: 5px;
         }
         
         .car-details-sidebar::-webkit-scrollbar-thumb {
             background: #df2d24;
-            border-radius: 10px;
+            border-radius: 5px;
         }
         
         .car-details-sidebar::-webkit-scrollbar-thumb:hover {
@@ -675,7 +679,7 @@
 
         .sidebar-card {
             background: #fff;
-            border-radius: 14px;
+            border-radius: 5px;
             padding: 20px;
             margin-bottom: 16px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -722,7 +726,7 @@
             align-items: center;
             padding: 10px 12px;
             background: linear-gradient(135deg, #fafbfc, #ffffff);
-            border-radius: 8px;
+            border-radius: 5px;
             border: 1px solid #f0f0f0;
             transition: all 0.3s;
         }
@@ -747,7 +751,7 @@
 
         .stock-value {
             padding: 3px 10px;
-            border-radius: 16px;
+            border-radius: 5px;
             background: linear-gradient(135deg, #10b981, #34d399);
             color: #fff;
             font-size: 11px;
@@ -764,11 +768,10 @@
 
         .price-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
             padding: 10px 12px;
             background: linear-gradient(135deg, #fafbfc, #ffffff);
-            border-radius: 8px;
+            border-radius: 5px;
         }
 
         .price-item.discount {
@@ -819,7 +822,7 @@
         .btn-sidebar-secondary,
         .btn-sidebar-action {
             padding: 12px 16px;
-            border-radius: 10px;
+            border-radius: 5px;
             font-size: 13px;
             font-weight: 700;
             text-align: center;
@@ -835,6 +838,7 @@
         }
         
         .wishlist-button-wrapper {
+            margin-top: 16px;
             margin-bottom: 0;
         }
         
@@ -842,11 +846,11 @@
             margin: 0;
         }
         
-        .cart-button-wrapper {
+        .chat-button-wrapper {
             margin-top: 12px;
         }
         
-        .cart-button-wrapper form {
+        .chat-button-wrapper a {
             margin: 0;
         }
 
@@ -883,30 +887,29 @@
             box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
         }
 
-        .btn-wishlist-remove,
-        .btn-cart-remove {
+        .btn-wishlist-remove {
             background: linear-gradient(135deg, #dc2626, #b91c1c);
             color: #fff;
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
         }
 
-        .btn-wishlist-remove:hover,
-        .btn-cart-remove:hover {
+        .btn-wishlist-remove:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
         }
 
-        .btn-cart-add,
-        .btn-cart-login {
-            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+        .btn-chat-seller,
+        .btn-chat-login {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
             color: #fff;
-            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
-        .btn-cart-add:hover,
-        .btn-cart-login:hover {
+        .btn-chat-seller:hover,
+        .btn-chat-login:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            color: #fff;
         }
 
         .btn-report {
@@ -918,6 +921,85 @@
         .btn-report:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Seller Card */
+        .seller-card {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+        }
+
+        .seller-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .seller-avatar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .seller-avatar i {
+            font-size: 64px;
+            color: #df2d24;
+            opacity: 0.8;
+        }
+
+        .seller-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .seller-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #1a1a1a;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .seller-email,
+        .seller-phone,
+        .seller-location {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #fff;
+            border-radius: 5px;
+            font-size: 13px;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s;
+        }
+
+        .seller-email:hover,
+        .seller-phone:hover,
+        .seller-location:hover {
+            background: #f9fafb;
+            border-color: #df2d24;
+            transform: translateX(4px);
+        }
+
+        .seller-email i,
+        .seller-phone i,
+        .seller-location i {
+            color: #df2d24;
+            font-size: 14px;
+            width: 18px;
+            text-align: center;
+        }
+
+        .seller-chat-button {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .seller-chat-button .btn-sidebar-action {
+            margin: 0;
         }
 
         /* Animations */
@@ -983,7 +1065,7 @@
         .car__details__tab__feature {
             padding: 24px;
             background: #fff;
-            border-radius: 14px;
+            border-radius: 5px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
@@ -1030,7 +1112,7 @@
         .car__details__tab__feature__item {
             padding: 16px;
             background: linear-gradient(135deg, #fafbfc, #ffffff);
-            border-radius: 10px;
+            border-radius: 5px;
             border: 1px solid #f0f0f0;
             transition: all 0.3s;
         }
@@ -1114,28 +1196,6 @@
                         thumbnails.forEach(t => t.classList.remove('active'));
                         this.classList.add('active');
                     }
-                });
-            });
-        });
-
-        // Handle Add to Cart with SweetAlert
-        document.addEventListener('DOMContentLoaded', function() {
-            const cartForms = document.querySelectorAll('form[action*="cart.store"]');
-            
-            cartForms.forEach(function(form) {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    const formData = new FormData(form);
-                    const url = form.getAttribute('action');
-                    const button = form.querySelector('button[type="submit"]');
-                    const originalText = button ? button.innerHTML : '';
-                    
-                    // Disable button
-                    if (button) {
-                        button.disabled = true;
-                        button.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Menambahkan...';
-                    }
                     
                     fetch(url, {
                         method: 'POST',
@@ -1189,5 +1249,6 @@
                 });
             });
         });
+
     </script>
     @endsection

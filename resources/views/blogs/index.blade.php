@@ -24,7 +24,7 @@
 .page-header-section {
     background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%) !important;
     padding: 45px 40px !important;
-    border-radius: 24px !important;
+    border-radius: 5px !important;
     border: 1px solid #e9ecef !important;
     margin-bottom: 40px !important;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02) !important;
@@ -81,7 +81,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
     padding: 6px 14px;
-    border-radius: 20px;
+    border-radius: 5px;
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
@@ -100,7 +100,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
     padding: 14px 28px;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 14px;
     border: none;
@@ -134,7 +134,7 @@
 
 .blog-card {
     background: #fff !important;
-    border-radius: 16px !important;
+    border-radius: 5px !important;
     overflow: hidden;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
     border: 1px solid #e9ecef !important;
@@ -173,7 +173,7 @@
     top: 12px;
     right: 12px;
     padding: 5px 12px;
-    border-radius: 20px;
+    border-radius: 5px;
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
@@ -254,7 +254,7 @@
 .btn-action {
     flex: 1 !important;
     padding: 10px 12px !important;
-    border-radius: 8px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 12px !important;
     border: 2px solid;
@@ -296,7 +296,7 @@
 /* Empty State */
 .empty-state {
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-    border-radius: 20px !important;
+    border-radius: 5px !important;
     padding: 80px 40px !important;
     text-align: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
@@ -325,7 +325,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
     padding: 12px 24px;
-    border-radius: 10px;
+    border-radius: 5px;
     font-weight: 700;
     text-decoration: none;
     display: inline-flex;
@@ -344,7 +344,7 @@
     background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
     color: #fff;
     padding: 12px 24px;
-    border-radius: 10px;
+    border-radius: 5px;
     font-weight: 700;
     text-decoration: none;
     display: inline-flex;
@@ -360,7 +360,7 @@
 }
 
 .alert-custom {
-    border-radius: 12px !important;
+    border-radius: 5px !important;
     border: none !important;
     box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2) !important;
     margin-bottom: 25px !important;
@@ -473,7 +473,7 @@ function confirmDeleteBlog(blogId, blogTitle) {
         title: '<strong style="color: #1a1a1a;">Hapus Blog?</strong>',
         html: `<div style="text-align: left; padding: 10px 0;">
             <p style="color: #6b7280; margin-bottom: 15px;">Anda akan menghapus blog berikut:</p>
-            <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border-left: 4px solid #dc2626; margin-bottom: 15px;">
+            <div style="background: #f9fafb; padding: 15px; border-radius: 5px; border-left: 4px solid #dc2626; margin-bottom: 15px;">
                 <strong style="color: #1a1a1a; display: block; margin-bottom: 5px;">${blogTitle}</strong>
             </div>
             <p style="color: #dc2626; font-size: 14px; margin: 0;">
@@ -521,7 +521,7 @@ function confirmDeleteBlog(blogId, blogTitle) {
 <style>
 /* SweetAlert2 Custom Styling */
 .swal2-popup-custom {
-    border-radius: 16px !important;
+    border-radius: 5px !important;
     padding: 30px !important;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
     border: 1px solid #e9ecef !important;
@@ -544,7 +544,7 @@ function confirmDeleteBlog(blogId, blogTitle) {
     background: linear-gradient(135deg, #dc2626, #ef4444) !important;
     color: #fff !important;
     padding: 12px 24px !important;
-    border-radius: 8px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 14px !important;
     border: none !important;
@@ -561,7 +561,7 @@ function confirmDeleteBlog(blogId, blogTitle) {
     background: linear-gradient(135deg, #fff, #fafafa) !important;
     color: #6b7280 !important;
     padding: 12px 24px !important;
-    border-radius: 8px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 14px !important;
     border: 2px solid #e9ecef !important;

@@ -433,7 +433,7 @@ class CarController extends Controller
 
     public function showDetail($id)
     {
-        $car = car::where('status', 'approved')->findOrFail($id);
+        $car = car::where('status', 'approved')->with('seller')->findOrFail($id);
         return view('car-details', compact('car'));
     }
 

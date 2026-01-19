@@ -25,6 +25,8 @@
     <link rel="stylesheet" href="{{ asset('garasi62/css/owl.carousel.min.css')}}" type="text/css">
     <link rel="stylesheet" href="{{ asset('garasi62/css/slicknav.min.css')}}" type="text/css">
     <link rel="stylesheet" href="{{ asset('garasi62/css/style.css')}}" type="text/css">
+    
+    @stack('head')
 </head>
 
 <body>

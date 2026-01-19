@@ -275,7 +275,7 @@
 
 .recent-car-card {
     background: #fff;
-    border-radius: 12px;
+    border-radius: 5px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border: 1px solid #e9ecef;
@@ -326,7 +326,7 @@
     top: 8px;
     right: 8px;
     padding: 4px 10px;
-    border-radius: 12px;
+    border-radius: 5px;
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
@@ -347,7 +347,7 @@
     bottom: 8px;
     left: 8px;
     padding: 4px 8px;
-    border-radius: 8px;
+    border-radius: 5px;
     font-size: 9px;
     font-weight: 600;
     display: flex;
@@ -436,7 +436,7 @@
 
 .testimonial-card {
     background: #fff;
-    border-radius: 16px;
+    border-radius: 5px;
     padding: 24px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     border: 1px solid #e9ecef;

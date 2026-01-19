@@ -6,7 +6,7 @@
 <style>
 .form-section {
     background: #fff;
-    border-radius: 16px;
+    border-radius: 5px;
     padding: 30px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     border: 1px solid #e9ecef;
@@ -22,7 +22,7 @@
 
 .form-control, .form-select {
     border: 2px solid #e9ecef;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 12px 15px;
     transition: all 0.3s;
 }
@@ -36,7 +36,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
     padding: 12px 30px;
-    border-radius: 8px;
+    border-radius: 5px;
     font-weight: 700;
     border: none;
     transition: all 0.3s;
@@ -52,7 +52,7 @@
     background: #f3f4f6;
     color: #1a1a1a;
     padding: 12px 30px;
-    border-radius: 8px;
+    border-radius: 5px;
     font-weight: 700;
     border: none;
     text-decoration: none;
@@ -68,7 +68,7 @@
 .image-preview {
     max-width: 300px;
     max-height: 200px;
-    border-radius: 8px;
+    border-radius: 5px;
     margin-top: 10px;
     border: 2px solid #e9ecef;
 }
@@ -76,7 +76,7 @@
 .current-image {
     max-width: 300px;
     max-height: 200px;
-    border-radius: 8px;
+    border-radius: 5px;
     margin-top: 10px;
     border: 2px solid #e9ecef;
 }

@@ -39,7 +39,7 @@
 .page-header-section {
     background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%) !important;
     padding: 45px 40px !important;
-    border-radius: 24px !important;
+    border-radius: 5px !important;
     border: 1px solid #e9ecef !important;
     margin-bottom: 40px !important;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02) !important;
@@ -102,7 +102,7 @@
     padding: 8px 18px;
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
-    border-radius: 25px;
+    border-radius: 5px;
     font-size: 13px;
     font-weight: 700;
     box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4), 0 0 0 0 rgba(220, 38, 38, 0.5);
@@ -144,7 +144,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
     text-decoration: none;
-    border-radius: 14px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -226,7 +226,7 @@
 
 .car-card {
     background: #fff !important;
-    border-radius: 16px !important;
+    border-radius: 5px !important;
     overflow: hidden;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
     border: 1px solid #e9ecef !important;
@@ -244,7 +244,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    border-radius: 20px;
+    border-radius: 5px;
     padding: 2px;
     background: linear-gradient(135deg, #dc2626, #ef4444);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -343,7 +343,7 @@
     backdrop-filter: blur(12px);
     color: #fff;
     padding: 5px 10px;
-    border-radius: 15px;
+    border-radius: 5px;
     font-size: 10px;
     font-weight: 700;
     display: flex;
@@ -399,7 +399,7 @@
     width: 35px;
     height: 2px;
     background: linear-gradient(90deg, #dc2626, #ef4444);
-    border-radius: 2px;
+    border-radius: 5px;
 }
 
 .car-brand {
@@ -421,7 +421,7 @@
     padding: 5px 0 !important;
     list-style: none !important;
     background: linear-gradient(135deg, #fafafa, #ffffff);
-    border-radius: 8px;
+    border-radius: 5px;
     border: 1px solid #f3f4f6;
 }
 
@@ -431,7 +431,7 @@
     gap: 10px;
     padding: 6px 8px;
     margin: 2px 0;
-    border-radius: 6px;
+    border-radius: 5px;
     border-bottom: none !important;
     background: transparent;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -505,7 +505,7 @@
 .btn-action {
     flex: 1 !important;
     padding: 8px 12px !important;
-    border-radius: 7px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 11px !important;
     border: 2px solid;
@@ -587,7 +587,7 @@
 /* Empty State */
 .empty-state {
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-    border-radius: 20px !important;
+    border-radius: 5px !important;
     padding: 80px 40px !important;
     text-align: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
@@ -651,7 +651,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -676,7 +676,7 @@
     background: linear-gradient(135deg, #1a1a1a, #374151);
     color: #fff;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -701,7 +701,7 @@
 
 /* Success Alert Enhancement */
 .alert-custom {
-    border-radius: 12px !important;
+    border-radius: 5px !important;
     border: none !important;
     box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2) !important;
     margin-bottom: 25px !important;
@@ -742,7 +742,7 @@
 .pagination .page-link {
     padding: 10px 16px;
     border: 2px solid #e9ecef;
-    border-radius: 8px;
+    border-radius: 5px;
     color: #1a1a1a;
     background: #fff;
     text-decoration: none;
@@ -1039,20 +1039,20 @@ function confirmDeleteCar(button) {
         title: '<strong style="color: #1a1a1a;">Hapus Mobil?</strong>',
         html: `<div style="text-align: left; padding: 5px 0;">
             <p style="color: #6b7280; margin-bottom: 10px; font-size: 13px;">Anda akan menghapus mobil berikut:</p>
-            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; border-left: 3px solid #dc2626; margin-bottom: 10px;">
+            <div style="background: #f9fafb; padding: 12px; border-radius: 5px; border-left: 3px solid #dc2626; margin-bottom: 10px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; flex-shrink: 0;">
+                    <div style="width: 40px; height: 40px; border-radius: 5px; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; flex-shrink: 0;">
                         <i class="fas fa-car"></i>
                     </div>
                     <div style="flex: 1;">
                         <strong style="color: #1a1a1a; display: block; margin-bottom: 3px; font-size: 14px;">${carName}</strong>
-                        <span style="background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-size: 11px; color: #6b7280; font-weight: 600;">
+                        <span style="background: #e9ecef; padding: 2px 8px; border-radius: 5px; font-size: 11px; color: #6b7280; font-weight: 600;">
                             <i class="fas fa-tag me-1"></i>${carBrand}
                         </span>
                     </div>
                 </div>
             </div>
-            <div style="background: #fef2f2; padding: 10px; border-radius: 6px; border-left: 3px solid #ef4444; margin-top: 10px;">
+            <div style="background: #fef2f2; padding: 10px; border-radius: 5px; border-left: 3px solid #ef4444; margin-top: 10px;">
                 <p style="color: #dc2626; font-size: 12px; margin: 0; display: flex; align-items: center; gap: 6px; margin-bottom: 5px;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 12px;"></i>
                     <strong>Tindakan ini tidak dapat dibatalkan!</strong>
@@ -1170,7 +1170,7 @@ function confirmDeleteCar(button) {
 <style>
 /* SweetAlert2 Custom Styling for Car Delete */
 .swal2-popup-custom-delete-car {
-    border-radius: 12px !important;
+    border-radius: 5px !important;
     padding: 20px !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
     border: 1px solid #e9ecef !important;
@@ -1196,7 +1196,7 @@ function confirmDeleteCar(button) {
     background: linear-gradient(135deg, #dc2626, #ef4444) !important;
     color: #fff !important;
     padding: 10px 20px !important;
-    border-radius: 8px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 13px !important;
     border: none !important;
@@ -1214,7 +1214,7 @@ function confirmDeleteCar(button) {
     background: linear-gradient(135deg, #fff, #fafafa) !important;
     color: #6b7280 !important;
     padding: 10px 20px !important;
-    border-radius: 8px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 13px !important;
     border: 2px solid #e9ecef !important;

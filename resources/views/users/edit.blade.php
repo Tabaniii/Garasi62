@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
 .page-header-section {
     background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%) !important;
     padding: 45px 40px !important;
-    border-radius: 24px !important;
+    border-radius: 5px !important;
     border: 1px solid #e9ecef !important;
     margin-bottom: 40px !important;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02) !important;
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .form-control {
     border: 2px solid #e9ecef;
-    border-radius: 8px;
+    border-radius: 5px;
     padding: 12px 16px;
     transition: all 0.3s;
 }
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s;
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
     background: linear-gradient(135deg, #6b7280, #4b5563);
     color: #fff;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s;

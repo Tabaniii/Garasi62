@@ -1,5 +1,53 @@
 @extends('template.temp')
 
+@push('head')
+<script>
+// CRITICAL: Prevent nice-select from initializing on tipe select - MUST RUN BEFORE nice-select loads
+(function() {
+    // Override nice-select initialization IMMEDIATELY when jQuery is available
+    function overrideNiceSelect() {
+        if (typeof jQuery !== 'undefined' || typeof $ !== 'undefined') {
+            const $ = typeof jQuery !== 'undefined' ? jQuery : window.$;
+            if ($ && $.fn && !$.fn.niceSelect._overridden) {
+                const originalNiceSelect = $.fn.niceSelect;
+                $.fn.niceSelect._overridden = true;
+                $.fn.niceSelect = function(options) {
+                    // Don't initialize nice-select on select#tipe or elements with data-no-nice-select
+                    if (this.length > 0) {
+                        const shouldSkip = this.filter(function() {
+                            const $el = $(this);
+                            return $el.attr('id') === 'tipe' || 
+                                   $el.attr('name') === 'tipe' || 
+                                   $el.attr('data-no-nice-select') !== undefined;
+                        });
+                        if (shouldSkip.length > 0) {
+                            return this;
+                        }
+                    }
+                    return originalNiceSelect ? originalNiceSelect.call(this, options) : this;
+                };
+            }
+        }
+    }
+    
+    // Try to override immediately
+    overrideNiceSelect();
+    
+    // Also try when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', overrideNiceSelect);
+    } else {
+        overrideNiceSelect();
+    }
+    
+    // Also try after a short delay to catch late-loading jQuery
+    setTimeout(overrideNiceSelect, 10);
+    setTimeout(overrideNiceSelect, 50);
+    setTimeout(overrideNiceSelect, 100);
+})();
+</script>
+@endpush
+
 @section('content')
 <!-- Bootstrap 5 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -44,7 +92,7 @@
                                     <label for="tipe" class="form-label-modern">
                                         Tipe <span class="required">*</span>
                                     </label>
-                                    <select class="form-control-modern @error('tipe') is-invalid @enderror" id="tipe" name="tipe" required>
+                                    <select class="form-control-modern @error('tipe') is-invalid @enderror" id="tipe" name="tipe" required data-no-nice-select>
                                         <option value="rent" {{ old('tipe') == 'rent' ? 'selected' : '' }}>Rent (Sewa)</option>
                                         <option value="buy" {{ old('tipe') == 'buy' ? 'selected' : '' }}>Buy (Beli)</option>
                                     </select>
@@ -416,82 +464,115 @@
         document.getElementById('images').click();
     });
     
-    // Prevent nice-select from initializing on tipe select
+    // Prevent nice-select from initializing on tipe select - RUN IMMEDIATELY
     (function() {
-        // Override nice-select initialization for tipe select
-        if (typeof $ !== 'undefined' && typeof $.fn.niceSelect !== 'undefined') {
+        // Override nice-select initialization BEFORE it loads
+        if (typeof $ !== 'undefined') {
             const originalNiceSelect = $.fn.niceSelect;
             $.fn.niceSelect = function(options) {
-                // Don't initialize nice-select on select#tipe
-                if (this.attr('id') === 'tipe' || this.attr('name') === 'tipe') {
-                    return this;
+                // Don't initialize nice-select on select#tipe or elements with data-no-nice-select
+                if (this.length > 0) {
+                    const shouldSkip = this.filter(function() {
+                        return $(this).attr('id') === 'tipe' || 
+                               $(this).attr('name') === 'tipe' || 
+                               $(this).attr('data-no-nice-select') !== undefined;
+                    });
+                    if (shouldSkip.length > 0) {
+                        return this;
+                    }
                 }
-                return originalNiceSelect.call(this, options);
+                return originalNiceSelect ? originalNiceSelect.call(this, options) : this;
             };
         }
+        
+        // Also prevent after DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Remove any nice-select wrappers that might have been created
+            const niceSelects = document.querySelectorAll('.nice-select');
+            niceSelects.forEach(function(niceSelect) {
+                const select = niceSelect.querySelector('select#tipe, select[name="tipe"], select[data-no-nice-select]');
+                if (select) {
+                    // Restore original select
+                    if (niceSelect.parentNode) {
+                        niceSelect.parentNode.replaceChild(select, niceSelect);
+                    }
+                }
+            });
+        });
     })();
 
-    // Ensure only one select dropdown exists for Tipe
+    // Ensure only one select dropdown exists for Tipe - AGGRESSIVE VERSION
     function removeDuplicateSelects() {
-        // Find all selects with id="tipe"
-        const tipeSelects = document.querySelectorAll('select#tipe');
+        // STEP 1: Remove ALL nice-select wrappers for tipe select
+        const niceSelects = document.querySelectorAll('.nice-select');
+        niceSelects.forEach(function(niceSelect) {
+            const select = niceSelect.querySelector('select#tipe, select[name="tipe"], select[data-no-nice-select]');
+            if (select) {
+                // Restore original select by replacing wrapper
+                if (niceSelect.parentNode) {
+                    niceSelect.parentNode.replaceChild(select, niceSelect);
+                } else {
+                    niceSelect.remove();
+                }
+            }
+        });
         
-        // Find the original select (one with label)
+        // STEP 2: Find all selects with id="tipe" or name="tipe"
+        const allTipeSelects = document.querySelectorAll('select#tipe, select[name="tipe"]');
+        
+        // STEP 3: Find the original select (one with label in form-group-modern)
         let originalSelect = null;
         const formGroups = document.querySelectorAll('.form-group-modern');
         formGroups.forEach(function(group) {
             const label = group.querySelector('label[for="tipe"]');
             if (label) {
-                const select = group.querySelector('select#tipe');
+                const select = group.querySelector('select#tipe, select[name="tipe"]');
                 if (select) {
                     originalSelect = select;
                 }
             }
         });
         
-        if (tipeSelects.length > 1) {
-            // Keep only the original one, remove all others
-            tipeSelects.forEach(function(select) {
+        // STEP 4: Remove ALL duplicates, keep only original
+        if (allTipeSelects.length > 1) {
+            allTipeSelects.forEach(function(select) {
                 if (select !== originalSelect) {
                     // Remove nice-select wrapper if exists
                     const niceSelectWrapper = select.closest('.nice-select');
                     if (niceSelectWrapper) {
                         niceSelectWrapper.remove();
-                    } else {
-                        // Remove parent form-group if it doesn't have label
-                        const parent = select.parentElement;
-                        if (parent) {
-                            const hasLabel = parent.querySelector('label[for="tipe"]');
-                            if (!hasLabel) {
-                                parent.remove();
-                            } else {
-                                select.remove();
-                            }
+                    }
+                    
+                    // Remove the duplicate select and its parent if no label
+                    const parent = select.parentElement;
+                    if (parent) {
+                        const hasLabel = parent.querySelector('label[for="tipe"]');
+                        if (!hasLabel && !parent.classList.contains('form-group-modern')) {
+                            parent.remove();
+                        } else if (!hasLabel) {
+                            select.remove();
                         } else {
                             select.remove();
                         }
+                    } else {
+                        select.remove();
                     }
                 }
             });
         }
         
-        // Remove all nice-select wrappers for tipe select
-        const niceSelects = document.querySelectorAll('.nice-select');
-        niceSelects.forEach(function(niceSelect) {
-            const select = niceSelect.querySelector('select#tipe');
-            if (select) {
-                // Remove nice-select wrapper and restore original select
-                if (niceSelect.parentNode) {
-                    niceSelect.parentNode.replaceChild(select, niceSelect);
+        // STEP 5: Final check - ensure only one remains
+        const finalSelects = document.querySelectorAll('select#tipe, select[name="tipe"]');
+        if (finalSelects.length > 1) {
+            // Keep only the first one with label
+            for (let i = 1; i < finalSelects.length; i++) {
+                const duplicate = finalSelects[i];
+                const parent = duplicate.parentElement;
+                if (parent && !parent.querySelector('label[for="tipe"]')) {
+                    parent.remove();
+                } else {
+                    duplicate.remove();
                 }
-            }
-        });
-        
-        // Ensure only one select is visible
-        const remainingSelects = document.querySelectorAll('select#tipe');
-        if (remainingSelects.length > 1) {
-            for (let i = 1; i < remainingSelects.length; i++) {
-                remainingSelects[i].remove();
             }
         }
     }
@@ -554,12 +635,86 @@
         }
     }
     
-    // Also run after window load to catch any late-loading scripts
+    // CRITICAL: Run AFTER main.js loads (main.js calls $("select").niceSelect() at line 195)
+    // This must run after main.js to clean up any nice-select wrappers it creates
+    function forceRemoveNiceSelectAfterMainJS() {
+        // Find all nice-select wrappers for tipe
+        const niceSelects = document.querySelectorAll('.nice-select');
+        niceSelects.forEach(function(niceSelect) {
+            const select = niceSelect.querySelector('select#tipe, select[name="tipe"], select[data-no-nice-select]');
+            if (select) {
+                // Remove the nice-select wrapper and restore original select
+                const parent = niceSelect.parentNode;
+                if (parent) {
+                    parent.replaceChild(select, niceSelect);
+                } else {
+                    niceSelect.remove();
+                }
+            }
+        });
+        
+        // Remove any duplicate selects
+        const allTipeSelects = document.querySelectorAll('select#tipe, select[name="tipe"]');
+        if (allTipeSelects.length > 1) {
+            // Keep only the first one (the original with label)
+            let originalSelect = null;
+            const formGroups = document.querySelectorAll('.form-group-modern');
+            formGroups.forEach(function(group) {
+                const label = group.querySelector('label[for="tipe"]');
+                if (label) {
+                    const select = group.querySelector('select#tipe, select[name="tipe"]');
+                    if (select) {
+                        originalSelect = select;
+                    }
+                }
+            });
+            
+            // Remove all duplicates
+            allTipeSelects.forEach(function(select) {
+                if (select !== originalSelect) {
+                    const wrapper = select.closest('.nice-select');
+                    if (wrapper) {
+                        wrapper.remove();
+                    } else {
+                        select.remove();
+                    }
+                }
+            });
+        }
+        
+        // Final cleanup: remove any remaining nice-select wrappers
+        document.querySelectorAll('.nice-select').forEach(function(wrapper) {
+            const select = wrapper.querySelector('select#tipe, select[name="tipe"], select[data-no-nice-select]');
+            if (select) {
+                const parent = wrapper.parentNode;
+                if (parent) {
+                    parent.replaceChild(select, wrapper);
+                }
+            }
+        });
+    }
+    
+    // Run after window load (when main.js has finished)
     window.addEventListener('load', function() {
-        setTimeout(removeDuplicateSelects, 100);
-        setTimeout(removeDuplicateSelects, 300);
-        setTimeout(removeDuplicateSelects, 500);
+        setTimeout(forceRemoveNiceSelectAfterMainJS, 100);
+        setTimeout(forceRemoveNiceSelectAfterMainJS, 300);
+        setTimeout(forceRemoveNiceSelectAfterMainJS, 500);
+        setTimeout(forceRemoveNiceSelectAfterMainJS, 1000);
+        setTimeout(forceRemoveNiceSelectAfterMainJS, 2000);
     });
+    
+    // Also run immediately if DOM is already ready
+    if (document.readyState === 'complete') {
+        setTimeout(forceRemoveNiceSelectAfterMainJS, 100);
+        setTimeout(forceRemoveNiceSelectAfterMainJS, 300);
+        setTimeout(forceRemoveNiceSelectAfterMainJS, 500);
+    }
+    
+    // Additional cleanup after a longer delay to catch any late-loading scripts
+    setTimeout(function() {
+        forceRemoveNiceSelectAfterMainJS();
+        removeDuplicateSelects();
+    }, 3000);
 </script>
 
     <style>
@@ -583,9 +738,12 @@
         position: relative !important;
     }
     
-    /* Hide duplicate select tipe - ensure only one is visible */
+    /* CRITICAL: Hide ALL duplicate selects and nice-select wrappers for tipe */
     select#tipe:not(:first-of-type),
-    select[name="tipe"]:not(:first-of-type) {
+    select[name="tipe"]:not(:first-of-type),
+    select[data-no-nice-select]:not(:first-of-type),
+    select#tipe + select#tipe,
+    select[name="tipe"] + select[name="tipe"] {
         display: none !important;
         visibility: hidden !important;
         opacity: 0 !important;
@@ -594,23 +752,48 @@
         position: absolute !important;
         left: -9999px !important;
         pointer-events: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
     }
     
     /* Hide duplicate form-group-modern that contains tipe select */
-    .form-group-modern:has(select#tipe) ~ .form-group-modern:has(select#tipe) {
+    .form-group-modern:has(select#tipe) ~ .form-group-modern:has(select#tipe),
+    .form-group-modern:has(select[name="tipe"]) ~ .form-group-modern:has(select[name="tipe"]),
+    .form-group-modern:has(select#tipe) + .form-group-modern:has(select#tipe) {
         display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+        overflow: hidden !important;
     }
     
-    /* Prevent nice-select from styling tipe select */
+    /* Prevent nice-select from styling tipe select - HIDE ALL WRAPPERS */
     select#tipe.nice-select,
-    .nice-select:has(select#tipe) {
+    .nice-select:has(select#tipe),
+    .nice-select:has(select[name="tipe"]),
+    .nice-select:has(select[data-no-nice-select]),
+    .nice-select + .nice-select:has(select#tipe) {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        height: 0 !important;
+        width: 0 !important;
+        position: absolute !important;
+        left: -9999px !important;
+        pointer-events: none !important;
+        overflow: hidden !important;
     }
     
-    select#tipe {
+    /* Ensure only the first select#tipe is visible */
+    select#tipe:first-of-type,
+    select[name="tipe"]:first-of-type,
+    select[data-no-nice-select]:first-of-type {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
+        position: relative !important;
+        height: auto !important;
+        width: 100% !important;
     }
         
         /* Modern Create Car Form Styles - Same as Edit */
@@ -626,7 +809,7 @@
         gap: 20px;
         background: #fff;
         padding: 30px;
-        border-radius: 16px;
+        border-radius: 5px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         margin-bottom: 30px;
     }
@@ -638,7 +821,7 @@
         align-items: center;
         justify-content: center;
         background: linear-gradient(135deg, #df2d24, #ff6b6b);
-        border-radius: 12px;
+        border-radius: 5px;
         color: #fff;
         font-size: 24px;
     }
@@ -669,7 +852,7 @@
         background: linear-gradient(135deg, #f8f9fa, #e9ecef);
         color: #1a1a1a;
         text-decoration: none;
-        border-radius: 10px;
+        border-radius: 5px;
         font-weight: 600;
         display: flex;
         align-items: center;
@@ -688,7 +871,7 @@
     /* Form Card */
     .form-card-modern {
         background: #fff;
-        border-radius: 20px;
+        border-radius: 5px;
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
         overflow: visible !important;
         border: 1px solid rgba(0, 0, 0, 0.05);
@@ -729,7 +912,7 @@
         margin-bottom: 30px;
         padding: 24px;
         background: linear-gradient(135deg, #fafbfc, #ffffff);
-        border-radius: 16px;
+        border-radius: 5px;
         border: 1px solid #f0f0f0;
         transition: all 0.3s;
         overflow: visible !important;
@@ -790,7 +973,7 @@
 
     .section-badge {
         padding: 6px 14px;
-        border-radius: 20px;
+        border-radius: 5px;
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
@@ -870,7 +1053,7 @@
         max-width: 100%;
         padding: 12px 16px;
         border: 2px solid #e0e0e0;
-        border-radius: 12px;
+        border-radius: 5px;
         font-size: 15px;
         transition: all 0.3s;
         background: #fff;
@@ -918,7 +1101,7 @@
         -moz-user-select: auto !important;
         user-select: auto !important;
         border: 2px solid #e0e0e0 !important;
-        border-radius: 12px !important;
+        border-radius: 5px !important;
         font-size: 15px !important;
         background: #fff !important;
         opacity: 1 !important;
@@ -962,7 +1145,7 @@
         display: flex;
         align-items: center;
         border: 2px solid #e0e0e0;
-        border-radius: 12px;
+        border-radius: 5px;
         overflow: hidden;
         background: #fff;
         width: 100%;
@@ -1017,7 +1200,7 @@
         padding: 14px 24px;
         background: linear-gradient(135deg, #f8f9fa, #e9ecef);
         border: 2px dashed #d0d0d0;
-        border-radius: 12px;
+        border-radius: 5px;
         cursor: pointer;
         transition: all 0.3s;
         font-weight: 600;
@@ -1058,7 +1241,7 @@
 
     .image-wrapper-modern {
         position: relative;
-        border-radius: 12px;
+        border-radius: 5px;
         overflow: hidden;
         border: 2px solid #e0e0e0;
         transition: all 0.3s;
@@ -1128,7 +1311,7 @@
     .btn-cancel-modern {
         flex: 1;
         padding: 16px 24px;
-        border-radius: 12px;
+        border-radius: 5px;
         font-size: 16px;
         font-weight: 700;
         display: flex;

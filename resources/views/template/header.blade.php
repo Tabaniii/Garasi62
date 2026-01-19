@@ -51,33 +51,16 @@
                         </ul>
                     </nav>
                     <div class="header__nav__widget d-flex align-items-center" style="gap: 12px;">
-                        @auth
-                            @if(auth()->user()->role === 'buyer')
-                                <a href="{{ route('cart.index') }}" class="text-white text-decoration-none d-flex align-items-center justify-content-center position-relative" style="width: 32px; height: 32px;">
-                                    <i class="fa fa-shopping-cart"></i>
-                                    @php
-                                        $cartCount = \App\Models\Cart::where('buyer_id', auth()->id())->count();
-                                    @endphp
-                                    @if($cartCount > 0)
-                                        <span class="badge badge-danger" style="position: absolute; top: -5px; right: -5px; font-size: 10px; padding: 2px 5px; border-radius: 10px;">{{ $cartCount }}</span>
-                                    @endif
-                                </a>
-                            @else
-                                <a href="#" class="text-white text-decoration-none d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="fa fa-cart-plus"></i></a>
-                            @endif
-                        @else
-                            <a href="#" class="text-white text-decoration-none d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="fa fa-cart-plus"></i></a>
-                        @endauth
                         <a href="#" class="search-switch text-white text-decoration-none d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="fa fa-search"></i></a>
                         @auth
-                            <a href="{{ route('dashboard') }}" class="site-btn" style="white-space: nowrap; text-decoration: none; border-radius: 2px;">Dashboard</a>
+                            <a href="{{ route('dashboard') }}" class="site-btn" style="white-space: nowrap; text-decoration: none; border-radius: 5px;">Dashboard</a>
                             <form action="{{ route('logout') }}" method="POST" class="d-inline m-0">
                                 @csrf
-                                <button type="submit" class="site-btn" style="white-space: nowrap; text-decoration: none; border-radius: 2px;">Keluar</button>
+                                <button type="submit" class="site-btn" style="white-space: nowrap; text-decoration: none; border-radius: 5px;">Keluar</button>
                             </form>
                         @else
-                            <a href="{{ route('login') }}" class="site-btn" style="white-space: nowrap; text-decoration: none; border-radius: 2px;">Masuk</a>
-                            <a href="{{ route('register') }}" class="site-btn" style="white-space: nowrap; text-decoration: none; border-radius: 2px;">Daftar</a>
+                            <a href="{{ route('login') }}" class="site-btn" style="white-space: nowrap; text-decoration: none; border-radius: 5px;">Masuk</a>
+                            <a href="{{ route('register') }}" class="site-btn" style="white-space: nowrap; text-decoration: none; border-radius: 5px;">Daftar</a>
                         @endauth
                     </div>
                 </div>

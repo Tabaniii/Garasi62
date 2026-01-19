@@ -314,6 +314,10 @@
                                         </form>
                                     @endif
                                 @endif
+                            @else
+                                <a href="{{ route('login') }}" class="btn-sidebar-action btn-cart-login">
+                                    <i class="fa fa-shopping-cart"></i> Login untuk Tambah ke Keranjang
+                                </a>
                             @endauth
                             </div>
                         </div>
@@ -395,6 +399,16 @@
                             @endif
                         @endauth
                     </div>
+                    @auth
+                        @if(Auth::user()->role !== 'seller' || Auth::id() != $car->seller_id)
+                        <div class="mt-4" style="border-top: 1px solid #e8e8e8; padding-top: 20px;">
+                            <h6 style="margin-bottom: 15px; font-weight: 600;">Laporkan Mobil</h6>
+                            <button type="button" class="primary-btn sidebar-btn w-100" style="background: #ef4444;" data-toggle="modal" data-target="#reportModal">
+                                <i class="fa fa-flag"></i> Laporkan Mobil Ini
+                            </button>
+                        </div>
+                        @endif
+                    @endauth
                 </div>
             </div>
         </div>
@@ -1182,6 +1196,56 @@
                         thumbnails.forEach(t => t.classList.remove('active'));
                         this.classList.add('active');
                     }
+                    
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || formData.get('_token')
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        throw new Error('Network response was not ok');
+                    })
+                    .then(data => {
+                        // Show SweetAlert success
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: data.message || 'Mobil berhasil ditambahkan ke keranjang!',
+                            showConfirmButton: true,
+                            confirmButtonColor: '#df2d24',
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                        
+                        // Update cart badge if exists
+                        const cartBadge = document.querySelector('.cart-badge');
+                        if (cartBadge && data.cart_count) {
+                            cartBadge.textContent = data.cart_count;
+                            cartBadge.style.display = 'inline-block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Terjadi kesalahan saat menambahkan ke keranjang.',
+                            confirmButtonColor: '#df2d24'
+                        });
+                    })
+                    .finally(() => {
+                        // Re-enable button
+                        if (button) {
+                            button.disabled = false;
+                            button.innerHTML = originalText;
+                        }
+                    });
                 });
             });
         });

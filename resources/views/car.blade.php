@@ -786,6 +786,13 @@
 
         .spec-value {
             font-size: 12px;
+        .car-card-actions {
+            flex-direction: column;
+        }
+
+        .btn-detail,
+        .btn-cart {
+            width: 100%;
         }
     }
 

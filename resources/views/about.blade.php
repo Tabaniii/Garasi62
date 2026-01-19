@@ -196,103 +196,225 @@
     </section>
     <!-- Team Section End -->
 
-    <section class="testimonial spad" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); position: relative; overflow: hidden;">
+    <section class="testimonial spad" style="background: #f8f9fa; position: relative; overflow: hidden; padding: 80px 0;">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="section-title testimonial-title" style="position: relative; z-index: 2;">
-                        <span style="color: #dc2626; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 14px;">Testimonials</span>
-                        <h2 style="font-size: 42px; font-weight: 800; margin: 15px 0 20px; color: #1a1a1a; position: relative;">
+                    <div class="section-title testimonial-title" style="text-align: center; margin-bottom: 50px;">
+                        <span style="color: #dc2626; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; display: inline-block; margin-bottom: 10px;">Testimonials</span>
+                        <h2 style="font-size: 42px; font-weight: 800; margin: 15px 0 20px; color: #1a1a1a; position: relative; word-wrap: break-word; overflow-wrap: break-word;">
                             What People Say About Us
-                            <span style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 80px; height: 4px; background: linear-gradient(90deg, #dc2626, #991b1b); border-radius: 2px;"></span>
+                            <span style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 80px; height: 4px; background: linear-gradient(90deg, #dc2626, #991b1b); border-radius: 5px;"></span>
                         </h2>
-                        <p style="font-size: 16px; color: #6b7280; max-width: 600px; margin: 0 auto;">Our customers are our biggest supporters. What do they think of us?</p>
+                        <p style="font-size: 16px; color: #6b7280; max-width: 600px; margin: 0 auto; word-wrap: break-word; overflow-wrap: break-word;">Our customers are our biggest supporters. What do they think of us?</p>
                     </div>
                 </div>
             </div>
             <div class="row" style="margin-top: 50px;">
-                <div class="testimonial__slider owl-carousel">
-                    @forelse($testimonials as $testimonial)
-                        <div class="col-lg-6">
-                            <div class="testimonial__item" style="background: #ffffff; border-radius: 20px; padding: 35px;  border: 1px solid #f0f0f0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; height: 100%;">
-                                <!-- Decorative Quote Icon -->
-                                <div style="position: absolute; top: 20px; right: 20px; opacity: 0.1; font-size: 80px; color: #dc2626; line-height: 1;">
-                                    <i class="fa fa-quote-right"></i>
-                                </div>
-                                
-                                <div class="testimonial__item__author" style="display: flex; align-items: center; margin-bottom: 25px; position: relative; z-index: 1;">
-                                    <div class="testimonial__item__author__pic" style="margin-right: 20px; position: relative;">
-                                        @if($testimonial->image)
-                                            <img src="{{ asset('storage/' . $testimonial->image) }}" alt="{{ $testimonial->name }}" style="width: 80px; height: 80px; border-radius: 10px; object-fit: cover; border: 4px solid #dc2626;">
-                                        @else
-                                            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 32px; color: #ffffff; border: 4px solid #ffffff;">
-                                                {{ strtoupper(mb_substr($testimonial->name, 0, 1)) }}
-                                            </div>
-                                        @endif
+                <div class="col-lg-12">
+                    <div class="testimonial__slider owl-carousel">
+                        @forelse($testimonials as $testimonial)
+                            <div class="testimonial__item__wrapper">
+                                <div class="testimonial__item" style="background: #ffffff; border-radius: 5px; padding: 45px 40px; border: 1px solid #f0f0f0; transition: all 0.3s ease; position: relative; overflow: visible; min-height: 300px; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); height: 100%; width: 500px; max-width: 100%;">
+                                    <!-- Decorative Quote Icon -->
+                                    <div style="position: absolute; top: 25px; right: 25px; opacity: 0.08; font-size: 120px; color: #dc2626; line-height: 1; z-index: 0; pointer-events: none;">
+                                        <i class="fa fa-quote-right"></i>
                                     </div>
-                                    <div class="testimonial__item__author__text" style="flex: 1;">
-                                        <div class="rating" style="margin-bottom: 10px;">
-                                            @for($i = 0; $i < $testimonial->rating; $i++)
-                                                <i class="fa fa-star" style="color: #fbbf24; font-size: 16px; margin-right: 3px; text-shadow: 0 1px 2px rgba(251, 191, 36, 0.3);"></i>
-                                            @endfor
-                                            @for($i = $testimonial->rating; $i < 5; $i++)
-                                                <i class="fa fa-star" style="color: #e5e7eb; font-size: 16px; margin-right: 3px;"></i>
-                                            @endfor
-                                        </div>
-                                        <h5 style="font-size: 18px; font-weight: 700; color: #1a1a1a; margin: 0 0 5px 0;">
-                                            {{ $testimonial->name }}
-                                            @if($testimonial->position || $testimonial->company)
-                                                <span style="color: #6b7280; font-weight: 500; font-size: 14px;">
-                                                    / {{ $testimonial->position }}
-                                                    @if($testimonial->position && $testimonial->company)
-                                                        , 
-                                                    @endif
-                                                    {{ $testimonial->company }}
-                                                </span>
+                                    
+                                    <div class="testimonial__item__author" style="display: flex; align-items: flex-start; margin-bottom: 25px; position: relative; z-index: 1; flex-shrink: 0;">
+                                        <div class="testimonial__item__author__pic" style="margin-right: 20px; position: relative; flex-shrink: 0;">
+                                            @if($testimonial->image)
+                                                <img src="{{ asset('storage/' . $testimonial->image) }}" alt="{{ $testimonial->name }}" style="width: 80px; height: 80px; border-radius: 5px; object-fit: cover; border: 4px solid #dc2626; display: block;">
+                                            @else
+                                                <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 32px; color: #ffffff; border: 4px solid #ffffff; flex-shrink: 0; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);">
+                                                    {{ strtoupper(mb_substr($testimonial->name, 0, 1)) }}
+                                                </div>
                                             @endif
-                                        </h5>
+                                        </div>
+                                        <div class="testimonial__item__author__text" style="flex: 1; min-width: 0; word-wrap: break-word; overflow-wrap: break-word; overflow: visible;">
+                                            <div class="rating" style="margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 3px;">
+                                                @for($i = 0; $i < $testimonial->rating; $i++)
+                                                    <i class="fa fa-star" style="color: #fbbf24; font-size: 16px; flex-shrink: 0;"></i>
+                                                @endfor
+                                                @for($i = $testimonial->rating; $i < 5; $i++)
+                                                    <i class="fa fa-star" style="color: #e5e7eb; font-size: 16px; flex-shrink: 0;"></i>
+                                                @endfor
+                                            </div>
+                                            <h5 style="font-size: 18px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px 0; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.5; display: block; width: 100%; white-space: normal; overflow: visible;">
+                                                <span style="display: block; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; overflow: visible;">{{ $testimonial->name }}</span>
+                                                @if($testimonial->position || $testimonial->company)
+                                                    <span style="color: #6b7280; font-weight: 500; font-size: 14px; display: block; margin-top: 5px; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.6; white-space: normal; overflow: visible;">
+                                                        @if($testimonial->position)
+                                                            {{ $testimonial->position }}
+                                                        @endif
+                                                        @if($testimonial->position && $testimonial->company)
+                                                            <span style="color: #9ca3af;">, </span>
+                                                        @endif
+                                                        @if($testimonial->company)
+                                                            {{ $testimonial->company }}
+                                                        @endif
+                                                    </span>
+                                                @endif
+                                            </h5>
+                                        </div>
+                                    </div>
+                                    <div style="flex: 1; position: relative; z-index: 1; min-height: 70px; display: flex; align-items: flex-start; margin-top: 10px;">
+                                        <p style="font-size: 15px; line-height: 1.95; color: #4b5563; margin: 0; font-style: italic; word-wrap: break-word; overflow-wrap: break-word; text-align: left; white-space: normal; width: 100%; hyphens: auto; overflow: visible;">"{{ $testimonial->message }}"</p>
                                     </div>
                                 </div>
-                                <p style="font-size: 15px; line-height: 1.8; color: #4b5563; margin: 0; position: relative; z-index: 1; font-style: italic;">"{{ $testimonial->message }}"</p>
-                                
-                                <!-- Hover Effect Border -->
-                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #dc2626, #991b1b); transform: scaleX(0); transform-origin: left; transition: transform 0.4s;"></div>
                             </div>
-                        </div>
-                    @empty
-                        <div class="col-lg-12">
-                            <div class="text-center" style="padding: 60px 20px;">
-                                <i class="fa fa-quote-right" style="font-size: 64px; color: #e5e7eb; margin-bottom: 20px;"></i>
-                                <p style="font-size: 18px; color: #6b7280;">Belum ada testimoni yang ditampilkan.</p>
+                        @empty
+                            <div class="col-lg-12">
+                                <div class="text-center" style="padding: 60px 20px;">
+                                    <i class="fa fa-quote-right" style="font-size: 64px; color: #e5e7eb; margin-bottom: 20px;"></i>
+                                    <p style="font-size: 18px; color: #6b7280; word-wrap: break-word; overflow-wrap: break-word;">Belum ada testimoni yang ditampilkan.</p>
+                                </div>
                             </div>
-                        </div>
-                    @endforelse
+                        @endforelse
+                    </div>
                 </div>
             </div>
         </div>
         
         <style>
+            .testimonial__slider.owl-carousel {
+                position: relative;
+            }
+            
+            .testimonial__slider .owl-stage {
+                display: flex;
+                align-items: stretch;
+            }
+            
+            .testimonial__slider .owl-item {
+                display: flex;
+                height: auto;
+            }
+            
+            .testimonial__item__wrapper {
+                height: 100%;
+                display: flex;
+                padding: 0 15px;
+            }
+            
+            .testimonial__item {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+                width: 500px !important;
+                max-width: 100% !important;
+                transition: all 0.3s ease !important;
+            }
+            
             .testimonial__item:hover {
-                transform: translateY(-8px) !important;
-                border-color: #dc2626 !important;
+                transform: translateY(-5px) !important;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
             }
             
-            .testimonial__item:hover .testimonial__item__author__pic img,
-            .testimonial__item:hover .testimonial__item__author__pic div {
-                transform: scale(1.1);
+            .testimonial__item__author__text,
+            .testimonial__item__author__text * {
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+                hyphens: auto;
+                overflow: visible !important;
             }
             
-            .testimonial__item:hover > div:last-child {
-                transform: scaleX(1);
+            .testimonial__item p {
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+                hyphens: auto;
+                white-space: normal !important;
+                overflow: visible !important;
+            }
+            
+            .testimonial__item h5,
+            .testimonial__item h5 * {
+                word-break: break-word !important;
+                overflow-wrap: break-word !important;
+                white-space: normal !important;
+                overflow: visible !important;
+            }
+            
+            .testimonial__item {
+                overflow: visible !important;
+            }
+            
+            @media (min-width: 992px) {
+                .testimonial__slider .owl-item {
+                    width: auto !important;
+                }
+                
+                .testimonial__item {
+                    padding: 45px 40px !important;
+                    min-height: 300px !important;
+                    width: 500px !important;
+                    max-width: 100% !important;
+                }
+            }
+            
+            @media (max-width: 991px) {
+                .testimonial__slider .owl-item {
+                    width: 100% !important;
+                }
+                
+                .testimonial__item {
+                    padding: 35px 30px !important;
+                    min-height: 260px !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                }
             }
             
             @media (max-width: 768px) {
                 .testimonial__item {
-                    padding: 25px !important;
+                    padding: 30px 25px !important;
+                    min-height: 240px !important;
+                }
+                
+                .testimonial__item__author__pic {
+                    margin-right: 15px !important;
+                }
+                
+                .testimonial__item__author__pic img,
+                .testimonial__item__author__pic div {
+                    width: 70px !important;
+                    height: 70px !important;
                 }
                 
                 .section-title h2 {
                     font-size: 32px !important;
+                    word-wrap: break-word !important;
+                    overflow-wrap: break-word !important;
+                }
+                
+                .testimonial__item p {
+                    font-size: 14px !important;
+                    line-height: 1.8 !important;
+                }
+                
+                .testimonial__item__author__text h5 {
+                    font-size: 16px !important;
+                }
+            }
+            
+            @media (max-width: 576px) {
+                .testimonial__item {
+                    padding: 25px 20px !important;
+                    min-height: 220px !important;
+                }
+                
+                .testimonial__item__author {
+                    flex-direction: column;
+                    align-items: center !important;
+                    text-align: center;
+                }
+                
+                .testimonial__item__author__pic {
+                    margin-right: 0 !important;
+                    margin-bottom: 15px !important;
+                }
+                
+                .testimonial__item__author__text {
+                    text-align: center;
+                    width: 100%;
                 }
             }
         </style>
@@ -388,5 +510,75 @@
         </div>
     </div>
     <!-- Clients End -->
+
+    <!-- Script untuk Testimonial Carousel Unlimited Loop -->
+    <script>
+        $(document).ready(function() {
+            setTimeout(function() {
+                var $testimonialSlider = $(".testimonial__slider");
+                
+                // Destroy existing carousel jika ada
+                if ($testimonialSlider.length && $testimonialSlider.data('owl.carousel')) {
+                    $testimonialSlider.trigger('destroy.owl.carousel');
+                    $testimonialSlider.removeClass('owl-carousel');
+                }
+                
+                // Hitung jumlah item
+                var itemCount = $testimonialSlider.find('.testimonial__item__wrapper').length;
+                
+                // Jika item kurang dari yang ditampilkan, clone items untuk loop
+                if (itemCount > 0 && itemCount <= 2) {
+                    var $items = $testimonialSlider.find('.testimonial__item__wrapper');
+                    // Clone items untuk memastikan loop bekerja
+                    $items.clone().appendTo($testimonialSlider);
+                    $items.clone().appendTo($testimonialSlider);
+                    itemCount = $testimonialSlider.find('.testimonial__item__wrapper').length;
+                }
+                
+                // Inisialisasi dengan loop unlimited
+                $testimonialSlider.addClass('owl-carousel').owlCarousel({
+                    loop: true,                    // Selalu loop
+                    margin: 30,
+                    items: 2,
+                    slideBy: 1,
+                    dots: true,
+                    nav: true,
+                    navText: ["<i class='fa fa-angle-left'></i>", "<i class='fa fa-angle-right'></i>"],
+                    smartSpeed: 600,
+                    autoHeight: false,
+                    autoplay: false,                // Matikan autoplay, user kontrol manual
+                    rtl: false,
+                    rewind: false,                  // Jangan rewind, terus muter
+                    mouseDrag: true,
+                    touchDrag: true,
+                    pullDrag: true,
+                    center: false,
+                    stagePadding: 0,
+                    responsive: {
+                        1200: {
+                            items: 2,
+                            loop: true
+                        },
+                        992: {
+                            items: 2,
+                            loop: true
+                        },
+                        768: {
+                            items: 2,
+                            loop: true
+                        },
+                        576: {
+                            items: 1,
+                            loop: true
+                        },
+                        0: {
+                            items: 1,
+                            loop: true
+                        }
+                    }
+                });
+            }, 200);
+        });
+    </script>
 
     @endsection

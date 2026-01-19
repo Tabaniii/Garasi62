@@ -7,6 +7,7 @@
     <meta name="keywords" content="HVAC, unica, creative, html">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>GARASI62</title>
 
     <!-- Google Font -->
@@ -24,6 +25,8 @@
     <link rel="stylesheet" href="{{ asset('garasi62/css/owl.carousel.min.css')}}" type="text/css">
     <link rel="stylesheet" href="{{ asset('garasi62/css/slicknav.min.css')}}" type="text/css">
     <link rel="stylesheet" href="{{ asset('garasi62/css/style.css')}}" type="text/css">
+    
+    @stack('head')
 </head>
 
 <body>

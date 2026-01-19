@@ -9,7 +9,7 @@
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
         <tr>
             <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 5px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <!-- Header -->
                     <tr>
                         <td style="background-color: #dc3545; color: #ffffff; padding: 30px 20px; text-align: center;">
@@ -25,14 +25,14 @@
                                 <tr>
                                     <td style="padding-bottom: 15px;">
                                         <strong style="color: #dc3545; font-size: 14px; display: block; margin-bottom: 5px;">Nama:</strong>
-                                        <div style="background-color: #f9f9f9; padding: 12px; border-left: 3px solid #dc3545; border-radius: 4px; font-size: 14px; color: #333;">{{ $name }}</div>
+                                        <div style="background-color: #f9f9f9; padding: 12px; border-left: 3px solid #dc3545; border-radius: 5px; font-size: 14px; color: #333;">{{ $name }}</div>
                                     </td>
                                 </tr>
                                 
                                 <tr>
                                     <td style="padding-bottom: 15px;">
                                         <strong style="color: #dc3545; font-size: 14px; display: block; margin-bottom: 5px;">Email:</strong>
-                                        <div style="background-color: #f9f9f9; padding: 12px; border-left: 3px solid #dc3545; border-radius: 4px; font-size: 14px; color: #333;">
+                                        <div style="background-color: #f9f9f9; padding: 12px; border-left: 3px solid #dc3545; border-radius: 5px; font-size: 14px; color: #333;">
                                             <a href="mailto:{{ $email }}" style="color: #dc3545; text-decoration: none;">{{ $email }}</a>
                                         </div>
                                     </td>
@@ -41,14 +41,14 @@
                                 <tr>
                                     <td style="padding-bottom: 15px;">
                                         <strong style="color: #dc3545; font-size: 14px; display: block; margin-bottom: 5px;">Subject:</strong>
-                                        <div style="background-color: #f9f9f9; padding: 12px; border-left: 3px solid #dc3545; border-radius: 4px; font-size: 14px; color: #333;">{{ $subject }}</div>
+                                        <div style="background-color: #f9f9f9; padding: 12px; border-left: 3px solid #dc3545; border-radius: 5px; font-size: 14px; color: #333;">{{ $subject }}</div>
                                     </td>
                                 </tr>
                                 
                                 <tr>
                                     <td style="padding-bottom: 15px;">
                                         <strong style="color: #dc3545; font-size: 14px; display: block; margin-bottom: 5px;">Pesan:</strong>
-                                        <div style="background-color: #f9f9f9; padding: 15px; border-left: 3px solid #dc3545; border-radius: 4px; font-size: 14px; color: #333; line-height: 1.6; white-space: pre-wrap;">{{ $messageContent }}</div>
+                                        <div style="background-color: #f9f9f9; padding: 15px; border-left: 3px solid #dc3545; border-radius: 5px; font-size: 14px; color: #333; line-height: 1.6; white-space: pre-wrap;">{{ $messageContent }}</div>
                                     </td>
                                 </tr>
                             </table>

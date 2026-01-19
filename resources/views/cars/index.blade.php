@@ -39,7 +39,7 @@
 .page-header-section {
     background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%) !important;
     padding: 45px 40px !important;
-    border-radius: 24px !important;
+    border-radius: 5px !important;
     border: 1px solid #e9ecef !important;
     margin-bottom: 40px !important;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02) !important;
@@ -102,7 +102,7 @@
     padding: 8px 18px;
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
-    border-radius: 25px;
+    border-radius: 5px;
     font-size: 13px;
     font-weight: 700;
     box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4), 0 0 0 0 rgba(220, 38, 38, 0.5);
@@ -144,7 +144,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
     text-decoration: none;
-    border-radius: 14px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -226,7 +226,7 @@
 
 .car-card {
     background: #fff !important;
-    border-radius: 16px !important;
+    border-radius: 5px !important;
     overflow: hidden;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
     border: 1px solid #e9ecef !important;
@@ -244,7 +244,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    border-radius: 20px;
+    border-radius: 5px;
     padding: 2px;
     background: linear-gradient(135deg, #dc2626, #ef4444);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -343,7 +343,7 @@
     backdrop-filter: blur(12px);
     color: #fff;
     padding: 5px 10px;
-    border-radius: 15px;
+    border-radius: 5px;
     font-size: 10px;
     font-weight: 700;
     display: flex;
@@ -399,7 +399,7 @@
     width: 35px;
     height: 2px;
     background: linear-gradient(90deg, #dc2626, #ef4444);
-    border-radius: 2px;
+    border-radius: 5px;
 }
 
 .car-brand {
@@ -421,7 +421,7 @@
     padding: 5px 0 !important;
     list-style: none !important;
     background: linear-gradient(135deg, #fafafa, #ffffff);
-    border-radius: 8px;
+    border-radius: 5px;
     border: 1px solid #f3f4f6;
 }
 
@@ -431,7 +431,7 @@
     gap: 10px;
     padding: 6px 8px;
     margin: 2px 0;
-    border-radius: 6px;
+    border-radius: 5px;
     border-bottom: none !important;
     background: transparent;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -505,7 +505,7 @@
 .btn-action {
     flex: 1 !important;
     padding: 8px 12px !important;
-    border-radius: 7px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 11px !important;
     border: 2px solid;
@@ -587,7 +587,7 @@
 /* Empty State */
 .empty-state {
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-    border-radius: 20px !important;
+    border-radius: 5px !important;
     padding: 80px 40px !important;
     text-align: center;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
@@ -651,7 +651,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -676,7 +676,7 @@
     background: linear-gradient(135deg, #1a1a1a, #374151);
     color: #fff;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -701,7 +701,7 @@
 
 /* Success Alert Enhancement */
 .alert-custom {
-    border-radius: 12px !important;
+    border-radius: 5px !important;
     border: none !important;
     box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2) !important;
     margin-bottom: 25px !important;
@@ -712,6 +712,94 @@
     border-top: 2px solid #e9ecef !important;
     padding-top: 30px !important;
 }
+
+/* Pagination Styles */
+.pagination-wrapper {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.pagination-info {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pagination .page-item {
+    margin: 0 2px;
+}
+
+.pagination .page-link {
+    padding: 10px 16px;
+    border: 2px solid #e9ecef;
+    border-radius: 5px;
+    color: #1a1a1a;
+    background: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+}
+
+.pagination .page-link:hover {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-color: #dc2626;
+    color: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    border-color: #dc2626;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+}
+
+.pagination .page-item.disabled .page-link {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f8f9fa;
+    color: #9ca3af;
+}
+
+.pagination .page-item.disabled .page-link:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: #e9ecef;
+    color: #9ca3af;
+}
+
+/* Image Loading Optimization */
+.car-main-image {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+/* Reduce animation on low-end devices */
+@media (prefers-reduced-motion: reduce) {
+    .animate-fade-in,
+    .car-card,
+    .car-card:hover {
+        animation: none !important;
+        transition: none !important;
+    }
+}
 </style>
 
 <div class="page-header-section mb-5">
@@ -719,8 +807,8 @@
         <div class="page-header-text">
             <div class="page-title-wrapper">
                 <h1 class="page-title">Kelola Mobil Saya</h1>
-                @if($cars->count() > 0)
-                <span class="page-badge">{{ $cars->count() }} Mobil</span>
+                @if($cars->total() > 0)
+                <span class="page-badge">{{ $cars->total() }} Mobil</span>
                 @endif
             </div>
             <p class="page-subtitle">
@@ -734,13 +822,18 @@
             </div>
         </div>
 
-@if($cars->count() > 0)
+@if($cars->total() > 0)
 <div class="cars-grid">
     @foreach($cars as $index => $car)
     <div class="car-card animate-fade-in" data-animation-delay="{{ $index * 0.1 }}">
         <div class="car-card-image">
             @if($car->image && is_array($car->image) && count($car->image) > 0)
-            <img src="{{ asset('storage/' . $car->image[0]) }}" alt="{{ $car->brand }}" class="car-main-image">
+            <img src="{{ asset('storage/' . $car->image[0]) }}" 
+                 alt="{{ $car->brand }}" 
+                 class="car-main-image"
+                 loading="lazy"
+                 decoding="async"
+                 onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\'%3E%3Crect fill=\'%23f3f4f6\' width=\'300\' height=\'200\'/%3E%3Ctext fill=\'%239ca3af\' font-family=\'sans-serif\' font-size=\'14\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\'%3EGambar tidak tersedia%3C/text%3E%3C/svg%3E';">
             <div class="car-image-count">
                 <i class="fas fa-images"></i>
                 <span>{{ count($car->image) }}</span>
@@ -836,6 +929,20 @@
     </div>
     @endforeach
 </div>
+
+<!-- Pagination -->
+@if($cars->hasPages())
+<div class="pagination-wrapper mt-5">
+    <div class="pagination-info mb-3 text-center">
+        <p class="text-muted mb-0" style="font-size: 14px;">
+            Menampilkan {{ $cars->firstItem() }} - {{ $cars->lastItem() }} dari {{ $cars->total() }} mobil
+        </p>
+    </div>
+    <div class="d-flex justify-content-center">
+        {{ $cars->links('pagination::bootstrap-4') }}
+    </div>
+</div>
+@endif
         @else
 <div class="empty-state animate-fade-in">
     <div class="empty-state-icon">
@@ -859,32 +966,66 @@
 
 @push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const carCards = document.querySelectorAll('.car-card[data-animation-delay]');
-        carCards.forEach(function(card) {
-            const delay = card.getAttribute('data-animation-delay');
-            card.style.animationDelay = delay + 's';
-            card.style.opacity = '0';
-        });
+    // Optimized with requestIdleCallback for better performance
+    (function() {
+        'use strict';
         
-        // Trigger animation on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-        
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                }
+        function initCarCards() {
+            const carCards = document.querySelectorAll('.car-card[data-animation-delay]');
+            if (carCards.length === 0) return;
+            
+            // Use Intersection Observer for lazy animation
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '50px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        const delay = entry.target.getAttribute('data-animation-delay') || '0';
+                        entry.target.style.animationDelay = delay + 's';
+                        entry.target.style.opacity = '1';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+            
+            carCards.forEach(function(card) {
+                card.style.opacity = '0';
+                observer.observe(card);
             });
-        }, observerOptions);
+        }
         
-        carCards.forEach(function(card) {
-            observer.observe(card);
-        });
-    });
+        // Use requestIdleCallback if available, otherwise use setTimeout
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(initCarCards, { timeout: 2000 });
+        } else {
+            setTimeout(initCarCards, 100);
+        }
+        
+        // Lazy load images with Intersection Observer
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        if (img.dataset.src) {
+                            img.src = img.dataset.src;
+                            img.removeAttribute('data-src');
+                        }
+                        imageObserver.unobserve(img);
+                    }
+                });
+            }, {
+                rootMargin: '50px'
+            });
+            
+            document.querySelectorAll('img[data-src]').forEach(function(img) {
+                imageObserver.observe(img);
+            });
+        }
+    })();
 </script>
 
 <!-- SweetAlert2 -->
@@ -898,20 +1039,20 @@ function confirmDeleteCar(button) {
         title: '<strong style="color: #1a1a1a;">Hapus Mobil?</strong>',
         html: `<div style="text-align: left; padding: 5px 0;">
             <p style="color: #6b7280; margin-bottom: 10px; font-size: 13px;">Anda akan menghapus mobil berikut:</p>
-            <div style="background: #f9fafb; padding: 12px; border-radius: 8px; border-left: 3px solid #dc2626; margin-bottom: 10px;">
+            <div style="background: #f9fafb; padding: 12px; border-radius: 5px; border-left: 3px solid #dc2626; margin-bottom: 10px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; flex-shrink: 0;">
+                    <div style="width: 40px; height: 40px; border-radius: 5px; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; flex-shrink: 0;">
                         <i class="fas fa-car"></i>
                     </div>
                     <div style="flex: 1;">
                         <strong style="color: #1a1a1a; display: block; margin-bottom: 3px; font-size: 14px;">${carName}</strong>
-                        <span style="background: #e9ecef; padding: 2px 8px; border-radius: 4px; font-size: 11px; color: #6b7280; font-weight: 600;">
+                        <span style="background: #e9ecef; padding: 2px 8px; border-radius: 5px; font-size: 11px; color: #6b7280; font-weight: 600;">
                             <i class="fas fa-tag me-1"></i>${carBrand}
                         </span>
                     </div>
                 </div>
             </div>
-            <div style="background: #fef2f2; padding: 10px; border-radius: 6px; border-left: 3px solid #ef4444; margin-top: 10px;">
+            <div style="background: #fef2f2; padding: 10px; border-radius: 5px; border-left: 3px solid #ef4444; margin-top: 10px;">
                 <p style="color: #dc2626; font-size: 12px; margin: 0; display: flex; align-items: center; gap: 6px; margin-bottom: 5px;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 12px;"></i>
                     <strong>Tindakan ini tidak dapat dibatalkan!</strong>
@@ -1029,7 +1170,7 @@ function confirmDeleteCar(button) {
 <style>
 /* SweetAlert2 Custom Styling for Car Delete */
 .swal2-popup-custom-delete-car {
-    border-radius: 12px !important;
+    border-radius: 5px !important;
     padding: 20px !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
     border: 1px solid #e9ecef !important;
@@ -1055,7 +1196,7 @@ function confirmDeleteCar(button) {
     background: linear-gradient(135deg, #dc2626, #ef4444) !important;
     color: #fff !important;
     padding: 10px 20px !important;
-    border-radius: 8px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 13px !important;
     border: none !important;
@@ -1073,7 +1214,7 @@ function confirmDeleteCar(button) {
     background: linear-gradient(135deg, #fff, #fafafa) !important;
     color: #6b7280 !important;
     padding: 10px 20px !important;
-    border-radius: 8px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 13px !important;
     border: 2px solid #e9ecef !important;

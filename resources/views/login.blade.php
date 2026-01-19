@@ -50,7 +50,7 @@
         }
         .card{
             background:rgba(20,20,20,.95);
-            border-radius:16px;
+            border-radius: 5px;
             padding:40px 35px;
             box-shadow:0 10px 40px rgba(220,53,69,.2),0 0 0 1px rgba(220,53,69,.1);
             border:1px solid rgba(220,53,69,.2);
@@ -96,7 +96,7 @@
             width:100%;
             padding:14px 15px 14px 45px;
             border:2px solid #333;
-            border-radius:10px;
+            border-radius: 5px;
             font-size:.95rem;
             color:#fff !important;
             background:#1a1a1a !important;
@@ -193,7 +193,7 @@
             padding:14px;
             background:linear-gradient(135deg,#dc3545 0%,#c82333 100%);
             border:none;
-            border-radius:10px;
+            border-radius: 5px;
             color:#fff;
             font-weight:600;
             font-size:1rem;
@@ -223,7 +223,7 @@
             transition:color .2s,transform .2s;
             margin-bottom:20px;
             padding:10px 15px;
-            border-radius:8px;
+            border-radius: 5px;
             background:rgba(220,53,69,.1);
             border:1px solid rgba(220,53,69,.2);
             width:fit-content
@@ -264,7 +264,7 @@
         }
         .alert{
             padding:12px 16px;
-            border-radius:10px;
+            border-radius: 5px;
             margin-bottom:20px;
             font-size:.9rem
         }

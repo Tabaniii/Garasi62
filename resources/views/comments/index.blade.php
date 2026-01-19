@@ -6,7 +6,7 @@
 <style>
 .comment-card {
     background: #fff;
-    border-radius: 12px;
+    border-radius: 5px;
     padding: 20px;
     margin-bottom: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -60,7 +60,7 @@
 
 .comment-status {
     padding: 6px 12px;
-    border-radius: 20px;
+    border-radius: 5px;
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
@@ -85,7 +85,7 @@
     margin-bottom: 15px;
     padding: 15px;
     background: #f9fafb;
-    border-radius: 8px;
+    border-radius: 5px;
     border-left: 3px solid #dc2626;
 }
 
@@ -96,7 +96,7 @@
 
 .btn-action-sm {
     padding: 8px 16px;
-    border-radius: 8px;
+    border-radius: 5px;
     font-size: 12px;
     font-weight: 700;
     border: none;
@@ -136,7 +136,7 @@
 
 .stats-card {
     background: #fff;
-    border-radius: 12px;
+    border-radius: 5px;
     padding: 20px;
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -282,7 +282,7 @@
 <style>
 /* SweetAlert2 Custom Styling */
 .swal2-popup {
-    border-radius: 16px !important;
+    border-radius: 5px !important;
     padding: 30px !important;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 }
@@ -301,7 +301,7 @@
 }
 
 .swal2-confirm {
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     padding: 12px 24px !important;
     font-weight: 700 !important;
     font-size: 14px !important;
@@ -315,7 +315,7 @@
 }
 
 .swal2-cancel {
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     padding: 12px 24px !important;
     font-weight: 700 !important;
     font-size: 14px !important;
@@ -358,7 +358,7 @@
 
 /* Enhanced Delete Confirmation Styling */
 .swal2-popup-custom-delete {
-    border-radius: 20px !important;
+    border-radius: 5px !important;
     padding: 35px !important;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
     border: 1px solid #e9ecef !important;
@@ -384,7 +384,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444) !important;
     color: #fff !important;
     padding: 14px 28px !important;
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 14px !important;
     border: none !important;
@@ -402,7 +402,7 @@
     background: linear-gradient(135deg, #fff, #fafafa) !important;
     color: #6b7280 !important;
     padding: 14px 28px !important;
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 14px !important;
     border: 2px solid #e9ecef !important;
@@ -425,7 +425,7 @@
 
 /* Enhanced Delete Confirmation Styling */
 .swal2-popup-custom-delete {
-    border-radius: 20px !important;
+    border-radius: 5px !important;
     padding: 35px !important;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
     border: 1px solid #e9ecef !important;
@@ -451,7 +451,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444) !important;
     color: #fff !important;
     padding: 14px 28px !important;
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 14px !important;
     border: none !important;
@@ -469,7 +469,7 @@
     background: linear-gradient(135deg, #fff, #fafafa) !important;
     color: #6b7280 !important;
     padding: 14px 28px !important;
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 14px !important;
     border: 2px solid #e9ecef !important;
@@ -654,7 +654,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 title: '<strong style="color: #1a1a1a;">Hapus Komentar?</strong>',
                 html: `<div style="text-align: left; padding: 10px 0;">
                     <p style="color: #6b7280; margin-bottom: 15px;">Anda akan menghapus komentar berikut:</p>
-                    <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border-left: 4px solid #dc2626; margin-bottom: 15px;">
+                    <div style="background: #f9fafb; padding: 15px; border-radius: 5px; border-left: 4px solid #dc2626; margin-bottom: 15px;">
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                             <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 16px;">
                                 ${commenter.charAt(0).toUpperCase()}
@@ -664,11 +664,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <span style="color: #9ca3af; font-size: 12px;">Komentar</span>
                             </div>
                         </div>
-                        <div style="background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #e9ecef; margin-top: 10px;">
+                        <div style="background: #fff; padding: 12px; border-radius: 5px; border: 1px solid #e9ecef; margin-top: 10px;">
                             <p style="color: #4b5563; font-size: 14px; margin: 0; line-height: 1.5;">"${commentPreview}"</p>
                         </div>
                     </div>
-                    <div style="background: #fef2f2; padding: 12px; border-radius: 8px; border-left: 4px solid #ef4444; margin-top: 10px;">
+                    <div style="background: #fef2f2; padding: 12px; border-radius: 5px; border-left: 4px solid #ef4444; margin-top: 10px;">
                         <p style="color: #dc2626; font-size: 14px; margin: 0; display: flex; align-items: center; gap: 8px;">
                             <i class="fas fa-exclamation-triangle"></i>
                             <strong>Tindakan ini tidak dapat dibatalkan!</strong>

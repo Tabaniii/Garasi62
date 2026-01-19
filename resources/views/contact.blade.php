@@ -41,14 +41,14 @@
                 <div class="col-lg-6 col-md-6">
                     <div class="contact__form">
                         @guest
-                            <div class="alert alert-warning" style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; color: #856404;">
+                            <div class="alert alert-warning" style="margin-bottom: 20px; padding: 15px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 5px; color: #856404;">
                                 <i class="fa fa-exclamation-triangle"></i> 
                                 <strong>Perhatian!</strong> Anda harus <a href="{{ route('login') }}" style="color: #dc3545; font-weight: bold; text-decoration: underline;">login terlebih dahulu</a> untuk mengirim pesan.
                             </div>
                         @endguest
                         
                         @auth
-                            <div class="alert alert-info" style="margin-bottom: 20px; padding: 12px; background-color: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 4px;">
+                            <div class="alert alert-info" style="margin-bottom: 20px; padding: 12px; background-color: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 5px;">
                                 <i class="fa fa-info-circle"></i> 
                                 <strong>Email Anda:</strong> {{ auth()->user()->email }}
                             </div>

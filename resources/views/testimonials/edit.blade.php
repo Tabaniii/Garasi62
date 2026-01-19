@@ -5,7 +5,7 @@
 @section('content')
 <div class="form-section testimonial-form-section">
     @if($errors->any())
-    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 12px; border-left: 4px solid #dc2626;">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 5px; border-left: 4px solid #dc2626;">
         <div class="d-flex align-items-center">
             <i class="fas fa-exclamation-circle me-2" style="font-size: 20px;"></i>
             <div class="flex-grow-1">
@@ -250,7 +250,7 @@ document.getElementById('rating').addEventListener('change', function() {
     margin-bottom: 32px;
     padding: 24px;
     background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-    border-radius: 16px;
+    border-radius: 5px;
     border-left: 4px solid #dc2626;
 }
 
@@ -258,7 +258,7 @@ document.getElementById('rating').addEventListener('change', function() {
     width: 64px;
     height: 64px;
     background: linear-gradient(135deg, #dc2626, #991b1b);
-    border-radius: 16px;
+    border-radius: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -284,7 +284,7 @@ document.getElementById('rating').addEventListener('change', function() {
 .form-card {
     background: #ffffff;
     border: 1px solid #e9ecef;
-    border-radius: 16px;
+    border-radius: 5px;
     margin-bottom: 24px;
     overflow: hidden;
     transition: all 0.3s;
@@ -334,7 +334,7 @@ document.getElementById('rating').addEventListener('change', function() {
     width: 100%;
     padding: 12px 16px;
     border: 2px solid #e9ecef;
-    border-radius: 10px;
+    border-radius: 5px;
     font-size: 15px;
     transition: all 0.3s;
     background: #ffffff;
@@ -373,7 +373,7 @@ document.getElementById('rating').addEventListener('change', function() {
     width: 100%;
     padding: 12px 16px;
     border: 2px solid #e9ecef;
-    border-radius: 10px;
+    border-radius: 5px;
     font-size: 15px;
     transition: all 0.3s;
     background: #ffffff;
@@ -423,7 +423,7 @@ document.getElementById('rating').addEventListener('change', function() {
     padding: 12px 24px;
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     border: 2px dashed #dc2626;
-    border-radius: 10px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s;
     font-weight: 600;
@@ -443,7 +443,7 @@ document.getElementById('rating').addEventListener('change', function() {
 .preview-image-wrapper {
     position: relative;
     display: inline-block;
-    border-radius: 12px;
+    border-radius: 5px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -480,7 +480,7 @@ document.getElementById('rating').addEventListener('change', function() {
 .form-switch-custom {
     padding: 16px;
     background: #f8f9fa;
-    border-radius: 12px;
+    border-radius: 5px;
 }
 
 .switch-wrapper {
@@ -504,7 +504,7 @@ document.getElementById('rating').addEventListener('change', function() {
     width: 50px;
     height: 26px;
     background: #e5e7eb;
-    border-radius: 26px;
+    border-radius: 5px;
     transition: all 0.3s;
 }
 
@@ -553,7 +553,7 @@ document.getElementById('rating').addEventListener('change', function() {
     background: linear-gradient(135deg, #dc2626, #991b1b);
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
@@ -576,7 +576,7 @@ document.getElementById('rating').addEventListener('change', function() {
     background: #ffffff;
     color: #6b7280;
     border: 2px solid #e9ecef;
-    border-radius: 12px;
+    border-radius: 5px;
     font-size: 16px;
     font-weight: 600;
     text-decoration: none;

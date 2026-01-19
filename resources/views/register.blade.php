@@ -51,7 +51,7 @@
         }
         .card{
             background:rgba(20,20,20,.95);
-            border-radius:16px;
+            border-radius: 5px;
             padding:40px 35px;
             box-shadow:0 10px 40px rgba(220,53,69,.2),0 0 0 1px rgba(220,53,69,.1);
             border:1px solid rgba(220,53,69,.2);
@@ -74,7 +74,10 @@
         }
         .input-group{
             position:relative;
-            margin-bottom:18px
+            margin-bottom:18px;
+            min-height:48px;
+            display:flex;
+            align-items:center
         }
         .input-icon{
             position:absolute;
@@ -97,7 +100,7 @@
             width:100%;
             padding:14px 15px 14px 45px;
             border:2px solid #333;
-            border-radius:10px;
+            border-radius: 5px;
             font-size:.95rem;
             color:#fff !important;
             background:#1a1a1a !important;
@@ -172,7 +175,7 @@
             margin-top:8px;
             height:4px;
             background:#333;
-            border-radius:2px;
+            border-radius: 5px;
             overflow:hidden;
             display:none
         }
@@ -183,7 +186,7 @@
             height:100%;
             width:0;
             transition:width .2s;
-            border-radius:2px
+            border-radius: 5px
         }
         .password-strength-bar.weak{
             width:33%;
@@ -206,13 +209,48 @@
         .password-hint.active{
             display:block
         }
+        .input-hint{
+            font-size:.8rem;
+            color:#999;
+            margin-top:-10px;
+            margin-bottom:18px;
+            margin-left:0;
+            padding-left:45px;
+            display:flex;
+            align-items:center;
+            gap:6px;
+            line-height:1.4
+        }
+        .input-hint i{
+            font-size:.75rem;
+            color:#666
+        }
+        .password-hint{
+            font-size:.8rem;
+            color:#999;
+            margin-top:-10px;
+            margin-bottom:18px;
+            margin-left:0;
+            padding-left:45px;
+            display:none;
+            line-height:1.4
+        }
+        .password-hint.active{
+            display:block
+        }
         .match-indicator{
             font-size:.85rem;
-            margin-top:5px;
-            display:none
+            margin-top:-10px;
+            margin-bottom:18px;
+            margin-left:0;
+            padding-left:45px;
+            display:none;
+            align-items:center;
+            gap:6px;
+            line-height:1.4
         }
         .match-indicator.active{
-            display:block
+            display:flex
         }
         .match-indicator.match{
             color:#4ade80
@@ -225,7 +263,7 @@
             padding:14px;
             background:linear-gradient(135deg,#dc3545 0%,#c82333 100%);
             border:none;
-            border-radius:10px;
+            border-radius: 5px;
             color:#fff;
             font-weight:600;
             font-size:1rem;
@@ -269,7 +307,7 @@
         }
         .alert{
             padding:12px 16px;
-            border-radius:10px;
+            border-radius: 5px;
             margin-bottom:20px;
             font-size:.9rem
         }
@@ -412,9 +450,9 @@
                             <option value="buyer" {{ old('role') == 'buyer' ? 'selected' : '' }}>Buyer (Pembeli)</option>
                             <option value="seller" {{ old('role') == 'seller' ? 'selected' : '' }}>Seller (Penjual)</option>
                         </select>
-                        <small class="text-muted" style="display: block; margin-top: 5px; font-size: 12px; color: #999;">
-                            <i class="fas fa-info-circle"></i> Pilih tipe akun sesuai kebutuhan Anda
-                        </small>
+                    </div>
+                    <div class="input-hint">
+                        <i class="fas fa-info-circle"></i> Pilih tipe akun sesuai kebutuhan Anda
                     </div>
                     
                     <div class="input-group password-wrapper">
@@ -449,9 +487,9 @@
                         <span class="toggle-password" onclick="togglePassword('password_confirmation')">
                             <i class="fa-solid fa-eye"></i>
                         </span>
-                        <div class="match-indicator" id="matchIndicator">
-                            <i class="fas fa-check-circle"></i> Kata sandi cocok
-                        </div>
+                    </div>
+                    <div class="match-indicator" id="matchIndicator">
+                        <i class="fas fa-check-circle"></i> Kata sandi cocok
                     </div>
                     
                     <button type="submit" class="btn-submit" id="submitBtn">

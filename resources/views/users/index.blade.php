@@ -137,7 +137,7 @@
 .page-header-section {
     background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%) !important;
     padding: 45px 40px !important;
-    border-radius: 24px !important;
+    border-radius: 5px !important;
     border: 1px solid #e9ecef !important;
     margin-bottom: 40px !important;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02) !important;
@@ -194,7 +194,7 @@
     padding: 8px 18px;
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
-    border-radius: 25px;
+    border-radius: 5px;
     font-size: 13px;
     font-weight: 700;
     box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4), 0 0 0 0 rgba(220, 38, 38, 0.5);
@@ -271,7 +271,7 @@
     padding: 6px 12px;
     font-size: 11px;
     font-weight: 600;
-    border-radius: 6px;
+    border-radius: 5px;
 }
 
 .info-card-header {
@@ -299,7 +299,7 @@
 }
 
 .pagination-wrapper .page-link {
-    border-radius: 8px;
+    border-radius: 5px;
     border: 1px solid #e9ecef;
     color: #6b7280;
     padding: 10px 16px;
@@ -329,7 +329,7 @@
     background: linear-gradient(135deg, #1a1a1a, #374151);
     color: #fff;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -352,7 +352,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444);
     color: #fff;
     text-decoration: none;
-    border-radius: 12px;
+    border-radius: 5px;
     font-weight: 700;
     font-size: 15px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -380,7 +380,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    border-radius: 5px;
     border: none;
     cursor: pointer;
     transition: all 0.3s;
@@ -430,89 +430,51 @@
 }
 
 @push('scripts')
-
-@if(session('success'))
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: '{{ session('success') }}',
-            confirmButtonColor: '#dc2626',
-            timer: 3000,
-            timerProgressBar: true,
-            showConfirmButton: true
-        });
-    });
-</script>
-@endif
-
-@if(session('error'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal!',
-            text: '{{ session('error') }}',
-            confirmButtonColor: '#dc2626',
-            showConfirmButton: true
-        });
-    });
-</script>
-@endif
-
-<script>
-// Handle delete button clicks - wait for both DOM and SweetAlert to be ready
+// Handle delete button clicks
 (function() {
+    let initialized = false;
+    
     function initDeleteButtons() {
-        // Check if SweetAlert is loaded
+        if (initialized) return;
+        
+        // Tunggu SweetAlert2 siap
         if (typeof Swal === 'undefined') {
-            console.log('SweetAlert not loaded yet, retrying...');
             setTimeout(initDeleteButtons, 100);
             return;
         }
         
-        // Check if buttons exist
-        const deleteButtons = document.querySelectorAll('.delete-btn');
+        // Ambil semua tombol delete yang belum punya listener
+        const deleteButtons = document.querySelectorAll('.delete-btn:not([data-listener-attached])');
+        
         if (deleteButtons.length === 0) {
-            console.log('Delete buttons not found');
             return;
         }
         
-        console.log('Initializing delete buttons:', deleteButtons.length);
-        
-        // Handle delete button clicks
+        // Attach event listener ke setiap button
         deleteButtons.forEach(function(button) {
-            // Check if already has listener
-            if (button.hasAttribute('data-listener-attached')) {
-                return;
-            }
-            
+            // Tandai button sudah punya listener
             button.setAttribute('data-listener-attached', 'true');
             
+            // Attach event listener
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                const userName = this.getAttribute('data-user-name');
+                const userName = this.getAttribute('data-user-name') || 'Pengguna ini';
                 const form = this.closest('form');
                 
                 if (!form) {
-                    console.error('Form not found');
                     Swal.fire({
                         icon: 'error',
                         title: 'Error!',
                         text: 'Form tidak ditemukan',
                         confirmButtonColor: '#dc2626'
                     });
-                    return;
+                    return false;
                 }
                 
-                if (typeof Swal === 'undefined') {
-                    console.error('SweetAlert not loaded');
-                    return;
-                }
-                
+                // Tampilkan konfirmasi SweetAlert
                 Swal.fire({
                     title: 'Apakah yakin ingin menghapus user?',
                     html: `<div style="text-align: left; padding: 10px 0;">
@@ -538,11 +500,13 @@
                     }
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Show loading
+                        // Tampilkan loading
                         Swal.fire({
                             title: 'Menghapus...',
                             text: 'Mohon tunggu sebentar',
                             allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
                             didOpen: () => {
                                 Swal.showLoading();
                             }
@@ -552,24 +516,28 @@
                         form.submit();
                     }
                 });
+                
+                return false;
             });
         });
+        
+        initialized = true;
     }
     
-    // Initialize when DOM is ready
+    // Initialize ketika DOM ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(initDeleteButtons, 200);
+            setTimeout(initDeleteButtons, 500);
         });
     } else {
-        setTimeout(initDeleteButtons, 200);
+        setTimeout(initDeleteButtons, 500);
     }
 })();
 </script>
 
 <style>
 .swal2-popup-custom-delete {
-    border-radius: 20px !important;
+    border-radius: 5px !important;
     padding: 35px !important;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
     border: 1px solid #e9ecef !important;
@@ -595,7 +563,7 @@
     background: linear-gradient(135deg, #dc2626, #ef4444) !important;
     color: #fff !important;
     padding: 14px 28px !important;
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 14px !important;
     border: none !important;
@@ -613,7 +581,7 @@
     background: linear-gradient(135deg, #fff, #fafafa) !important;
     color: #6b7280 !important;
     padding: 14px 28px !important;
-    border-radius: 10px !important;
+    border-radius: 5px !important;
     font-weight: 700 !important;
     font-size: 14px !important;
     border: 2px solid #e9ecef !important;

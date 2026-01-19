@@ -6,12 +6,13 @@ use Illuminate\Http\Request;
 use App\Models\car;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class CarController extends Controller
 {
     public function show(Request $request)
     {
-        $query = car::query();
+        $query = car::where('status', 'approved');
 
         // Search by nama or brand
         if ($request->filled('search')) {
@@ -89,14 +90,60 @@ class CarController extends Controller
     }
 
     // CRUD Methods untuk Dashboard
-    public function index()
+    public function index(Request $request)
     {
-        $cars = car::orderBy('created_at', 'desc')->get();
+        $user = Auth::user();
+
+        // Query builder dengan select hanya kolom yang diperlukan untuk performa lebih baik
+        $query = car::select([
+            'id',
+            'nama',
+            'brand',
+            'tahun',
+            'kilometer',
+            'transmisi',
+            'kapasitasmesin',
+            'harga',
+            'metode',
+            'tipe',
+            'image',
+            'status',
+            'seller_id',
+            'created_at',
+            'updated_at'
+        ]);
+
+        if ($user->role === 'admin') {
+            // Admin can see all cars with status info
+            // Tidak perlu eager load seller karena tidak digunakan di view
+        } elseif ($user->role === 'seller') {
+            // Seller can only see their own cars
+            $query->where('seller_id', $user->id);
+        } else {
+            // Buyer cannot access this page
+            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $query->orderBy($sortBy, $sortOrder);
+
+        // Pagination - hanya load 12 item per halaman untuk performa lebih baik
+        $perPage = $request->get('per_page', 12);
+        $cars = $query->paginate($perPage)->withQueryString();
+
         return view('cars.index', compact('cars'));
     }
 
     public function create()
     {
+        $user = Auth::user();
+
+        if (!in_array($user->role, ['admin', 'seller'])) {
+            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+        }
+
         return view('cars.create');
     }
 
@@ -226,6 +273,10 @@ class CarController extends Controller
                 $data['extra_features'] = array_filter($request->input('extra_features', []));
             }
 
+            // Add seller_id and status for approval system
+            $data['seller_id'] = Auth::id();
+            $data['status'] = 'pending';
+
             car::create($data);
 
             return redirect()->route('cars.index')->with('success', 'Mobil berhasil ditambahkan!');
@@ -239,7 +290,22 @@ class CarController extends Controller
 
     public function edit($id)
     {
+        $user = Auth::user();
         $car = car::findOrFail($id);
+
+        // Check permissions
+        if ($user->role === 'admin') {
+            // Admin can edit all cars
+        } elseif ($user->role === 'seller') {
+            // Seller can only edit their own cars
+            if ($car->seller_id !== $user->id) {
+                return redirect()->route('cars.index')->with('error', 'Anda tidak memiliki akses untuk mengedit mobil ini.');
+            }
+        } else {
+            // Buyer cannot edit
+            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+        }
+
         return view('cars.edit', compact('car'));
     }
 
@@ -270,7 +336,21 @@ class CarController extends Controller
         ]);
 
         $car = car::findOrFail($id);
-        
+
+        // Check permissions
+        $user = Auth::user();
+        if ($user->role === 'admin') {
+            // Admin can update all cars
+        } elseif ($user->role === 'seller') {
+            // Seller can only update their own cars
+            if ($car->seller_id !== $user->id) {
+                return redirect()->route('cars.index')->with('error', 'Anda tidak memiliki akses untuk mengupdate mobil ini.');
+            }
+        } else {
+            // Buyer cannot update
+            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+        }
+
         // Handle existing images
         $existingImages = $request->input('existing_images', []);
         $imagePaths = $existingImages;
@@ -353,7 +433,7 @@ class CarController extends Controller
 
     public function showDetail($id)
     {
-        $car = car::findOrFail($id);
+        $car = car::where('status', 'approved')->with('seller')->findOrFail($id);
         return view('car-details', compact('car'));
     }
 
@@ -361,6 +441,20 @@ class CarController extends Controller
     {
         try {
             $car = car::findOrFail($id);
+
+            // Check permissions
+            $user = Auth::user();
+            if ($user->role === 'admin') {
+                // Admin can delete all cars
+            } elseif ($user->role === 'seller') {
+                // Seller can only delete their own cars
+                if ($car->seller_id !== $user->id) {
+                    return redirect()->route('cars.index')->with('error', 'Anda tidak memiliki akses untuk menghapus mobil ini.');
+                }
+            } else {
+                // Buyer cannot delete
+                return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+            }
             
             // Hapus gambar dari storage
             if ($car->image && is_array($car->image)) {

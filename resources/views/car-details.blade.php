@@ -417,7 +417,15 @@
                 <form action="{{ route('reports.store', $car->id) }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <p class="mb-3">Anda akan melaporkan mobil <strong>{{ $car->brand }} {{ $car->nama }}</strong>. Laporan ini akan dikirim ke admin dan seller pemilik mobil.</p>
+                        <div class="alert alert-info" style="border-radius: 5px; border-left: 4px solid #3b82f6;">
+                            <h6 style="margin: 0 0 8px 0; font-weight: 700; color: #1e40af;">
+                                <i class="fa fa-info-circle"></i> Informasi Penting
+                            </h6>
+                            <p style="margin: 0; font-size: 13px; line-height: 1.6;">
+                                Anda akan melaporkan mobil <strong>{{ $car->brand }} {{ $car->nama }}</strong>. 
+                                Laporan ini akan dikirim ke admin untuk ditinjau.
+                            </p>
+                        </div>
                         
                         <div class="mb-3">
                             <label for="reason" class="form-label">Alasan Pelaporan <span class="text-danger">*</span></label>
@@ -436,6 +444,21 @@
                             <label for="message" class="form-label">Detail Laporan <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="message" name="message" rows="4" placeholder="Jelaskan secara detail mengapa Anda melaporkan mobil ini..." required minlength="10" maxlength="1000"></textarea>
                             <small class="form-text text-muted">Minimal 10 karakter, maksimal 1000 karakter</small>
+                        </div>
+
+                        <div class="report-process-info" style="background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #10b981; margin-top: 20px;">
+                            <h6 style="margin: 0 0 10px 0; font-weight: 700; color: #059669; font-size: 14px;">
+                                <i class="fa fa-check-circle"></i> Proses Setelah Laporan Dikirim:
+                            </h6>
+                            <ol style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.8; color: #374151;">
+                                <li><strong>Laporan Dikirim</strong> - Laporan Anda akan masuk ke sistem</li>
+                                <li><strong>Review Admin</strong> - Admin akan meninjau laporan dalam 1-3 hari kerja</li>
+                                <li><strong>Update Status</strong> - Anda akan melihat status di halaman "Laporan Saya"</li>
+                                <li><strong>Tindak Lanjut</strong> - Admin akan mengambil tindakan sesuai hasil review</li>
+                            </ol>
+                            <p style="margin: 10px 0 0 0; font-size: 12px; color: #6b7280;">
+                                <i class="fa fa-clock-o"></i> Anda dapat melihat status laporan di <a href="{{ route('reports.my-reports') }}" target="_blank" style="color: #3b82f6; font-weight: 600;">halaman Laporan Saya</a>
+                            </p>
                         </div>
                     </div>
                     <div class="modal-footer">

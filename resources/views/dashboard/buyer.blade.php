@@ -60,6 +60,9 @@
                 <a href="{{ route('cars') }}?tipe=rent" class="btn btn-outline-primary btn-animate" style="padding: 12px 20px;">
                     <i class="fas fa-calendar-alt me-2"></i>Lihat Mobil Disewa
                 </a>
+                <a href="{{ route('reports.my-reports') }}" class="btn btn-outline-warning btn-animate" style="padding: 12px 20px;">
+                    <i class="fas fa-flag me-2"></i>Laporan Saya
+                </a>
                 <a href="{{ route('index') }}" class="btn btn-outline-dark btn-animate" style="padding: 12px 20px;">
                     <i class="fas fa-home me-2"></i>Kunjungi Halaman Utama
                 </a>

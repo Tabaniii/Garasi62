@@ -137,6 +137,7 @@ Route::post('/contact', [ContactController::class, 'send'])->name('contact.send'
     // Reports Management
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::post('/{car}', [ReportController::class, 'store'])->name('store');
+        Route::get('/my-reports', [ReportController::class, 'myReports'])->name('my-reports');
     });
 
     // Reports Management (Admin Only)

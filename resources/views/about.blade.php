@@ -204,7 +204,7 @@
                         <span style="color: #dc2626; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; display: inline-block; margin-bottom: 10px;">Testimonials</span>
                         <h2 style="font-size: 42px; font-weight: 800; margin: 15px 0 20px; color: #1a1a1a; position: relative; word-wrap: break-word; overflow-wrap: break-word;">
                             What People Say About Us
-                            <span style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 80px; height: 4px; background: linear-gradient(90deg, #dc2626, #991b1b); border-radius: 5px;"></span>
+                            <span style="position: absolute; bottom: -10px; left: 50%; width: 80px; height: 4px; background: linear-gradient(90deg, #dc2626, #991b1b); border-radius: 5px;"></span>
                         </h2>
                         <p style="font-size: 16px; color: #6b7280; max-width: 600px; margin: 0 auto; word-wrap: break-word; overflow-wrap: break-word;">Our customers are our biggest supporters. What do they think of us?</p>
                     </div>
@@ -305,8 +305,57 @@
             }
             
             .testimonial__item:hover {
-                transform: translateY(-5px) !important;
                 box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+            }
+            
+            /* Styling untuk navigasi yang lebih jelas */
+            .testimonial__slider .owl-nav {
+                margin-top: 30px;
+                text-align: center;
+            }
+            
+            .testimonial__slider .owl-nav button {
+                width: 45px;
+                height: 45px;
+                background: #dc2626 !important;
+                color: #fff !important;
+                border-radius: 5px;
+                margin: 0 10px;
+                font-size: 18px;
+                border: none;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .testimonial__slider .owl-nav button:hover {
+                background: #991b1b !important;
+            }
+            
+            .testimonial__slider .owl-nav button.disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+            }
+            
+            /* Styling untuk dots indicator */
+            .testimonial__slider .owl-dots {
+                text-align: center;
+                margin-top: 25px;
+            }
+            
+            .testimonial__slider .owl-dots button {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #d1d5db !important;
+                margin: 0 5px;
+                border: none;
+            }
+            
+            .testimonial__slider .owl-dots button.active {
+                background: #dc2626 !important;
+                width: 30px;
+                border-radius: 5px;
             }
             
             .testimonial__item__author__text,
@@ -511,7 +560,7 @@
     </div>
     <!-- Clients End -->
 
-    <!-- Script untuk Testimonial Carousel Unlimited Loop -->
+    <!-- Script untuk Testimonial Carousel - Pola Gerakan Jelas -->
     <script>
         $(document).ready(function() {
             setTimeout(function() {
@@ -521,62 +570,77 @@
                 if ($testimonialSlider.length && $testimonialSlider.data('owl.carousel')) {
                     $testimonialSlider.trigger('destroy.owl.carousel');
                     $testimonialSlider.removeClass('owl-carousel');
+                    $testimonialSlider.find('.owl-stage-outer').remove();
+                    $testimonialSlider.find('.owl-nav').remove();
+                    $testimonialSlider.find('.owl-dots').remove();
                 }
                 
                 // Hitung jumlah item
                 var itemCount = $testimonialSlider.find('.testimonial__item__wrapper').length;
                 
-                // Jika item kurang dari yang ditampilkan, clone items untuk loop
-                if (itemCount > 0 && itemCount <= 2) {
-                    var $items = $testimonialSlider.find('.testimonial__item__wrapper');
-                    // Clone items untuk memastikan loop bekerja
-                    $items.clone().appendTo($testimonialSlider);
-                    $items.clone().appendTo($testimonialSlider);
-                    itemCount = $testimonialSlider.find('.testimonial__item__wrapper').length;
-                }
-                
-                // Inisialisasi dengan loop unlimited
-                $testimonialSlider.addClass('owl-carousel').owlCarousel({
-                    loop: true,                    // Selalu loop
-                    margin: 30,
-                    items: 2,
-                    slideBy: 1,
-                    dots: true,
-                    nav: true,
-                    navText: ["<i class='fa fa-angle-left'></i>", "<i class='fa fa-angle-right'></i>"],
-                    smartSpeed: 600,
-                    autoHeight: false,
-                    autoplay: false,                // Matikan autoplay, user kontrol manual
-                    rtl: false,
-                    rewind: false,                  // Jangan rewind, terus muter
-                    mouseDrag: true,
-                    touchDrag: true,
-                    pullDrag: true,
-                    center: false,
-                    stagePadding: 0,
-                    responsive: {
-                        1200: {
-                            items: 2,
-                            loop: true
-                        },
-                        992: {
-                            items: 2,
-                            loop: true
-                        },
-                        768: {
-                            items: 2,
-                            loop: true
-                        },
-                        576: {
-                            items: 1,
-                            loop: true
-                        },
-                        0: {
-                            items: 1,
-                            loop: true
+                // Inisialisasi slider dengan pola yang jelas dan sederhana
+                if (itemCount > 0) {
+                    // Tentukan apakah perlu loop (hanya jika item lebih banyak dari yang ditampilkan)
+                    var needsLoop = itemCount > 2;
+                    
+                    $testimonialSlider.addClass('owl-carousel').owlCarousel({
+                        loop: needsLoop,                // Loop hanya jika benar-benar perlu
+                        margin: 30,
+                        items: 2,
+                        slideBy: 1,
+                        dots: true,                     // Dots untuk indikator posisi yang jelas
+                        nav: true,                      // Tombol navigasi kiri/kanan
+                        navText: ["<i class='fa fa-angle-left'></i>", "<i class='fa fa-angle-right'></i>"],
+                        smartSpeed: 600,
+                        autoHeight: false,
+                        autoplay: false,                // Kontrol manual oleh user
+                        rtl: false,
+                        rewind: true,                   // Kembali ke awal dengan jelas saat sampai akhir
+                        mouseDrag: true,
+                        touchDrag: true,
+                        pullDrag: true,
+                        center: false,
+                        stagePadding: 0,
+                        responsive: {
+                            1200: {
+                                items: 2,
+                                loop: needsLoopFull
+                            },
+                            992: {
+                                items: 2,
+                                loop: needsLoopFull
+                            },
+                            768: {
+                                items: 1,
+                                loop: itemCount > 1
+                            },
+                            576: {
+                                items: 1,
+                                loop: itemCount > 1
+                            },
+                            0: {
+                                items: 1,
+                                loop: itemCount > 1
+                            }
                         }
+                    });
+                    
+                    // Nonaktifkan nav button di ujung jika tidak loop
+                    if (!needsLoop) {
+                        $testimonialSlider.on('changed.owl.carousel', function(event) {
+                            var current = event.item.index;
+                            var total = event.item.count;
+                            
+                            // Disable nav button di ujung
+                            var $nav = $testimonialSlider.find('.owl-nav');
+                            $nav.find('.owl-prev').toggleClass('disabled', current === 0);
+                            $nav.find('.owl-next').toggleClass('disabled', current >= total - 2);
+                        });
+                        
+                        // Trigger sekali untuk set initial state
+                        $testimonialSlider.trigger('changed.owl.carousel');
                     }
-                });
+                }
             }, 200);
         });
     </script>

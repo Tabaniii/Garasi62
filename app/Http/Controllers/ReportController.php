@@ -47,7 +47,31 @@ class ReportController extends Controller
             'status' => 'pending',
         ]);
 
-        return back()->with('success', 'Laporan berhasil dikirim. Admin akan meninjau laporan Anda.');
+        return redirect()->route('reports.my-reports')
+            ->with('success', 'Laporan berhasil dikirim! Admin akan meninjau laporan Anda dalam 1-3 hari kerja. Anda dapat melihat status laporan di halaman "Laporan Saya".');
+    }
+
+    /**
+     * Display reports for current user (reporter)
+     */
+    public function myReports()
+    {
+        $user = Auth::user();
+
+        $reports = Report::with(['car', 'seller', 'reviewer'])
+            ->where('reporter_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        $stats = [
+            'pending' => Report::where('reporter_id', $user->id)->where('status', 'pending')->count(),
+            'reviewed' => Report::where('reporter_id', $user->id)->where('status', 'reviewed')->count(),
+            'resolved' => Report::where('reporter_id', $user->id)->where('status', 'resolved')->count(),
+            'dismissed' => Report::where('reporter_id', $user->id)->where('status', 'dismissed')->count(),
+            'total' => Report::where('reporter_id', $user->id)->count(),
+        ];
+
+        return view('reports.my-reports', compact('reports', 'stats'));
     }
 
     /**

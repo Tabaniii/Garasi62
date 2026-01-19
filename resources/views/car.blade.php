@@ -79,15 +79,17 @@
                             </select>
 
                             <div class="filter-price">
-                                <p>Price:</p>
+                                <p style="margin-bottom: 15px; font-weight: 600; color: #1a1a1a;">Harga:</p>
                                 <div class="price-range-wrap">
-                                    <div class="filter-price-range" id="priceRange"></div>
-                                    <div class="range-slider">
-                                        <div class="price-input">
-                                            <input type="text" id="filterAmount" readonly>
-                                            <input type="hidden" name="min_price" id="minPrice" value="{{ request('min_price', $minPrice ?? 0) }}">
-                                            <input type="hidden" name="max_price" id="maxPrice" value="{{ request('max_price', $maxPrice ?? 0) }}">
+                                    <div class="price-display" style="margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 5px; text-align: center;">
+                                        <div id="filterAmount" style="font-size: 14px; font-weight: 700; color: #dc2626;">
+                                            Rp {{ number_format($minPrice ?? 0, 0, ',', '.') }} - Rp {{ number_format($maxPrice ?? 1000000000, 0, ',', '.') }}
                                         </div>
+                                    </div>
+                                    <div class="filter-price-range" id="priceRange" style="margin-bottom: 10px;"></div>
+                                    <div class="range-slider">
+                                        <input type="hidden" name="min_price" id="minPrice" value="{{ request('min_price', $minPrice ?? 0) }}">
+                                        <input type="hidden" name="max_price" id="maxPrice" value="{{ request('max_price', $maxPrice ?? 1000000000) }}">
                                     </div>
                                 </div>
                             </div>
@@ -594,8 +596,9 @@
     .spec-content {
         flex: 1;
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
     }
 
     .spec-label {
@@ -610,6 +613,9 @@
         font-size: 13px;
         color: #1a1a1a;
         font-weight: 700;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.4;
     }
 
     /* Price */
@@ -652,12 +658,13 @@
     /* Action Buttons */
     .car-card-actions {
         display: flex;
+        flex-direction: column;
         gap: 10px;
     }
 
     .btn-detail,
     .btn-chat {
-        flex: 1;
+        width: 100%;
     }
 
     .btn-detail,
@@ -777,13 +784,8 @@
             font-size: 18px;
         }
 
-        .car-card-actions {
-            flex-direction: column;
-        }
-
-        .btn-detail,
-        .btn-chat {
-            width: 100%;
+        .spec-value {
+            font-size: 12px;
         }
     }
 
@@ -1120,6 +1122,29 @@
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
 
+        // Pastikan min selalu lebih kecil dari max
+        function ensureMinMaxOrder(min, max) {
+            if (min > max) {
+                var temp = min;
+                min = max;
+                max = temp;
+            }
+            return { min: min, max: max };
+        }
+
+        // Update price displays
+        function updatePriceDisplays(minVal, maxVal) {
+            var ordered = ensureMinMaxOrder(minVal, maxVal);
+            minVal = ordered.min;
+            maxVal = ordered.max;
+            
+            $("#filterAmount").html("Rp " + formatNumber(minVal) + " - Rp " + formatNumber(maxVal));
+            $("#minPriceDisplay").val("Rp " + formatNumber(minVal));
+            $("#maxPriceDisplay").val("Rp " + formatNumber(maxVal));
+            $("#minPrice").val(minVal);
+            $("#maxPrice").val(maxVal);
+        }
+
         // Tunggu hingga jQuery UI ter-load (setelah main.js)
         function initPriceSlider() {
             if (typeof $ === 'undefined' || !$.fn.slider) {
@@ -1131,6 +1156,11 @@
             if ($("#priceRange").hasClass('ui-slider')) {
                 $("#priceRange").slider('destroy');
             }
+
+            // Pastikan currentMin dan currentMax dalam urutan yang benar
+            var ordered = ensureMinMaxOrder(currentMin, currentMax);
+            currentMin = ordered.min;
+            currentMax = ordered.max;
             
             $("#priceRange").slider({
                 range: true,
@@ -1138,11 +1168,10 @@
                 max: maxPrice,
                 values: [currentMin, currentMax],
                 slide: function(event, ui) {
-                    $("#filterAmount").val("Rp " + formatNumber(ui.values[0]) + " - Rp " + formatNumber(ui.values[1]));
-                    $("#minPrice").val(ui.values[0]);
-                    $("#maxPrice").val(ui.values[1]);
+                    updatePriceDisplays(ui.values[0], ui.values[1]);
                 },
                 change: function(event, ui) {
+                    updatePriceDisplays(ui.values[0], ui.values[1]);
                     // Auto submit on change
                     setTimeout(function() {
                         document.getElementById('filterForm').submit();
@@ -1150,8 +1179,8 @@
                 }
             });
 
-            // Pastikan format Rupiah digunakan, override format dari main.js
-            $("#filterAmount").val("Rp " + formatNumber(currentMin) + " - Rp " + formatNumber(currentMax));
+            // Set initial display
+            updatePriceDisplays(currentMin, currentMax);
         }
 
         // Tunggu window load untuk memastikan main.js sudah ter-load

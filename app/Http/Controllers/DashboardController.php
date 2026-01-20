@@ -79,7 +79,18 @@ class DashboardController extends Controller
             'cars_for_rent' => car::where('seller_id', $user->id)->where('tipe', 'rent')->where('status', 'approved')->count(),
         ];
 
-        return view('dashboard.seller', compact('stats'));
+        // Get unread notifications
+        $unreadNotifications = \App\Models\NotificationLog::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $unreadNotificationCount = \App\Models\NotificationLog::where('user_id', $user->id)
+            ->where('is_read', false)
+            ->count();
+
+        return view('dashboard.seller', compact('stats', 'unreadNotifications', 'unreadNotificationCount'));
     }
 
     private function buyerDashboard()

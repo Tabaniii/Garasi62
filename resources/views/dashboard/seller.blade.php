@@ -140,6 +140,52 @@
 </div>
 @endif
 
+<!-- Notifications Section -->
+@if(isset($unreadNotifications) && $unreadNotifications->count() > 0)
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <div class="info-card animate-fade-in">
+            <div class="info-card-header">
+                <h5 class="info-card-title">
+                    <i class="fas fa-bell me-2"></i>Notifikasi Terbaru
+                    @if(isset($unreadNotificationCount) && $unreadNotificationCount > 0)
+                        <span class="badge bg-danger ms-2">{{ $unreadNotificationCount }}</span>
+                    @endif
+                </h5>
+            </div>
+            <div class="notifications-list">
+                @foreach($unreadNotifications as $notification)
+                @php
+                    // Extract report ID from notification message if it contains a URL
+                    $reportId = null;
+                    if (preg_match('/seller\/reports\/(\d+)/', $notification->message, $matches)) {
+                        $reportId = $matches[1];
+                    }
+                    // Also try to extract from URL pattern in message
+                    if (!$reportId && preg_match('/reports\/(\d+)/', $notification->message, $matches)) {
+                        $reportId = $matches[1];
+                    }
+                    $notificationUrl = $reportId ? route('seller.reports.show', $reportId) : route('seller.reports.index');
+                @endphp
+                <a href="{{ $notificationUrl }}" class="notification-item-link {{ !$notification->is_read ? 'notification-unread' : '' }}">
+                    <div class="notification-item">
+                        <div class="notification-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="notification-content">
+                            <h6 class="notification-title">{{ $notification->title }}</h6>
+                            <p class="notification-message">{{ Str::limit($notification->message, 150) }}</p>
+                            <span class="notification-time">{{ $notification->created_at->diffForHumans() }}</span>
+                        </div>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <!-- Status Information -->
 @if($stats['pending_cars'] > 0)
 <div class="row g-4 mb-5">
@@ -516,6 +562,97 @@
     flex-shrink: 0;
 }
 
+/* Notifications Styles */
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.notification-item-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+}
+
+.notification-item-link:hover {
+    text-decoration: none;
+    color: inherit;
+}
+
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 16px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.2s;
+}
+
+.notification-item-link:last-child .notification-item {
+    border-bottom: none;
+}
+
+.notification-item-link:hover .notification-item {
+    background: #f8f9fa;
+    transform: translateX(4px);
+}
+
+.notification-unread .notification-item {
+    background: #fff7ed;
+    border-left: 4px solid #f59e0b;
+}
+
+.notification-unread:hover .notification-item {
+    background: #fffbeb;
+}
+
+.notification-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 6px 0;
+}
+
+.notification-unread .notification-title {
+    color: #92400e;
+}
+
+.notification-message {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 0 0 8px 0;
+    line-height: 1.5;
+}
+
+.notification-unread .notification-message {
+    color: #78350f;
+}
+
+.notification-time {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
 @media (max-width: 768px) {
     .recent-cars-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -530,6 +667,16 @@
         width: 36px;
         height: 36px;
         font-size: 14px;
+    }
+
+    .notification-item {
+        padding: 12px;
+    }
+
+    .notification-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
     }
 }
 </style>

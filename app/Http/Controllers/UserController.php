@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Users;
+use App\Models\car;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
@@ -30,6 +31,30 @@ class UserController extends Controller
     {
         $users = Users::orderBy('created_at', 'desc')->paginate(10);
         return view('users.index', compact('users'));
+    }
+
+    /**
+     * List all sellers (Admin only)
+     */
+    public function sellers()
+    {
+        $sellers = Users::where('role', 'seller')
+            ->withCount([
+                'cars as total_cars',
+                'cars as approved_cars' => function($query) {
+                    $query->where('status', 'approved');
+                },
+                'cars as pending_cars' => function($query) {
+                    $query->where('status', 'pending');
+                },
+                'cars as rejected_cars' => function($query) {
+                    $query->where('status', 'rejected');
+                }
+            ])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+        
+        return view('admin.sellers.index', compact('sellers'));
     }
 
     public function create()

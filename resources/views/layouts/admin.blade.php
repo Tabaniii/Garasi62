@@ -782,7 +782,11 @@
                 {{-- Admin Menu --}}
                 <a href="{{ route('cars.index') }}" class="sidebar-menu-item {{ request()->routeIs('cars.*') ? 'active' : '' }}">
                     <i class="fas fa-car"></i>
-                    <span>Mobil</span>
+                    <span>List Mobil</span>
+                </a>
+                <a href="{{ route('users.sellers') }}" class="sidebar-menu-item {{ request()->routeIs('users.sellers') ? 'active' : '' }}">
+                    <i class="fas fa-user-tie"></i>
+                    <span>List Seller</span>
                 </a>
                 <a href="{{ route('admin.car-approvals.index') }}" class="sidebar-menu-item {{ request()->routeIs('admin.car-approvals.*') ? 'active' : '' }}">
                     <i class="fas fa-check-circle"></i>
@@ -793,6 +797,10 @@
                     @if($pendingCars > 0)
                     <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $pendingCars }}</span>
                     @endif
+                </a>
+                <a href="{{ route('admin.duplicate-cars.index') }}" class="sidebar-menu-item {{ request()->routeIs('admin.duplicate-cars.*') ? 'active' : '' }}">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Deteksi Duplikat</span>
                 </a>
                 <a href="{{ route('blogs.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('blogs.admin.*') ? 'active' : '' }}">
                     <i class="fas fa-blog"></i>
@@ -863,10 +871,17 @@
                     <i class="fas fa-flag"></i>
                     <span>Laporan Mobil</span>
                     @php
-                        $sellerPendingReports = \App\Models\Report::where('seller_id', Auth::id())->where('status', 'pending')->count();
+                        // Count reports that caused car to be unpublished (resolved with admin_notes)
+                        $sellerUnpublishedReports = \App\Models\Report::where('seller_id', Auth::id())
+                            ->where('status', 'resolved')
+                            ->whereNotNull('admin_notes')
+                            ->whereHas('car', function($query) {
+                                $query->where('status', 'rejected');
+                            })
+                            ->count();
                     @endphp
-                    @if($sellerPendingReports > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $sellerPendingReports }}</span>
+                    @if($sellerUnpublishedReports > 0)
+                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $sellerUnpublishedReports }}</span>
                     @endif
                 </a>
             @elseif(Auth::user()->role === 'buyer')

@@ -106,14 +106,10 @@
                             <i class="fas fa-car"></i>
                         </div>
                         <div>
-                            <h3 class="card-title-modern">Mobil yang Dilaporkan</h3>
-                            <p class="card-subtitle-modern">Informasi mobil terkait laporan</p>
+                            <h3 class="card-title-modern">Informasi Mobil</h3>
+                            <p class="card-subtitle-modern">Mobil yang dilaporkan</p>
                         </div>
                     </div>
-                    <a href="{{ route('car.details', $report->car->id) }}" target="_blank" class="btn-view-link">
-                        <i class="fas fa-external-link-alt"></i>
-                        <span>Lihat Detail</span>
-                    </a>
                 </div>
                 <div class="card-body-modern">
                     <div class="car-preview">
@@ -131,15 +127,19 @@
                             <div class="car-specs-modern">
                                 <div class="spec-item">
                                     <i class="fas fa-calendar"></i>
-                                    <span>Tahun: <strong>{{ $report->car->tahun }}</strong></span>
+                                    <span><strong>Tahun:</strong> {{ $report->car->tahun }}</span>
                                 </div>
                                 <div class="spec-item">
                                     <i class="fas fa-tachometer-alt"></i>
-                                    <span>Km: <strong>{{ number_format($report->car->kilometer, 0, ',', '.') }}</strong></span>
+                                    <span><strong>Kilometer:</strong> {{ number_format($report->car->kilometer, 0, ',', '.') }} km</span>
                                 </div>
                                 <div class="spec-item">
                                     <i class="fas fa-tag"></i>
-                                    <span>Rp <strong>{{ number_format($report->car->harga, 0, ',', '.') }}</strong></span>
+                                    <span><strong>Tipe:</strong> {{ $report->car->tipe == 'rent' ? 'Sewa' : 'Jual' }}</span>
+                                </div>
+                                <div class="spec-item">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <span><strong>Harga:</strong> Rp {{ number_format($report->car->harga, 0, ',', '.') }}</span>
                                 </div>
                             </div>
                             <div class="car-status-wrapper">
@@ -148,8 +148,13 @@
                                     @elseif($report->car->status == 'pending') badge-warning-modern
                                     @else badge-danger-modern
                                     @endif">
-                                    <i class="fas fa-circle"></i>
-                                    {{ $report->car->status == 'approved' ? 'Disetujui' : ($report->car->status == 'pending' ? 'Menunggu' : 'Ditolak') }}
+                                    @if($report->car->status == 'approved')
+                                        <i class="fas fa-check-circle"></i> Disetujui
+                                    @elseif($report->car->status == 'pending')
+                                        <i class="fas fa-clock"></i> Menunggu
+                                    @else
+                                        <i class="fas fa-times-circle"></i> Ditolak/Di-Unpublish
+                                    @endif
                                 </span>
                             </div>
                         </div>
@@ -161,8 +166,8 @@
 
         <!-- Right Column - Sidebar -->
         <div class="col-lg-4">
-            <!-- Reporter Card -->
-            <div class="card-modern user-card-modern">
+            <!-- Reporter Information -->
+            <div class="card-modern">
                 <div class="card-header-modern">
                     <div class="card-header-left">
                         <div class="card-icon-wrapper user-icon">
@@ -170,6 +175,7 @@
                         </div>
                         <div>
                             <h3 class="card-title-modern">Pelapor</h3>
+                            <p class="card-subtitle-modern">Informasi pengguna yang melaporkan</p>
                         </div>
                     </div>
                 </div>
@@ -204,118 +210,35 @@
                 </div>
             </div>
 
-            <!-- Seller Card -->
-            <div class="card-modern user-card-modern mt-4">
-                <div class="card-header-modern">
+            <!-- Admin Notes Card (Highlighted) -->
+            @if($report->admin_notes)
+            <div class="card-modern mt-4" style="border: 2px solid #f59e0b;">
+                <div class="card-header-modern" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
                     <div class="card-header-left">
-                        <div class="card-icon-wrapper seller-icon">
-                            <i class="fas fa-user-tie"></i>
+                        <div class="card-icon-wrapper" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                            <i class="fas fa-exclamation-triangle"></i>
                         </div>
                         <div>
-                            <h3 class="card-title-modern">Seller</h3>
+                            <h3 class="card-title-modern" style="color: #92400e;">Catatan Admin</h3>
+                            <p class="card-subtitle-modern" style="color: #78350f;">Alasan mobil di-unpublish</p>
                         </div>
                     </div>
                 </div>
                 <div class="card-body-modern">
-                    @if($report->seller)
-                    <div class="user-profile-modern">
-                        <div class="user-avatar-modern seller-avatar-modern">
-                            {{ strtoupper(substr($report->seller->name, 0, 1)) }}
-                        </div>
-                        <div class="user-info-modern">
-                            <h5 class="user-name-modern">{{ $report->seller->name }}</h5>
-                            <div class="user-contact-modern">
-                                <div class="contact-item">
-                                    <i class="fas fa-envelope"></i>
-                                    <span>{{ $report->seller->email }}</span>
-                                </div>
-                                @if($report->seller->phone)
-                                <div class="contact-item">
-                                    <i class="fas fa-phone"></i>
-                                    <span>{{ $report->seller->phone }}</span>
-                                </div>
-                                @endif
-                            </div>
-                        </div>
+                    <div style="background: #fef3c7; padding: 16px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                        <p style="color: #78350f; margin: 0; line-height: 1.6; white-space: pre-wrap;">{{ $report->admin_notes }}</p>
                     </div>
-                    @else
-                    <div class="empty-state-modern">
-                        <i class="fas fa-user-slash"></i>
-                        <p>Informasi seller tidak tersedia</p>
-                    </div>
-                    @endif
                 </div>
             </div>
+            @endif
 
-            <!-- Action Card -->
-            <div class="card-modern action-card-modern mt-4">
-                <div class="card-header-modern">
-                    <div class="card-header-left">
-                        <div class="card-icon-wrapper action-icon">
-                            <i class="fas fa-tasks"></i>
-                        </div>
-                        <div>
-                            <h3 class="card-title-modern">Aksi</h3>
-                        </div>
-                    </div>
-                </div>
+            <!-- Back Button -->
+            <div class="card-modern mt-4">
                 <div class="card-body-modern">
-                    <form action="{{ route('admin.reports.update', $report) }}" method="POST" class="action-form">
-                        @csrf
-                        @method('PUT')
-                        <div class="form-group-modern">
-                            <label for="status" class="form-label-modern">
-                                <i class="fas fa-info-circle"></i>
-                                Status Laporan
-                            </label>
-                            <select class="form-control-modern" id="status" name="status" required>
-                                <option value="pending" {{ $report->status == 'pending' ? 'selected' : '' }}>Menunggu Review</option>
-                                <option value="reviewed" {{ $report->status == 'reviewed' ? 'selected' : '' }}>Sedang Ditinjau</option>
-                                <option value="resolved" {{ $report->status == 'resolved' ? 'selected' : '' }}>Selesai</option>
-                                <option value="dismissed" {{ $report->status == 'dismissed' ? 'selected' : '' }}>Ditolak</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group-modern">
-                            <label for="admin_notes" class="form-label-modern">
-                                <i class="fas fa-sticky-note"></i>
-                                Catatan Admin
-                            </label>
-                            <textarea class="form-control-modern" id="admin_notes" name="admin_notes" rows="3" placeholder="Tambahkan catatan untuk laporan ini...">{{ $report->admin_notes }}</textarea>
-                        </div>
-
-                        <button type="submit" class="btn-modern btn-primary-modern">
-                            <i class="fas fa-save"></i>
-                            <span>Update Status</span>
-                        </button>
-                    </form>
-
-                    @if($report->car && $report->car->status == 'approved')
-                    <div class="divider-modern">
-                        <span>Aksi Cepat</span>
-                    </div>
-                    <form action="{{ route('admin.reports.unpublish-car', $report) }}" method="POST" id="unpublish-car-form">
-                        @csrf
-                        <div class="form-group-modern">
-                            <label for="unpublish_notes" class="form-label-modern">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                Alasan Unpublish
-                            </label>
-                            <textarea class="form-control-modern" id="unpublish_notes" name="admin_notes" rows="2" placeholder="Masukkan alasan mengapa mobil di-unpublish..."></textarea>
-                        </div>
-                        <button type="button" class="btn-modern btn-warning-modern" onclick="confirmUnpublish()">
-                            <i class="fas fa-ban"></i>
-                            <span>Unpublish Mobil</span>
-                        </button>
-                    </form>
-                    @endif
-
-                    <div class="back-link-modern">
-                        <a href="{{ route('admin.reports.index') }}" class="btn-modern btn-secondary-modern">
-                            <i class="fas fa-arrow-left"></i>
-                            <span>Kembali ke Daftar</span>
-                        </a>
-                    </div>
+                    <a href="{{ route('seller.reports.index') }}" class="btn-modern btn-secondary-modern">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Kembali ke Daftar Laporan</span>
+                    </a>
                 </div>
             </div>
         </div>
@@ -443,14 +366,6 @@
 
 .card-icon-wrapper.user-icon {
     background: linear-gradient(135deg, #10b981, #34d399);
-}
-
-.card-icon-wrapper.seller-icon {
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
-}
-
-.card-icon-wrapper.action-icon {
-    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
 }
 
 .card-title-modern {
@@ -666,32 +581,7 @@
     margin-top: 12px;
 }
 
-.btn-view-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    background: linear-gradient(135deg, #dc2626, #ef4444);
-    color: #fff;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: all 0.3s;
-}
-
-.btn-view-link:hover {
-    background: linear-gradient(135deg, #b91c1c, #dc2626);
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-}
-
 /* User Profile Modern */
-.user-card-modern {
-    margin-bottom: 0;
-}
-
 .user-profile-modern {
     display: flex;
     align-items: flex-start;
@@ -711,11 +601,6 @@
     font-size: 20px;
     flex-shrink: 0;
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
-}
-
-.seller-avatar-modern {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
 }
 
 .user-info-modern {
@@ -766,50 +651,6 @@
     font-size: 14px;
 }
 
-/* Form Modern */
-.action-form {
-    margin-bottom: 0;
-}
-
-.form-group-modern {
-    margin-bottom: 20px;
-}
-
-.form-label-modern {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 8px;
-}
-
-.form-label-modern i {
-    color: #9ca3af;
-    font-size: 14px;
-}
-
-.form-control-modern {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1.5px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.3s;
-    background: #fff;
-}
-
-.form-control-modern:focus {
-    outline: none;
-    border-color: #dc2626;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-}
-
-.form-control-modern::placeholder {
-    color: #9ca3af;
-}
-
 /* Button Modern */
 .btn-modern {
     display: inline-flex;
@@ -827,28 +668,6 @@
     width: 100%;
 }
 
-.btn-primary-modern {
-    background: linear-gradient(135deg, #dc2626, #ef4444);
-    color: #fff;
-}
-
-.btn-primary-modern:hover {
-    background: linear-gradient(135deg, #b91c1c, #dc2626);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
-}
-
-.btn-warning-modern {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: #fff;
-}
-
-.btn-warning-modern:hover {
-    background: linear-gradient(135deg, #d97706, #b45309);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3);
-}
-
 .btn-secondary-modern {
     background: #fff;
     color: #6b7280;
@@ -859,40 +678,6 @@
     background: #f9fafb;
     border-color: #9ca3af;
     color: #4b5563;
-}
-
-.divider-modern {
-    position: relative;
-    text-align: center;
-    margin: 24px 0;
-    padding: 0 16px;
-}
-
-.divider-modern::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: #e9ecef;
-}
-
-.divider-modern span {
-    position: relative;
-    background: #fff;
-    padding: 0 12px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.back-link-modern {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid #e9ecef;
 }
 
 /* Responsive */
@@ -937,118 +722,5 @@
     }
 }
 </style>
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-function confirmUnpublish() {
-    const form = document.getElementById('unpublish-car-form');
-    const carName = '{{ $report->car ? strtoupper($report->car->brand) . " " . $report->car->nama : "Mobil ini" }}';
-    const reason = document.getElementById('unpublish_notes').value || 'Tidak ada alasan yang diberikan';
-    
-    Swal.fire({
-        title: '<strong style="color: #1a1a1a;">Unpublish Mobil?</strong>',
-        html: `<div style="text-align: left; padding: 5px 0;">
-            <p style="color: #6b7280; margin-bottom: 10px; font-size: 13px;">Anda akan meng-unpublish mobil berikut:</p>
-            <div style="background: #f9fafb; padding: 12px; border-radius: 5px; border-left: 3px solid #f59e0b; margin-bottom: 10px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 40px; height: 40px; border-radius: 5px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; flex-shrink: 0;">
-                        <i class="fas fa-car"></i>
-                    </div>
-                    <div style="flex: 1;">
-                        <strong style="color: #1a1a1a; display: block; margin-bottom: 3px; font-size: 14px;">${carName}</strong>
-                    </div>
-                </div>
-            </div>
-            <div style="background: #fef3c7; padding: 10px; border-radius: 5px; border-left: 3px solid #f59e0b; margin-top: 10px;">
-                <p style="color: #92400e; font-size: 12px; margin: 0; display: flex; align-items: center; gap: 6px; margin-bottom: 5px;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 12px;"></i>
-                    <strong>Mobil akan disembunyikan dari publik!</strong>
-                </p>
-                <p style="color: #78350f; font-size: 11px; margin: 0;">
-                    Mobil tidak akan muncul di halaman pencarian dan detail mobil.
-                </p>
-            </div>
-        </div>`,
-        icon: 'warning',
-        iconColor: '#f59e0b',
-        showCancelButton: true,
-        confirmButtonText: '<i class="fas fa-ban me-2"></i>Ya, Unpublish Mobil',
-        cancelButtonText: '<i class="fas fa-times me-2"></i>Batal',
-        confirmButtonColor: '#f59e0b',
-        cancelButtonColor: '#6b7280',
-        reverseButtons: true,
-        customClass: {
-            popup: 'swal2-popup-custom-unpublish',
-            confirmButton: 'swal2-confirm-custom-unpublish',
-            cancelButton: 'swal2-cancel-custom-unpublish',
-        },
-        buttonsStyling: false,
-        allowOutsideClick: false,
-        allowEscapeKey: false
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Show loading
-            Swal.fire({
-                title: 'Meng-unpublish Mobil...',
-                html: '<p style="font-size: 13px; color: #6b7280;">Mohon tunggu, mobil sedang di-unpublish.</p>',
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-
-            // Submit form
-            form.submit();
-        }
-    });
-}
-</script>
-<style>
-.swal2-popup-custom-unpublish {
-    border-radius: 5px !important;
-    padding: 20px !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
-    border: 1px solid #e9ecef !important;
-    max-width: 450px !important;
-}
-
-.swal2-confirm-custom-unpublish {
-    background: linear-gradient(135deg, #f59e0b, #d97706) !important;
-    color: #fff !important;
-    padding: 10px 20px !important;
-    border-radius: 5px !important;
-    font-weight: 700 !important;
-    font-size: 13px !important;
-    border: none !important;
-    transition: all 0.3s !important;
-    box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3) !important;
-}
-
-.swal2-confirm-custom-unpublish:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4) !important;
-    background: linear-gradient(135deg, #d97706, #b45309) !important;
-}
-
-.swal2-cancel-custom-unpublish {
-    background: linear-gradient(135deg, #fff, #fafafa) !important;
-    color: #6b7280 !important;
-    padding: 10px 20px !important;
-    border-radius: 5px !important;
-    font-weight: 700 !important;
-    font-size: 13px !important;
-    border: 2px solid #e9ecef !important;
-    transition: all 0.3s !important;
-}
-
-.swal2-cancel-custom-unpublish:hover {
-    background: linear-gradient(135deg, #f9fafb, #f3f4f6) !important;
-    border-color: #d1d5db !important;
-    transform: translateY(-2px) !important;
-    color: #4b5563 !important;
-}
-</style>
-@endpush
 @endsection
+

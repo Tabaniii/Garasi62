@@ -33,4 +33,12 @@ class Users extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Relationship dengan Car (sebagai seller)
+     */
+    public function cars()
+    {
+        return $this->hasMany(car::class, 'seller_id');
+    }
 }

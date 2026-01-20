@@ -95,9 +95,9 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#reportModal{{ $report->id }}">
+                                    <a href="{{ route('seller.reports.show', $report) }}" class="btn btn-sm btn-outline-primary" title="Lihat Detail Laporan">
                                         <i class="fas fa-eye"></i>
-                                    </button>
+                                    </a>
                                 </td>
                             </tr>
 

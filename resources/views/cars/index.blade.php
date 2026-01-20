@@ -335,6 +335,24 @@
     box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
+.badge-approved {
+    background: linear-gradient(135deg, #10b981, #34d399) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.badge-pending {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.badge-rejected {
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
 .car-image-count {
     position: absolute;
     bottom: 10px;
@@ -806,14 +824,40 @@
     <div class="page-header-content">
         <div class="page-header-text">
             <div class="page-title-wrapper">
-                <h1 class="page-title">Kelola Mobil Saya</h1>
+                <h1 class="page-title">
+                    @if(Auth::user()->role === 'admin')
+                        @if(request('seller_id'))
+                            Mobil Seller: {{ $cars->first() && $cars->first()->seller ? $cars->first()->seller->name : 'Tidak Diketahui' }}
+                        @else
+                            Kelola Semua Mobil
+                        @endif
+                    @else
+                        Kelola Mobil Saya
+                    @endif
+                </h1>
                 @if($cars->total() > 0)
                 <span class="page-badge">{{ $cars->total() }} Mobil</span>
                 @endif
             </div>
             <p class="page-subtitle">
-                <i class="fas fa-info-circle me-2"></i>Daftar mobil yang telah Anda tambahkan
+                <i class="fas fa-info-circle me-2"></i>
+                @if(Auth::user()->role === 'admin')
+                    @if(request('seller_id'))
+                        Daftar mobil dari seller ini
+                    @else
+                        Daftar semua mobil yang terdaftar di sistem
+                    @endif
+                @else
+                    Daftar mobil yang telah Anda tambahkan
+                @endif
             </p>
+            @if(Auth::user()->role === 'admin' && request('seller_id'))
+            <div class="mt-3">
+                <a href="{{ route('cars.index') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Kembali ke Semua Mobil
+                </a>
+            </div>
+            @endif
                     </div>
         <a href="{{ route('cars.create') }}" class="btn-add-new">
             <i class="fas fa-plus"></i>
@@ -844,12 +888,44 @@
             </div>
             @endif
         </div>
-        <div class="car-card-body">
+            <div class="car-card-body">
             <div class="car-brand-section">
                 <h5 class="car-brand">{{ strtoupper($car->nama) }}</h5>
-                <span class="car-status-badge {{ $car->tipe == 'rent' ? 'badge-rent' : 'badge-sale' }}">
-                    {{ $car->tipe == 'rent' ? 'For Rent' : 'For Sale' }}
-                </span>
+                <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;">
+                    <span class="car-status-badge {{ $car->tipe == 'rent' ? 'badge-rent' : 'badge-sale' }}">
+                        {{ $car->tipe == 'rent' ? 'For Rent' : 'For Sale' }}
+                    </span>
+                    @if(Auth::user()->role === 'admin')
+                    <span class="car-status-badge 
+                        @if($car->status == 'approved') badge-approved
+                        @elseif($car->status == 'pending') badge-pending
+                        @else badge-rejected
+                        @endif">
+                        @if($car->status == 'approved') Disetujui
+                        @elseif($car->status == 'pending') Menunggu
+                        @else Ditolak
+                        @endif
+                    </span>
+                    @endif
+                </div>
+                @if(Auth::user()->role === 'seller' && $car->status == 'rejected')
+                    @php
+                        $unpublishReport = $car->reports->where('status', 'resolved')->whereNotNull('admin_notes')->first();
+                    @endphp
+                    @if($unpublishReport)
+                    <div style="margin-top: 10px; padding: 8px 12px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 5px;">
+                        <p style="margin: 0; font-size: 11px; color: #92400e; display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 12px;"></i>
+                            <strong>Di-unpublish oleh admin</strong>
+                        </p>
+                        <p style="margin: 4px 0 0 0; font-size: 10px; color: #78350f;">
+                            <a href="{{ route('seller.reports.show', $unpublishReport) }}" style="color: #d97706; text-decoration: underline;">
+                                Lihat detail laporan
+                            </a>
+                        </p>
+                    </div>
+                    @endif
+                @endif
             </div>
             <div class="car-details-list">
                 <div class="car-detail-row">

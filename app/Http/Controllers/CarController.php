@@ -115,10 +115,21 @@ class CarController extends Controller
 
         if ($user->role === 'admin') {
             // Admin can see all cars with status info
-            // Tidak perlu eager load seller karena tidak digunakan di view
+            // Filter by seller_id if provided
+            if ($request->has('seller_id') && $request->seller_id) {
+                $query->where('seller_id', $request->seller_id);
+            }
+            // Eager load seller for admin view
+            $query->with('seller');
         } elseif ($user->role === 'seller') {
             // Seller can only see their own cars
             $query->where('seller_id', $user->id);
+            // Eager load reports that caused unpublish (resolved with admin_notes)
+            $query->with(['reports' => function($q) {
+                $q->where('status', 'resolved')
+                  ->whereNotNull('admin_notes')
+                  ->latest();
+            }]);
         } else {
             // Buyer cannot access this page
             return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');

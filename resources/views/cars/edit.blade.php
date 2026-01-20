@@ -80,6 +80,15 @@
                         <h3><i class="fa fa-car"></i> Informasi Mobil</h3>
                     </div>
                     <div class="form-card-body">
+                        @if(Auth::user()->role === 'admin' && $car->seller)
+                        <div class="alert alert-info d-flex align-items-center mb-4" role="alert" style="background-color: #e0f2fe; border-color: #bae6fd; color: #0369a1;">
+                            <i class="fa fa-user-circle fa-lg me-3" style="font-size: 1.5rem;"></i>
+                            <div>
+                                <strong style="font-weight: 600;">Publisher:</strong> {{ $car->seller->name }} <span style="color: #0c4a6e;">({{ $car->seller->email }})</span>
+                            </div>
+                        </div>
+                        @endif
+
                         <form action="{{ route('cars.update', $car->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')

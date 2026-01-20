@@ -14,6 +14,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\CarApprovalController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\DuplicateCarController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
@@ -40,29 +41,30 @@ Route::get('/contact', function () {
 Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 
 // CRUD Mobil (Protected by auth and role middleware)
-    Route::middleware(['auth'])->group(function () {
-        // Cars index - Admin and Seller only
-        Route::get('/cars', [CarController::class, 'index'])->middleware('role:admin,seller')->name('cars.index');
+Route::middleware(['auth'])->group(function () {
+    // Cars index - Admin and Seller only
+    Route::get('/cars', [CarController::class, 'index'])->middleware('role:admin,seller')->name('cars.index');
 
-        // Cars create - Admin and Seller only
-        Route::get('/cars/create', [CarController::class, 'create'])->middleware('role:admin,seller')->name('cars.create');
-        Route::post('/cars', [CarController::class, 'store'])->middleware('role:admin,seller')->name('cars.store');
+    // Cars create - Admin and Seller only
+    Route::get('/cars/create', [CarController::class, 'create'])->middleware('role:admin,seller')->name('cars.create');
+    Route::post('/cars', [CarController::class, 'store'])->middleware('role:admin,seller')->name('cars.store');
 
-        // Cars edit/update/delete - Admin and Seller (with ownership check)
-        Route::get('/cars/{id}/edit', [CarController::class, 'edit'])->middleware('role:admin,seller')->name('cars.edit');
-        Route::put('/cars/{id}', [CarController::class, 'update'])->middleware('role:admin,seller')->name('cars.update');
-        Route::delete('/cars/{id}', [CarController::class, 'destroy'])->middleware('role:admin,seller')->name('cars.destroy');
-    
+    // Cars edit/update/delete - Admin and Seller (with ownership check)
+    Route::get('/cars/{id}/edit', [CarController::class, 'edit'])->middleware('role:admin,seller')->name('cars.edit');
+    Route::put('/cars/{id}', [CarController::class, 'update'])->middleware('role:admin,seller')->name('cars.update');
+    Route::delete('/cars/{id}', [CarController::class, 'destroy'])->middleware('role:admin,seller')->name('cars.destroy');
+
     // Users Management (Admin Only)
     Route::prefix('users')->name('users.')->middleware('role:admin')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::get('/sellers', [UserController::class, 'sellers'])->name('sellers');
         Route::get('/create', [UserController::class, 'create'])->name('create');
         Route::post('/', [UserController::class, 'store'])->name('store');
         Route::get('/{id}/edit', [UserController::class, 'edit'])->name('edit');
         Route::put('/{id}', [UserController::class, 'update'])->name('update');
         Route::delete('/{id}', [UserController::class, 'destroy'])->name('destroy');
     });
-    
+
     // Blog Management (Admin Only)
     Route::prefix('admin/blogs')->name('blogs.admin.')->middleware('role:admin')->group(function () {
         Route::get('/', [BlogController::class, 'adminIndex'])->name('index');
@@ -72,7 +74,7 @@ Route::post('/contact', [ContactController::class, 'send'])->name('contact.send'
         Route::put('/{id}', [BlogController::class, 'update'])->name('update');
         Route::delete('/{id}', [BlogController::class, 'destroy'])->name('destroy');
     });
-    
+
     // Testimonials Management (Admin Only)
     Route::prefix('admin/testimonials')->name('testimonials.admin.')->middleware('role:admin')->group(function () {
         Route::get('/', [TestimonialController::class, 'index'])->name('index');
@@ -82,7 +84,7 @@ Route::post('/contact', [ContactController::class, 'send'])->name('contact.send'
         Route::put('/{testimonial}', [TestimonialController::class, 'update'])->name('update');
         Route::delete('/{testimonial}', [TestimonialController::class, 'destroy'])->name('destroy');
     });
-    
+
     // Comment Management (Admin Only)
     Route::prefix('admin/comments')->name('comments.admin.')->middleware('role:admin')->group(function () {
         Route::get('/', [CommentController::class, 'adminIndex'])->name('index');
@@ -100,6 +102,8 @@ Route::post('/contact', [ContactController::class, 'send'])->name('contact.send'
         Route::post('/{car}/reject', [CarApprovalController::class, 'reject'])->name('reject');
     });
 
+    Route::get('admin/duplicate-cars', [DuplicateCarController::class, 'index'])->middleware('role:admin')->name('admin.duplicate-cars.index');
+
     // Chat Management
     Route::prefix('chat')->name('chat.')->group(function () {
         // Buyer routes
@@ -107,12 +111,12 @@ Route::post('/contact', [ContactController::class, 'send'])->name('contact.send'
             Route::get('/', [ChatController::class, 'index'])->name('index');
             Route::get('/seller/{sellerId}', [ChatController::class, 'showSeller'])->name('seller');
         });
-        
+
         // Seller routes
         Route::middleware('role:seller')->group(function () {
             Route::get('/seller-chats', [ChatController::class, 'sellerIndex'])->name('seller.index');
         });
-        
+
         // Common routes (both buyer and seller)
         Route::get('/{chatId}', [ChatController::class, 'show'])->name('show');
         Route::post('/{chatId}/message', [ChatController::class, 'store'])->name('store');
@@ -145,11 +149,13 @@ Route::post('/contact', [ContactController::class, 'send'])->name('contact.send'
         Route::get('/', [ReportController::class, 'index'])->name('index');
         Route::get('/{report}', [ReportController::class, 'show'])->name('show');
         Route::put('/{report}', [ReportController::class, 'update'])->name('update');
+        Route::post('/{report}/unpublish-car', [ReportController::class, 'unpublishCar'])->name('unpublish-car');
     });
 
     // Reports Management (Seller Only)
     Route::prefix('seller/reports')->name('seller.reports.')->middleware('role:seller')->group(function () {
         Route::get('/', [ReportController::class, 'sellerIndex'])->name('index');
+        Route::get('/{report}', [ReportController::class, 'show'])->name('show');
     });
 });
 

@@ -5,8 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Report;
 use App\Models\car;
+use App\Models\NotificationLog;
+use App\Mail\CarUnpublishedMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class ReportController extends Controller
 {
@@ -128,19 +132,20 @@ class ReportController extends Controller
         // Check permissions
         $user = Auth::user();
         if ($user->role === 'admin') {
-            // Admin can see all reports
+            // Admin can see all reports with actions
+            return view('admin.reports.show', compact('report'));
         } elseif ($user->role === 'seller') {
-            // Seller can only see reports for their cars
+            // Seller can only see reports for their cars (read-only)
             if ($report->seller_id !== $user->id) {
                 return redirect()->route('seller.reports.index')
                     ->with('error', 'Anda tidak memiliki akses ke laporan ini.');
             }
+            // Return seller-specific view (read-only)
+            return view('seller.reports.show', compact('report'));
         } else {
             return redirect()->route('dashboard')
                 ->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
-
-        return view('admin.reports.show', compact('report'));
     }
 
     /**
@@ -148,6 +153,12 @@ class ReportController extends Controller
      */
     public function update(Request $request, Report $report)
     {
+        // Ensure only admin can access this
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('dashboard')
+                ->with('error', 'Anda tidak memiliki akses untuk melakukan aksi ini.');
+        }
+
         $request->validate([
             'status' => 'required|in:pending,reviewed,resolved,dismissed',
             'admin_notes' => 'nullable|string|max:1000',
@@ -162,5 +173,99 @@ class ReportController extends Controller
 
         return redirect()->route('admin.reports.index')
             ->with('success', 'Status laporan berhasil diperbarui.');
+    }
+
+    /**
+     * Unpublish car (Admin only)
+     */
+    public function unpublishCar(Request $request, Report $report)
+    {
+        // Ensure only admin can access this
+        if (Auth::user()->role !== 'admin') {
+            return redirect()->route('dashboard')
+                ->with('error', 'Anda tidak memiliki akses untuk melakukan aksi ini.');
+        }
+
+        $request->validate([
+            'admin_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $car = $report->car;
+
+        if (!$car) {
+            return redirect()->route('admin.reports.show', $report)
+                ->with('error', 'Mobil tidak ditemukan.');
+        }
+
+        $adminNotes = $request->admin_notes ?? 'Mobil telah di-unpublish karena laporan yang diterima.';
+
+        DB::transaction(function () use ($car, $report, $adminNotes) {
+            // Unpublish car (change status to rejected or unpublished)
+            $car->update([
+                'status' => 'rejected',
+            ]);
+
+            // Update report status
+            $report->update([
+                'status' => 'resolved',
+                'admin_notes' => $adminNotes,
+                'reviewed_by' => Auth::id(),
+                'reviewed_at' => now(),
+            ]);
+
+            // Notify seller jika seller ada
+            if ($car->seller_id) {
+                $seller = \App\Models\Users::find($car->seller_id);
+                
+                if ($seller) {
+                    $carName = "{$car->brand} {$car->nama}";
+                    $reportUrl = route('seller.reports.show', $report);
+                    
+                    // Load reporter untuk notifikasi
+                    $report->load('reporter');
+                    
+                    // Buat notifikasi di database dengan detail laporan
+                    $notificationMessage = "Mobil Anda ({$carName}) telah di-unpublish oleh admin karena laporan yang diterima.\n\n";
+                    $notificationMessage .= "Alasan Laporan: {$report->reason_label}\n";
+                    if ($report->reporter) {
+                        $notificationMessage .= "Dilaporkan oleh: {$report->reporter->name}\n";
+                    }
+                    $notificationMessage .= "Tanggal Laporan: {$report->created_at->format('d M Y, H:i')}\n";
+                    $notificationMessage .= "Detail: " . Str::limit($report->message, 100) . "\n\n";
+                    $notificationMessage .= "Keterangan Admin: {$adminNotes}\n\n";
+                    $notificationMessage .= "Lihat detail lengkap laporan di: {$reportUrl}";
+                    
+                    NotificationLog::create([
+                        'user_id' => $seller->id,
+                        'title' => 'Mobil Di-Unpublish',
+                        'message' => $notificationMessage,
+                        'is_read' => false,
+                    ]);
+
+                    // Kirim email notifikasi ke seller dengan detail lengkap
+                    try {
+                        Mail::to($seller->email)->send(new CarUnpublishedMail(
+                            $seller->name,
+                            $carName,
+                            $car->brand,
+                            $car->nama,
+                            $adminNotes,
+                            $report->reason_label,
+                            $report->message,
+                            $report->reporter ? $report->reporter->name : 'Pengguna',
+                            $report->created_at->format('d M Y, H:i'),
+                            $reportUrl,
+                            $report->id
+                        ));
+                    } catch (\Exception $e) {
+                        // Log error tapi jangan gagalkan proses
+                        \Log::error('Failed to send unpublish notification email: ' . $e->getMessage());
+                    }
+                }
+            }
+        });
+
+        return redirect()->route('admin.reports.show', $report)
+            ->with('success', 'Mobil berhasil di-unpublish dan seller telah diberitahu.');
     }
 }

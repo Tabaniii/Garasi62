@@ -13,8 +13,8 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\CarApprovalController;
-use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\DuplicateCarController;
+use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
@@ -102,7 +102,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{car}/reject', [CarApprovalController::class, 'reject'])->name('reject');
     });
 
-    Route::get('admin/duplicate-cars', [DuplicateCarController::class, 'index'])->middleware('role:admin')->name('admin.duplicate-cars.index');
+    // Duplicate Cars Management (Admin Only)
+    Route::prefix('admin/duplicate-cars')->name('admin.duplicate-cars.')->middleware('role:admin')->group(function () {
+        Route::get('/', [DuplicateCarController::class, 'index'])->name('index');
+    });
 
     // Chat Management
     Route::prefix('chat')->name('chat.')->group(function () {
@@ -164,6 +167,12 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.st
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.store');
+
+// Password Reset Routes
+Route::get('/password/reset', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/password/email', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/password/reset/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
 

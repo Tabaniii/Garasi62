@@ -53,17 +53,38 @@
 
                         <!-- Chat Messages -->
                         <div class="chat-messages" id="chatMessages">
-                            @foreach($messages as $message)
-                                <div class="message-item {{ $message->sender_id === Auth::id() ? 'message-sent' : 'message-received' }}">
-                                    <div class="message-content">
-                                        <div class="message-header">
-                                            <span class="message-sender">{{ $message->sender->name }}</span>
-                                            <span class="message-time">{{ $message->created_at->format('H:i') }}</span>
+                            @if($messages && $messages->count() > 0)
+                                @foreach($messages as $message)
+                                    @php
+                                        // Get sender name safely
+                                        $senderName = 'User';
+                                        if (isset($message->sender_name)) {
+                                            $senderName = $message->sender_name;
+                                        } elseif (isset($message->sender) && is_object($message->sender)) {
+                                            $senderName = $message->sender->name ?? 'User';
+                                        }
+                                        
+                                        // Get created_at safely
+                                        $createdAt = now();
+                                        if (isset($message->created_at)) {
+                                            if (is_string($message->created_at)) {
+                                                $createdAt = \Carbon\Carbon::parse($message->created_at);
+                                            } elseif (is_object($message->created_at)) {
+                                                $createdAt = $message->created_at;
+                                            }
+                                        }
+                                    @endphp
+                                    <div class="message-item {{ ($message->sender_id ?? 0) === Auth::id() ? 'message-sent' : 'message-received' }}">
+                                        <div class="message-content">
+                                            <div class="message-header">
+                                                <span class="message-sender">{{ $senderName }}</span>
+                                                <span class="message-time">{{ $createdAt->format('H:i') }}</span>
+                                            </div>
+                                            <div class="message-text">{{ $message->message ?? '' }}</div>
                                         </div>
-                                        <div class="message-text">{{ $message->message }}</div>
                                     </div>
-                                </div>
-                            @endforeach
+                                @endforeach
+                            @endif
                         </div>
 
                         <!-- Chat Input -->
@@ -312,10 +333,52 @@
         }
     </style>
 
+    <!-- Load Pusher JS -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <!-- Load Laravel Echo -->
+    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.3/dist/echo.iife.min.js"></script>
     <script>
-        const chatId = {{ $chat->id }};
+        // Initialize Laravel Echo
+        window.Pusher = Pusher;
+        
+        const pusherKey = '{{ $pusherConfig['key'] ?? config('broadcasting.connections.pusher.key') }}';
+        const pusherCluster = '{{ $pusherConfig['cluster'] ?? config('broadcasting.connections.pusher.options.cluster', 'ap1') }}';
+        
+        console.log('Initializing Echo with key:', pusherKey, 'cluster:', pusherCluster);
+        
+        window.Echo = new Echo({
+            broadcaster: 'pusher',
+            key: pusherKey,
+            cluster: pusherCluster,
+            forceTLS: true,
+            encrypted: true,
+            authEndpoint: '/broadcasting/auth',
+            auth: {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            },
+            enabledTransports: ['ws', 'wss'],
+            disableStats: true,
+        });
+        
+        console.log('✅ Echo initialized:', window.Echo);
+        console.log('🔑 Pusher Key:', pusherKey ? 'Set' : 'Missing');
+        console.log('🌍 Cluster:', pusherCluster);
+    </script>
+    
+    <script>
+        const chatId = '{{ $chat->id }}';
         const currentUserId = {{ Auth::id() }};
-        let lastMessageId = {{ $messages->count() > 0 ? $messages->last()->id : 0 }};
+        let lastMessageId = 0;
+        const initialMessageIds = @json($messages->map(function($msg) { 
+            return is_object($msg) ? ($msg->id ?? null) : ($msg['id'] ?? null); 
+        })->filter()->values()->toArray());
+        const renderedMessageIds = new Set(initialMessageIds);
+        
+        console.log('Chat ID:', chatId);
+        console.log('Current User ID:', currentUserId);
+        console.log('Initial messages:', @json($messages));
 
         // Auto scroll to bottom
         function scrollToBottom() {
@@ -323,47 +386,34 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // Load messages
-        function loadMessages() {
-            fetch(`{{ route('chat.messages', $chat->id) }}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const messagesContainer = document.getElementById('chatMessages');
-                const currentScroll = messagesContainer.scrollTop;
-                const isScrolledToBottom = messagesContainer.scrollHeight - messagesContainer.clientHeight <= currentScroll + 100;
+        function appendMessage({ id, sender_id, message, created_at, sender_name }) {
+            const messagesContainer = document.getElementById('chatMessages');
+            if (!messagesContainer) {
+                console.error('Messages container not found!');
+                return;
+            }
+            
+            const messageDiv = document.createElement('div');
+            const timeText = new Date(created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-                // Check if there are new messages
-                const newMessages = data.messages.filter(msg => msg.id > lastMessageId);
-                
-                if (newMessages.length > 0) {
-                    newMessages.forEach(message => {
-                        const messageDiv = document.createElement('div');
-                        messageDiv.className = `message-item ${message.sender_id === currentUserId ? 'message-sent' : 'message-received'}`;
-                        messageDiv.innerHTML = `
-                            <div class="message-content">
-                                <div class="message-header">
-                                    <span class="message-sender">${message.sender.name}</span>
-                                    <span class="message-time">${new Date(message.created_at).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})}</span>
-                                </div>
-                                <div class="message-text">${message.message}</div>
-                            </div>
-                        `;
-                        messagesContainer.appendChild(messageDiv);
-                    });
-
-                    lastMessageId = data.messages[data.messages.length - 1].id;
-
-                    if (isScrolledToBottom) {
-                        scrollToBottom();
-                    }
-                }
-            })
-            .catch(error => console.error('Error loading messages:', error));
+            messageDiv.className = `message-item ${sender_id === currentUserId ? 'message-sent' : 'message-received'}`;
+            messageDiv.dataset.id = id;
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-sender">${sender_name ?? 'User'}</span>
+                        <span class="message-time">${timeText}</span>
+                    </div>
+                    <div class="message-text">${message}</div>
+                </div>
+            `;
+            messagesContainer.appendChild(messageDiv);
+            lastMessageId = Math.max(lastMessageId, parseInt(id) || 0);
+            
+            // Always scroll to bottom after adding message
+            setTimeout(() => {
+                scrollToBottom();
+            }, 100);
         }
 
         // Send message
@@ -373,7 +423,9 @@
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
             
-            if (!message) return;
+            if (!message) {
+                return;
+            }
 
             const sendBtn = document.querySelector('.chat-send-btn');
             const originalHTML = sendBtn.innerHTML;
@@ -389,27 +441,48 @@
                 },
                 body: JSON.stringify({ message: message })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     messageInput.value = '';
                     
-                    // Add message to chat
-                    const messagesContainer = document.getElementById('chatMessages');
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = 'message-item message-sent';
-                    messageDiv.innerHTML = `
-                        <div class="message-content">
-                            <div class="message-header">
-                                <span class="message-sender">${data.message.sender.name}</span>
-                                <span class="message-time">${new Date(data.message.created_at).toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit'})}</span>
-                            </div>
-                            <div class="message-text">${data.message.message}</div>
-                        </div>
-                    `;
-                    messagesContainer.appendChild(messageDiv);
-                    scrollToBottom();
-                    lastMessageId = data.message.id;
+                    // Get sender name safely
+                    let senderName = 'User';
+                    if (data.message.sender && data.message.sender.name) {
+                        senderName = data.message.sender.name;
+                    } else if (data.message.sender_name) {
+                        senderName = data.message.sender_name;
+                    }
+                    
+                    const msg = {
+                        id: data.message.id,
+                        sender_id: data.message.sender_id,
+                        sender_name: senderName,
+                        message: data.message.message,
+                        created_at: data.message.created_at
+                    };
+
+                    // Always add message ID to rendered set first to prevent duplicate
+                    if (!renderedMessageIds.has(msg.id)) {
+                        renderedMessageIds.add(msg.id);
+                        appendMessage(msg);
+                        console.log('✅ Message sent and displayed immediately:', msg.id);
+                    } else {
+                        console.log('⚠️ Message already displayed, skipping:', msg.id);
+                    }
+                } else {
+                    console.error('Failed to send message:', data);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: data.error || 'Gagal mengirim pesan. Silakan coba lagi.',
+                        confirmButtonColor: '#df2d24'
+                    });
                 }
             })
             .catch(error => {
@@ -427,8 +500,103 @@
             });
         });
 
-        // Poll for new messages every 2 seconds
-        setInterval(loadMessages, 2000);
+        // Listen real-time via Echo
+        if (typeof Echo !== 'undefined' && window.Echo) {
+            console.log('🔌 Connecting to Pusher channel: chat.' + chatId);
+            
+            const channel = window.Echo.private(`chat.${chatId}`);
+            
+            channel.subscribed(() => {
+                console.log('✅ Successfully subscribed to channel: chat.' + chatId);
+                console.log('👂 Listening for MessageSent events...');
+            });
+            
+            channel.error((error) => {
+                console.error('❌ Echo subscription error:', error);
+                console.error('Error details:', JSON.stringify(error, null, 2));
+                
+                if (error.status === 403) {
+                    console.error('⚠️ Authorization failed! Check if user has access to this chat.');
+                } else if (error.status === 401) {
+                    console.error('⚠️ Authentication failed! User may not be logged in.');
+                }
+            });
+            
+            // Listen for connection state changes
+            window.Echo.connector.pusher.connection.bind('connected', () => {
+                console.log('✅ Pusher connected');
+            });
+            
+            window.Echo.connector.pusher.connection.bind('disconnected', () => {
+                console.warn('⚠️ Pusher disconnected');
+            });
+            
+            window.Echo.connector.pusher.connection.bind('error', (err) => {
+                console.error('❌ Pusher connection error:', err);
+            });
+            
+            // Listen for MessageSent event
+            channel.listen('.MessageSent', (e) => {
+                console.log('📨 Message received via Pusher:', e);
+                console.log('📨 Event data:', JSON.stringify(e, null, 2));
+                
+                if (!e.message) {
+                    console.error('❌ Invalid event data: message is missing');
+                    return;
+                }
+                
+                const msg = {
+                    id: e.message.id,
+                    sender_id: e.message.sender_id,
+                    sender_name: e.message.sender_name || 'User',
+                    message: e.message.message,
+                    created_at: e.message.created_at
+                };
+
+                // Check if message already rendered to prevent duplicates
+                if (renderedMessageIds.has(msg.id)) {
+                    console.log('⚠️ Message already rendered, skipping:', msg.id);
+                    return;
+                }
+
+                // Add to rendered set and display
+                renderedMessageIds.add(msg.id);
+                appendMessage(msg);
+                console.log('✅ New message displayed via Pusher:', msg.id);
+            });
+            
+            // Also listen without dot prefix (fallback)
+            channel.listen('MessageSent', (e) => {
+                console.log('📨 Message received via Pusher (fallback):', e);
+                console.log('📨 Event data:', JSON.stringify(e, null, 2));
+                
+                if (!e.message) {
+                    console.error('❌ Invalid event data: message is missing');
+                    return;
+                }
+                
+                const msg = {
+                    id: e.message.id,
+                    sender_id: e.message.sender_id,
+                    sender_name: e.message.sender_name || 'User',
+                    message: e.message.message,
+                    created_at: e.message.created_at
+                };
+
+                // Check if message already rendered to prevent duplicates
+                if (renderedMessageIds.has(msg.id)) {
+                    console.log('⚠️ Message already rendered (fallback), skipping:', msg.id);
+                    return;
+                }
+
+                // Add to rendered set and display
+                renderedMessageIds.add(msg.id);
+                appendMessage(msg);
+                console.log('✅ New message displayed via Pusher (fallback):', msg.id);
+            });
+        } else {
+            console.error('Laravel Echo is not loaded! Make sure Pusher credentials are set in .env');
+        }
 
         // Initial scroll to bottom
         scrollToBottom();

@@ -21,14 +21,41 @@
                 </div>
             </div>
 
+            @php
+                $shortcuts = $chats->groupBy('buyer_id');
+            @endphp
+
+            @if($shortcuts->count() > 0)
+            <div class="chat-shortcut-container mb-3">
+                @foreach($shortcuts as $buyerId => $buyerChats)
+                    @php
+                        $firstChat = $buyerChats->first();
+                        $buyer = $firstChat->buyer ?? null;
+                        if (!$buyer) continue;
+                        $unread = $buyerChats->sum(fn($c) => $c->unread_count ?? 0);
+                    @endphp
+                    <a href="{{ route('chat.show', $firstChat->id) }}" class="chat-shortcut-item" title="Chat dengan {{ $buyer->name }}">
+                        <div class="shortcut-avatar">
+                            <span>{{ strtoupper(substr($buyer->name,0,1)) }}</span>
+                        </div>
+                        <div class="shortcut-name">{{ Str::limit($buyer->name, 10) }}</div>
+                        @if($unread > 0)
+                            <span class="shortcut-badge">{{ $unread }}</span>
+                        @endif
+                    </a>
+                @endforeach
+            </div>
+            @endif
+
             <!-- Chat List -->
             <div class="chat-list-container">
                 @if($chats->count() > 0)
                     @foreach($chats as $chat)
                         @php
-                            $otherUser = $chat->buyer;
-                            $lastMessage = $chat->last_message;
-                            $unreadCount = $chat->getUnreadCount(Auth::id());
+                            $otherUser = $chat->buyer ?? null;
+                            if (!$otherUser) continue;
+                            $lastMessage = $chat->last_message ?? null;
+                            $unreadCount = $chat->unread_count ?? 0;
                         @endphp
                         <a href="{{ route('chat.show', $chat->id) }}" class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}">
                             <div class="chat-item-avatar">
@@ -249,6 +276,49 @@
         font-size: 12px;
     }
 }
+
+.chat-shortcut-container{
+    display:flex;
+    gap:12px;
+    overflow-x:auto;
+    padding:8px 4px 12px;
+}
+.chat-shortcut-item{
+    position:relative;
+    text-align:center;
+    min-width:72px;
+    text-decoration:none;
+    color:#1a1a1a;
+}
+.shortcut-avatar{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#df2d24,#b91c1c);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    margin:0 auto 6px;
+    box-shadow:0 4px 12px rgba(223,45,36,0.25);
+}
+.shortcut-name{
+    font-size:12px;
+    white-space:nowrap;
+}
+.shortcut-badge{
+    position:absolute;
+    top:-4px;
+    right:12px;
+    background:#df2d24;
+    color:#fff;
+    border-radius:10px;
+    padding:2px 6px;
+    font-size:10px;
+    font-weight:700;
+}
+</style>
 </style>
 
 <script>

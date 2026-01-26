@@ -7,15 +7,16 @@ use App\Models\User;
 use App\Models\car;
 use App\Models\Chat;
 use App\Models\Message;
+use App\Events\MessageUpdated;
+use App\Events\MessageDeleted;
+use App\Events\MessageRead;
+use App\Events\TypingIndicator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ChatController extends Controller
 {
-    /**
-     * Show chat with specific seller (for buyer)
-     */
     public function showSeller($sellerId)
     {
         $buyer = Auth::user();
@@ -50,10 +51,11 @@ class ChatController extends Controller
             'car_id' => $carId,
         ];
 
-        // Load messages from database if chat exists, otherwise from cache
         if ($dbChat) {
+            $this->markMessagesAsRead($chatId, $dbChat->id, $buyer->id);
+
             $messages = $dbChat->messages()
-                ->with('sender')
+                ->with('sender', 'replyTo.sender')
                 ->orderBy('created_at', 'asc')
                 ->get()
                 ->map(function($msg) use ($chatId) {
@@ -63,25 +65,199 @@ class ChatController extends Controller
                         'sender_id' => $msg->sender_id,
                         'sender_name' => $msg->sender->name ?? 'User',
                         'message' => $msg->message,
+                        'is_read' => $msg->is_read,
+                        'reply_to_message_id' => $msg->reply_to_message_id,
+                        'reply_to_message' => $msg->replyTo ? (object)[
+                            'id' => $msg->replyTo->id,
+                            'message' => $msg->replyTo->message,
+                            'sender_name' => $msg->replyTo->sender->name ?? 'User',
+                        ] : null,
                         'created_at' => $msg->created_at,
                     ];
                 });
         } else {
-            // Fallback to cache
             $messages = $this->getChatMessages($chatId);
         }
 
-        // Set otherUser for consistency
         $otherUser = $seller;
         $user = $buyer;
 
-        // Pass Pusher config for frontend
         $pusherConfig = [
             'key' => config('broadcasting.connections.pusher.key'),
             'cluster' => config('broadcasting.connections.pusher.options.cluster', 'ap1'),
         ];
 
         return view('chat.show', compact('chat', 'otherUser', 'user', 'car', 'messages', 'pusherConfig'));
+    }
+
+    public function updateMessage(Request $request, $chatId, $messageId)
+    {
+        $user = Auth::user();
+        
+        $chatId = urldecode($chatId);
+        
+        $chatData = $this->parseChatId($chatId);
+        
+        if (!$chatData) {
+            return response()->json(['error' => 'Invalid chat ID'], 400);
+        }
+
+        if ($chatData['buyer_id'] != $user->id && $chatData['seller_id'] != $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'message' => 'required|string|max:1000',
+        ]);
+
+        try {
+            $message = Message::findOrFail($messageId);
+
+            if ($message->sender_id != $user->id) {
+                return response()->json(['error' => 'Unauthorized to edit this message'], 403);
+            }
+
+            if ($message->is_read) {
+                return response()->json(['error' => 'Pesan sudah dibaca, tidak dapat diedit'], 403);
+            }
+
+            $message->update([
+                'message' => $request->message
+            ]);
+
+            $this->updateMessageInCache($chatId, $message);
+
+            event(new MessageUpdated($chatId, $message));
+            
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to update message', [
+                'chat_id' => $chatId,
+                'message_id' => $messageId,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal mengupdate pesan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteMessage($chatId, $messageId)
+    {
+        $user = Auth::user();
+        
+        $chatId = urldecode($chatId);
+        
+        $chatData = $this->parseChatId($chatId);
+        
+        if (!$chatData) {
+            return response()->json(['error' => 'Invalid chat ID'], 400);
+        }
+
+        if ($chatData['buyer_id'] != $user->id && $chatData['seller_id'] != $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $message = Message::findOrFail($messageId);
+
+            if ($message->sender_id != $user->id) {
+                return response()->json(['error' => 'Unauthorized to delete this message'], 403);
+            }
+
+            $message->delete();
+
+            $this->removeMessageFromCache($chatId, $messageId);
+
+            event(new MessageDeleted($chatId, $messageId));
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Pesan berhasil dihapus',
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete message', [
+                'chat_id' => $chatId,
+                'message_id' => $messageId,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal menghapus pesan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    private function markMessagesAsRead($chatId, $dbChatId, $readerId)
+    {
+        $messageIds = Message::where('chat_id', $dbChatId)
+            ->where('sender_id', '!=', $readerId)
+            ->where('is_read', false)
+            ->pluck('id')
+            ->all();
+
+        if (empty($messageIds)) {
+            return;
+        }
+
+        $affected = Message::whereIn('id', $messageIds)
+            ->update(['is_read' => true]);
+            
+        if ($affected > 0) {
+            $cacheKey = 'chat_messages_' . $chatId;
+            $messages = Cache::get($cacheKey, []);
+            $cacheUpdated = false;
+            
+            foreach ($messages as &$msg) {
+                if (isset($msg['sender_id']) && $msg['sender_id'] != $readerId) {
+                    if (!isset($msg['is_read']) || $msg['is_read'] === false) {
+                        $msg['is_read'] = true;
+                        $cacheUpdated = true;
+                    }
+                }
+            }
+            
+            if ($cacheUpdated) {
+                Cache::put($cacheKey, $messages, now()->addDays(7));
+            }
+
+            event(new MessageRead($chatId, $readerId, $messageIds));
+        }
+    }
+
+    private function updateMessageInCache($chatId, $updatedMessage)
+    {
+        $cacheKey = 'chat_messages_' . $chatId;
+        $messages = Cache::get($cacheKey, []);
+        
+        foreach ($messages as &$msg) {
+            if (isset($msg['id']) && $msg['id'] == $updatedMessage->id) {
+                $msg['message'] = $updatedMessage->message;
+                break;
+            }
+        }
+        
+        Cache::put($cacheKey, $messages, now()->addDays(7));
+    }
+
+    private function removeMessageFromCache($chatId, $messageId)
+    {
+        $cacheKey = 'chat_messages_' . $chatId;
+        $messages = Cache::get($cacheKey, []);
+        
+        $messages = array_filter($messages, function($msg) use ($messageId) {
+            return isset($msg['id']) && $msg['id'] != $messageId;
+        });
+        
+        Cache::put($cacheKey, array_values($messages), now()->addDays(7));
     }
 
     /**
@@ -123,10 +299,11 @@ class ChatController extends Controller
             'car_id' => $chatData['car_id'],
         ];
 
-        // Load messages from database if chat exists, otherwise from cache
         if ($dbChat) {
+            $this->markMessagesAsRead($chatId, $dbChat->id, $user->id);
+
             $messages = $dbChat->messages()
-                ->with('sender')
+                ->with('sender', 'replyTo.sender')
                 ->orderBy('created_at', 'asc')
                 ->get()
                 ->map(function($msg) use ($chatId) {
@@ -136,11 +313,17 @@ class ChatController extends Controller
                         'sender_id' => $msg->sender_id,
                         'sender_name' => $msg->sender->name ?? 'User',
                         'message' => $msg->message,
+                        'is_read' => $msg->is_read,
+                        'reply_to_message_id' => $msg->reply_to_message_id,
+                        'reply_to_message' => $msg->replyTo ? (object)[
+                            'id' => $msg->replyTo->id,
+                            'message' => $msg->replyTo->message,
+                            'sender_name' => $msg->replyTo->sender->name ?? 'User',
+                        ] : null,
                         'created_at' => $msg->created_at,
                     ];
                 });
         } else {
-            // Fallback to cache
             $messages = $this->getChatMessages($chatId);
         }
 
@@ -222,6 +405,7 @@ class ChatController extends Controller
         try {
             $request->validate([
                 'message' => 'required|string|max:1000',
+                'reply_to_message_id' => 'nullable|integer',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
@@ -245,6 +429,71 @@ class ChatController extends Controller
         
         // Update last_message_at
         $dbChat->update(['last_message_at' => now()]);
+
+        $recentCount = Message::where('chat_id', $dbChat->id)
+            ->where('sender_id', $user->id)
+            ->where('created_at', '>=', now()->subSeconds(10))
+            ->count();
+
+        if ($recentCount >= 5) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Terlalu banyak pesan dalam waktu singkat. Coba lagi sebentar.'
+            ], 429);
+        }
+
+        $lastMessage = Message::where('chat_id', $dbChat->id)
+            ->where('sender_id', $user->id)
+            ->latest()
+            ->first();
+
+        $replyMessageId = $request->input('reply_to_message_id');
+        $replyMessage = null;
+        if ($replyMessageId) {
+            $replyMessage = Message::with('sender')
+                ->where('id', $replyMessageId)
+                ->where('chat_id', $dbChat->id)
+                ->first();
+
+            if (!$replyMessage) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Pesan yang direply tidak ditemukan',
+                ], 422);
+            }
+        }
+
+        if ($lastMessage && $lastMessage->message === $request->message) {
+            $recentDuplicate = $lastMessage->created_at >= now()->subSeconds(3) &&
+                ((int)($lastMessage->reply_to_message_id ?? 0) === (int)($replyMessageId ?? 0));
+
+            if ($recentDuplicate) {
+                $lastMessage->loadMissing('sender', 'replyTo.sender');
+                return response()->json([
+                    'success' => true,
+                    'message' => [
+                        'id' => $lastMessage->id,
+                        'chat_id' => $chatId,
+                        'db_chat_id' => $dbChat->id,
+                        'sender_id' => $lastMessage->sender_id,
+                        'sender_name' => $lastMessage->sender->name ?? $user->name,
+                        'sender' => [
+                            'id' => $user->id,
+                            'name' => $lastMessage->sender->name ?? $user->name,
+                        ],
+                        'message' => $lastMessage->message,
+                        'is_read' => $lastMessage->is_read ?? false,
+                        'reply_to_message_id' => $lastMessage->reply_to_message_id,
+                        'reply_to_message' => $lastMessage->replyTo ? [
+                            'id' => $lastMessage->replyTo->id,
+                            'message' => $lastMessage->replyTo->message,
+                            'sender_name' => $lastMessage->replyTo->sender->name ?? 'User',
+                        ] : null,
+                        'created_at' => $lastMessage->created_at->toIso8601String(),
+                    ],
+                ]);
+            }
+        }
         
         // Create message in database
         $dbMessage = Message::create([
@@ -252,6 +501,7 @@ class ChatController extends Controller
             'sender_id' => $user->id,
             'message' => $request->message,
             'is_read' => false,
+            'reply_to_message_id' => $replyMessageId,
         ]);
         
         // Load sender relationship
@@ -260,7 +510,7 @@ class ChatController extends Controller
         // Create virtual chat object for cache compatibility
         $chat = (object)[
             'id' => $chatId,
-            'db_id' => $dbChat->id, // Database ID
+            'db_id' => $dbChat->id,
             'buyer_id' => $chatData['buyer_id'],
             'seller_id' => $chatData['seller_id'],
             'car_id' => $chatData['car_id'],
@@ -270,11 +520,18 @@ class ChatController extends Controller
         $message = (object)[
             'id' => $dbMessage->id,
             'chat_id' => $chatId,
-            'db_chat_id' => $dbChat->id, // Database chat ID
+            'db_chat_id' => $dbChat->id,
             'sender_id' => $user->id,
             'sender' => $user,
             'sender_name' => $user->name,
             'message' => $request->message,
+            'is_read' => false,
+            'reply_to_message_id' => $replyMessageId,
+            'reply_to_message' => $replyMessage ? (object)[
+                'id' => $replyMessage->id,
+                'message' => $replyMessage->message,
+                'sender_name' => $replyMessage->sender->name ?? 'User',
+            ] : null,
             'created_at' => $dbMessage->created_at,
         ];
         
@@ -335,6 +592,13 @@ class ChatController extends Controller
                     'name' => $user->name,
                 ],
                 'message' => $message->message,
+                'is_read' => false,
+                'reply_to_message_id' => $replyMessageId,
+                'reply_to_message' => $replyMessage ? [
+                    'id' => $replyMessage->id,
+                    'message' => $replyMessage->message,
+                    'sender_name' => $replyMessage->sender->name ?? 'User',
+                ] : null,
                 'created_at' => $dbMessage->created_at->toIso8601String(),
             ],
         ]);
@@ -344,7 +608,7 @@ class ChatController extends Controller
      * Get messages for a chat (AJAX)
      * Load from cache (not database)
      */
-    public function getMessages($chatId)
+    public function getMessages(Request $request, $chatId)
     {
         $user = Auth::user();
         
@@ -360,10 +624,71 @@ class ChatController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Load messages from cache
+        // Try to get chat from database to mark as read
+        $dbChat = Chat::where('buyer_id', $chatData['buyer_id'])
+            ->where('seller_id', $chatData['seller_id'])
+            ->where('car_id', $chatData['car_id'])
+            ->first();
+
+        if ($dbChat) {
+            $this->markMessagesAsRead($chatId, $dbChat->id, $user->id);
+        }
+
+        $source = $request->query('source', 'cache');
+        if ($source === 'db') {
+            usleep(400000);
+            $page = max(1, (int)$request->query('page', 1));
+            $perPage = min(50, max(10, (int)$request->query('per_page', 30)));
+            $beforeId = (int)$request->query('before_id', 0);
+
+            if (!$dbChat) {
+                return response()->json(['messages' => []]);
+            }
+
+            $query = Message::where('chat_id', $dbChat->id)->with('sender', 'replyTo.sender');
+            if ($beforeId > 0) {
+                $query->where('id', '<', $beforeId)->orderBy('id', 'desc');
+            } else {
+                $query->orderBy('created_at', 'asc')->skip(($page - 1) * $perPage);
+            }
+
+            $messages = $query
+                ->take($perPage)
+                ->get();
+
+            if ($beforeId > 0) {
+                $messages = $messages->sortBy('id')->values();
+            }
+
+            $messages = $messages->map(function($msg) use ($chatId) {
+                    return [
+                        'id' => $msg->id,
+                        'chat_id' => $chatId,
+                        'sender_id' => $msg->sender_id,
+                        'sender_name' => $msg->sender->name ?? 'User',
+                        'message' => $msg->message,
+                        'is_read' => $msg->is_read,
+                        'reply_to_message_id' => $msg->reply_to_message_id,
+                        'reply_to_message' => $msg->replyTo ? [
+                            'id' => $msg->replyTo->id,
+                            'message' => $msg->replyTo->message,
+                            'sender_name' => $msg->replyTo->sender->name ?? 'User',
+                        ] : null,
+                        'created_at' => $msg->created_at->toIso8601String(),
+                    ];
+                })
+                ->values()
+                ->all();
+
+            return response()->json([
+                'messages' => $messages,
+                'source' => 'db',
+            ]);
+        }
+
+        // Load messages from cache (now updated)
         $messages = $this->getChatMessages($chatId);
 
-        // Format messages properly for JSON response
         $formattedMessages = $messages->map(function($msg) {
             return [
                 'id' => $msg->id ?? null,
@@ -371,6 +696,9 @@ class ChatController extends Controller
                 'sender_id' => $msg->sender_id ?? null,
                 'sender_name' => $msg->sender_name ?? 'User',
                 'message' => $msg->message ?? '',
+                'is_read' => $msg->is_read ?? false,
+                'reply_to_message_id' => $msg->reply_to_message_id ?? null,
+                'reply_to_message' => $msg->reply_to_message ?? null,
                 'created_at' => isset($msg->created_at) ? 
                     (is_string($msg->created_at) ? $msg->created_at : 
                      (is_object($msg->created_at) ? $msg->created_at->toIso8601String() : now()->toIso8601String())) : 
@@ -380,7 +708,31 @@ class ChatController extends Controller
 
         return response()->json([
             'messages' => $formattedMessages,
+            'source' => 'cache',
         ]);
+    }
+
+    public function typing(Request $request, $chatId)
+    {
+        $user = Auth::user();
+        $chatId = urldecode($chatId);
+        $chatData = $this->parseChatId($chatId);
+
+        if (!$chatData) {
+            return response()->json(['error' => 'Invalid chat ID'], 400);
+        }
+
+        if ($chatData['buyer_id'] != $user->id && $chatData['seller_id'] != $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'typing' => 'required|boolean',
+        ]);
+
+        broadcast(new TypingIndicator($chatId, $user->id, (bool)$request->typing))->toOthers();
+
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -472,6 +824,9 @@ class ChatController extends Controller
             'sender_id' => $message->sender_id,
             'sender_name' => $senderName,
             'message' => $message->message,
+            'is_read' => $message->is_read ?? false,
+            'reply_to_message_id' => $message->reply_to_message_id ?? null,
+            'reply_to_message' => $message->reply_to_message ?? null,
             'created_at' => $createdAt->toIso8601String(),
         ];
         
@@ -488,9 +843,26 @@ class ChatController extends Controller
             $messages[] = $newMessage;
         }
         
-        // Keep only last 100 messages per chat (to prevent cache from growing too large)
-        if (count($messages) > 100) {
-            $messages = array_slice($messages, -100);
+        // Dynamic cache cap: keep ~30% of history (min 30, max 300)
+        $cap = 100;
+        $chatData = $this->parseChatId($chatId);
+        if ($chatData) {
+            $dbChat = Chat::where('buyer_id', $chatData['buyer_id'])
+                ->where('seller_id', $chatData['seller_id'])
+                ->where('car_id', $chatData['car_id'])
+                ->first();
+            if ($dbChat) {
+                $dbCount = Message::where('chat_id', $dbChat->id)->count();
+                $cap = max(30, min((int)ceil($dbCount * 0.3), 300));
+            } else {
+                $cap = max(30, min((int)ceil(count($messages) * 0.3), 300));
+            }
+        } else {
+            $cap = max(30, min((int)ceil(count($messages) * 0.3), 300));
+        }
+
+        if (count($messages) > $cap) {
+            $messages = array_slice($messages, -$cap);
         }
         
         // Store in cache for 7 days
@@ -861,4 +1233,3 @@ class ChatController extends Controller
         }
     }
 }
-

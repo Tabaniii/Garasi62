@@ -64,6 +64,9 @@ class MessageSent implements ShouldBroadcastNow
                 'sender_id' => $this->message->sender_id,
                 'sender_name' => $senderName,
                 'message' => $this->message->message,
+                'is_read' => $this->message->is_read ?? false,
+                'reply_to_message_id' => $this->message->reply_to_message_id ?? null,
+                'reply_to_message' => $this->message->reply_to_message ?? null,
                 'created_at' => is_object($this->message->created_at) 
                     ? $this->message->created_at->toIso8601String() 
                     : now()->toIso8601String(),
@@ -71,4 +74,3 @@ class MessageSent implements ShouldBroadcastNow
         ];
     }
 }
-

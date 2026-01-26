@@ -11,6 +11,7 @@ class Message extends Model
         'sender_id',
         'message',
         'is_read',
+        'reply_to_message_id',
     ];
 
     protected $casts = [
@@ -32,5 +33,14 @@ class Message extends Model
     {
         return $this->belongsTo(User::class, 'sender_id');
     }
-}
 
+    public function replyTo()
+    {
+        return $this->belongsTo(Message::class, 'reply_to_message_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Message::class, 'reply_to_message_id');
+    }
+}

@@ -7,7 +7,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="page-title mb-0">Obrolan</h1>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-secondary" onclick="window.location.reload()">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="refreshChatList()" title="Refresh">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
@@ -34,7 +34,7 @@
                         if (!$seller) continue;
                         $unread = $sellerChats->sum(fn($c) => $c->unread_count ?? 0);
                     @endphp
-                    <a href="{{ route('chat.show', $firstChat->id) }}" class="chat-shortcut-item" title="Chat dengan {{ $seller->name }}">
+                    <a href="{{ route('chat.show', $firstChat->id) }}" class="chat-shortcut-item" title="Chat dengan {{ $seller->name }}" onclick="loadChat(event, '{{ $firstChat->id }}')">
                         <div class="shortcut-avatar">
                             <span>{{ strtoupper(substr($seller->name,0,1)) }}</span>
                         </div>
@@ -57,7 +57,7 @@
                             $lastMessage = $chat->last_message ?? null;
                             $unreadCount = $chat->unread_count ?? 0;
                         @endphp
-                        <a href="{{ route('chat.show', $chat->id) }}" class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}">
+                        <a href="{{ route('chat.show', $chat->id) }}" class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}" data-chat-id="{{ $chat->id }}" onclick="loadChat(event, '{{ $chat->id }}')">
                             <div class="chat-item-avatar">
                                 <i class="fas fa-user"></i>
                             </div>
@@ -322,6 +322,111 @@
 </style>
 
 <script>
+// Load chat without page reload
+function loadChat(event, chatId) {
+    event.preventDefault();
+    
+    // Update URL without reload
+    if (window.history && window.history.pushState) {
+        window.history.pushState({chatId: chatId}, '', '{{ route('chat.show', '') }}/' + chatId);
+    }
+    
+    // Load chat content via AJAX
+    fetch('{{ route('chat.show', '') }}/' + chatId, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.text())
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.html) {
+            // Replace main content with chat view
+            document.querySelector('.main-content').innerHTML = data.html;
+            
+            // Re-execute scripts in the loaded content
+            const scripts = document.querySelectorAll('.main-content script');
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement('script');
+                Array.from(oldScript.attributes).forEach(attr => {
+                    newScript.setAttribute(attr.name, attr.value);
+                });
+                newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+            
+            // Mark messages as read
+            setTimeout(() => {
+                if (typeof markMessagesAsRead === 'function') {
+                    markMessagesAsRead();
+                }
+                if (typeof initChatScripts === 'function') {
+                    initChatScripts();
+                }
+            }, 100);
+        } else {
+            // Fallback to normal navigation
+            window.location.href = '{{ route('chat.show', '') }}/' + chatId;
+        }
+    })
+    .catch(error => {
+        console.error('Error loading chat:', error);
+        // Fallback to normal navigation
+        window.location.href = '{{ route('chat.show', '') }}/' + chatId;
+    });
+}
+
+// Refresh chat list without reload
+function refreshChatList() {
+    fetch('{{ route('chat.index') }}', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        // Update chat list container
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newChatList = doc.querySelector('.chat-list-container');
+        const newShortcuts = doc.querySelector('.chat-shortcut-container');
+        
+        if (newChatList) {
+            document.querySelector('.chat-list-container').innerHTML = newChatList.innerHTML;
+        }
+        if (newShortcuts) {
+            const shortcutsContainer = document.querySelector('.chat-shortcut-container');
+            if (shortcutsContainer) {
+                shortcutsContainer.innerHTML = newShortcuts.innerHTML;
+            }
+        }
+        
+        // Re-attach event listeners
+        attachChatItemListeners();
+    })
+    .catch(error => {
+        console.error('Error refreshing chat list:', error);
+    });
+}
+
+// Attach event listeners to chat items
+function attachChatItemListeners() {
+    document.querySelectorAll('.chat-item[data-chat-id]').forEach(item => {
+        const chatId = item.getAttribute('data-chat-id');
+        item.onclick = (e) => loadChat(e, chatId);
+    });
+    
+    document.querySelectorAll('.chat-shortcut-item').forEach(item => {
+        const href = item.getAttribute('href');
+        if (href) {
+            const chatId = href.split('/').pop();
+            item.onclick = (e) => loadChat(e, chatId);
+        }
+    });
+}
+
 // Search functionality
 document.getElementById('chatSearch').addEventListener('input', function(e) {
     const searchTerm = e.target.value.toLowerCase();
@@ -336,6 +441,20 @@ document.getElementById('chatSearch').addEventListener('input', function(e) {
             item.style.display = 'flex';
         } else {
             item.style.display = 'none';
+        }
+    });
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    attachChatItemListeners();
+    
+    // Listen for browser back/forward
+    window.addEventListener('popstate', function(event) {
+        if (event.state && event.state.chatId) {
+            loadChat({preventDefault: () => {}}, event.state.chatId);
+        } else {
+            window.location.reload();
         }
     });
 });

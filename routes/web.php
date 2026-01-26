@@ -18,10 +18,27 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 
 Route::get('/', [IndexController::class, 'index'])->name('home');
 Route::get('/index', [IndexController::class, 'index'])->name('index');
 Route::get('/index.html', [IndexController::class, 'index'])->name('index.html');
+
+// Email verification routes (Laravel built-in)
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect()->route('dashboard')->with('success', 'Email berhasil diverifikasi.');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('success', 'Link verifikasi baru sudah dikirim ke email Anda.');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
 
 // Public Blog Routes
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
@@ -30,9 +47,11 @@ Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 // Public Comment Routes (auth checked in controller)
 Route::post('/blog/{slug}/comment', [CommentController::class, 'store'])->name('comments.store');
 Route::get('/about', [AboutController::class, 'index'])->name('about');
-//car
+//car - Listing bisa dilihat semua, detail perlu login
 Route::get('/car', [CarController::class, 'show'])->name('cars');
-Route::get('/car/{id}', [CarController::class, 'showDetail'])->name('car.details');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/car/{id}', [CarController::class, 'showDetail'])->name('car.details');
+});
 
 // Contact Routes (Auth checked in controller)
 Route::get('/contact', function () {
@@ -121,8 +140,13 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Common routes (both buyer and seller)
+        Route::get('/unread-count', [ChatController::class, 'getUnreadCount'])->name('unread-count');
+        Route::post('/{chatId}/mark-read', [ChatController::class, 'markAsRead'])->name('mark-read');
         Route::get('/{chatId}', [ChatController::class, 'show'])->name('show');
         Route::post('/{chatId}/message', [ChatController::class, 'store'])->name('store');
+        Route::post('/{chatId}/reply', [ChatController::class, 'reply'])->name('reply');
+        Route::put('/{chatId}/message/{messageId}', [ChatController::class, 'edit'])->name('edit');
+        Route::delete('/{chatId}/message/{messageId}', [ChatController::class, 'delete'])->name('delete');
         Route::get('/{chatId}/messages', [ChatController::class, 'getMessages'])->name('messages');
     });
 
@@ -164,6 +188,9 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.store');
+Route::get('/register/verify', [AuthController::class, 'showVerifyForm'])->name('register.verify');
+Route::post('/register/verify', [AuthController::class, 'verifyCode'])->name('register.verify');
+Route::post('/register/resend', [AuthController::class, 'resendCode'])->name('register.resend');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.store');

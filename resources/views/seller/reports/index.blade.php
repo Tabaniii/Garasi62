@@ -36,7 +36,7 @@
             </div>
 
             @if($reports->count() > 0)
-                <div class="table-responsive">
+                <div class="table-responsive" style="overflow-x: auto;">
                     <table class="table table-hover">
                         <thead class="table-dark">
                             <tr>

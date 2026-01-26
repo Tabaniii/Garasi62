@@ -29,7 +29,7 @@
         <div class="row align-items-center">
             <div class="col-lg-2">
                 <div class="header__logo">
-                    <a href="/"><img src="img/logo.svg" alt=""></a>
+                    <a href="/"><img src="{{ asset('img/logo.svg') }}" alt=""></a>
                 </div>
             </div>
             <div class="col-lg-10">
@@ -53,6 +53,12 @@
                     <div class="header__nav__widget d-flex align-items-center" style="gap: 12px;">
                         <a href="#" class="search-switch text-white text-decoration-none d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="fa fa-search"></i></a>
                         @auth
+                            @if(Auth::user()->role === 'buyer' || Auth::user()->role === 'seller')
+                            <a href="{{ Auth::user()->role === 'buyer' ? route('chat.index') : route('chat.seller.index') }}" class="text-white text-decoration-none d-flex align-items-center justify-content-center position-relative" style="width: 32px; height: 32px; font-size: 18px;" title="Obrolan">
+                                <i class="fa fa-comments"></i>
+                                <span id="headerChatBadge" style="position: absolute; top: -5px; right: -5px; background: #dc2626; color: #fff; border-radius: 50%; width: 18px; height: 18px; display: none; align-items: center; justify-content: center; font-size: 10px; font-weight: bold;">0</span>
+                            </a>
+                            @endif
                             <a href="{{ route('dashboard') }}" class="site-btn" style="white-space: nowrap; text-decoration: none; border-radius: 5px;">Dashboard</a>
                             <form action="{{ route('logout') }}" method="POST" class="d-inline m-0">
                                 @csrf
@@ -73,7 +79,7 @@
     
     @if(request()->routeIs('dashboard'))
     <!-- Breadcrumb Begin -->
-    <div class="breadcrumb-option set-bg" data-setbg="img/breadcrumb-bg.jpg">
+    <div class="breadcrumb-option set-bg" data-setbg="{{ asset('img/breadcrumb-bg.jpg') }}">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">

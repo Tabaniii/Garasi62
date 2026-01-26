@@ -3,6 +3,7 @@
 <!-- @section('title', 'Home - GARASI62') Set the title for the page -->
 
 @section('content')
+@include('components.messages-widget')
 <!-- Hero Section Begin -->
 <section class="hero spad set-bg" data-setbg="img/hero-bg.jpg">
     <div class="container">

@@ -325,6 +325,7 @@ class CarController extends Controller
         $request->validate([
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // max 5MB per image
             'existing_images' => 'nullable|array',
+            'removed_images' => 'nullable|array',
             'tipe' => 'required|in:rent,buy',
             'tahun' => 'required|string|max:4',
             'brand' => 'required|string|max:20',
@@ -364,7 +365,40 @@ class CarController extends Controller
 
         // Handle existing images
         $existingImages = $request->input('existing_images', []);
-        $imagePaths = $existingImages;
+        $removedImages = $request->input('removed_images', []);
+        
+        // Get current images
+        $currentImages = is_array($car->image) ? $car->image : (is_string($car->image) ? json_decode($car->image, true) : []);
+        if (!is_array($currentImages)) $currentImages = [];
+        
+        // Filter out removed images
+        $imagePaths = array_filter($currentImages, function($imagePath) use ($removedImages) {
+            return !in_array($imagePath, $removedImages);
+        });
+        
+        // Add back existing images that were kept
+        $imagePaths = array_values($imagePaths);
+        
+        // Delete removed image files from storage
+        foreach ($removedImages as $removedImage) {
+            $fullPath = storage_path('app/public/' . $removedImage);
+            if (file_exists($fullPath)) {
+                // Check if this image is used by other cars before deleting
+                $usedByOtherCars = car::where('id', '!=', $id)
+                    ->whereNotNull('image')
+                    ->get()
+                    ->filter(function($otherCar) use ($removedImage) {
+                        $otherImages = is_array($otherCar->image) ? $otherCar->image : (is_string($otherCar->image) ? json_decode($otherCar->image, true) : []);
+                        if (!is_array($otherImages)) $otherImages = [];
+                        return in_array($removedImage, $otherImages);
+                    })
+                    ->count() > 0;
+                
+                if (!$usedByOtherCars) {
+                    Storage::disk('public')->delete($removedImage);
+                }
+            }
+        }
 
         // Handle new uploaded images
         if ($request->hasFile('images')) {
@@ -423,7 +457,7 @@ class CarController extends Controller
             return back()->withErrors(['images' => 'Minimal 1 gambar diperlukan.'])->withInput();
         }
 
-        $data = $request->except(['images', 'existing_images']);
+        $data = $request->except(['images', 'existing_images', 'removed_images']);
         $data['image'] = $imagePaths;
 
         // Handle features arrays

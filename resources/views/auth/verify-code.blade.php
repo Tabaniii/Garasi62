@@ -294,7 +294,7 @@
                                autofocus>
                     </div>
                     <p class="hint-text">
-                        <i class="fas fa-info-circle me-2"></i>Kode berlaku selama 10 menit
+                        <i class="fas fa-info-circle me-2"></i>Kode berlaku selama 60 menit
                     </p>
                     
                     <button type="submit" class="btn-submit" id="submitBtn">

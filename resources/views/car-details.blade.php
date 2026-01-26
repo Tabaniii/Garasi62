@@ -41,21 +41,18 @@
                             </div>
                         </div>
                         <div class="car-thumbs-modern">
-                            <div class="car-thumbs-grid">
+                            @php
+                                $imageCount = $car->image && is_array($car->image) ? count($car->image) : 0;
+                                $gridClass = $imageCount > 5 ? 'car-thumbs-grid-scrollable' : 'car-thumbs-grid-fixed';
+                            @endphp
+                            <div class="car-thumbs-grid {{ $gridClass }}">
                                 @if($car->image && is_array($car->image) && count($car->image) > 0)
-                                    @foreach(array_slice($car->image, 0, 5) as $index => $imagePath)
+                                    @foreach($car->image as $index => $imagePath)
                                         <div class="thumb-item {{ $index === 0 ? 'active' : '' }}" data-imgbigurl="{{ asset('storage/' . $imagePath) }}">
                                             <img src="{{ asset('storage/' . $imagePath) }}" alt="Thumbnail {{ $index + 1 }}">
                                             <div class="thumb-overlay"></div>
                                         </div>
                                     @endforeach
-                                    @if(count($car->image) < 5)
-                                        @for($i = count($car->image); $i < 5; $i++)
-                                            <div class="thumb-item placeholder">
-                                                <i class="fa fa-image"></i>
-                                            </div>
-                                        @endfor
-                                    @endif
                                 @else
                                     @for($i = 0; $i < 5; $i++)
                                         <div class="thumb-item placeholder">
@@ -314,6 +311,10 @@
                                         </form>
                                     @endif
                                 @endif
+                            @else
+                                <a href="{{ route('login') }}" class="btn-sidebar-action btn-cart-login">
+                                    <i class="fa fa-shopping-cart"></i> Login untuk Tambah ke Keranjang
+                                </a>
                             @endauth
                             </div>
                         </div>
@@ -395,6 +396,16 @@
                             @endif
                         @endauth
                     </div>
+                    @auth
+                        @if(Auth::user()->role !== 'seller' || Auth::id() != $car->seller_id)
+                        <div class="mt-4" style="border-top: 1px solid #e8e8e8; padding-top: 20px;">
+                            <h6 style="margin-bottom: 15px; font-weight: 600;">Laporkan Mobil</h6>
+                            <button type="button" class="primary-btn sidebar-btn w-100" style="background: #ef4444;" data-toggle="modal" data-target="#reportModal">
+                                <i class="fa fa-flag"></i> Laporkan Mobil Ini
+                            </button>
+                        </div>
+                        @endif
+                    @endauth
                 </div>
             </div>
         </div>
@@ -537,8 +548,46 @@
 
         .car-thumbs-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
             gap: 10px;
+            max-width: 100%;
+        }
+        
+        /* Grid fixed untuk 1-5 gambar - otomatis menyesuaikan jumlah kolom */
+        .car-thumbs-grid-fixed {
+            grid-template-columns: repeat(auto-fit, minmax(80px, 120px));
+            justify-content: start;
+        }
+        
+        /* Grid scrollable untuk lebih dari 5 gambar */
+        .car-thumbs-grid-scrollable {
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 5px;
+        }
+        
+        /* Batasi ukuran maksimal thumb-item agar tidak terlalu besar */
+        .thumb-item {
+            max-width: 120px;
+            width: 100%;
+        }
+        
+        .car-thumbs-grid::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .car-thumbs-grid::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 5px;
+        }
+        
+        .car-thumbs-grid::-webkit-scrollbar-thumb {
+            background: #df2d24;
+            border-radius: 5px;
+        }
+        
+        .car-thumbs-grid::-webkit-scrollbar-thumb:hover {
+            background: #b91c1c;
         }
 
         .thumb-item {
@@ -719,7 +768,6 @@
 
         .info-item:hover {
             background: linear-gradient(135deg, #ffffff, #fafbfc);
-            transform: translateX(4px);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
@@ -1139,12 +1187,14 @@
             }
 
             .car-thumbs-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
                 gap: 8px;
+                overflow-x: auto;
             }
             
             .thumb-item {
                 height: 70px;
+                min-width: 70px;
             }
             
             .sidebar-card {
@@ -1182,6 +1232,56 @@
                         thumbnails.forEach(t => t.classList.remove('active'));
                         this.classList.add('active');
                     }
+                    
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || formData.get('_token')
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                        throw new Error('Network response was not ok');
+                    })
+                    .then(data => {
+                        // Show SweetAlert success
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: data.message || 'Mobil berhasil ditambahkan ke keranjang!',
+                            showConfirmButton: true,
+                            confirmButtonColor: '#df2d24',
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                        
+                        // Update cart badge if exists
+                        const cartBadge = document.querySelector('.cart-badge');
+                        if (cartBadge && data.cart_count) {
+                            cartBadge.textContent = data.cart_count;
+                            cartBadge.style.display = 'inline-block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: 'Terjadi kesalahan saat menambahkan ke keranjang.',
+                            confirmButtonColor: '#df2d24'
+                        });
+                    })
+                    .finally(() => {
+                        // Re-enable button
+                        if (button) {
+                            button.disabled = false;
+                            button.innerHTML = originalText;
+                        }
+                    });
                 });
             });
         });

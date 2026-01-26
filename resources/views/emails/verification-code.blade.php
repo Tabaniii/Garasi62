@@ -112,7 +112,7 @@
             
             <div class="warning">
                 <p class="warning-text">
-                    <strong>⚠️ Penting:</strong> Kode ini berlaku selama 10 menit. Jangan bagikan kode ini kepada siapapun.
+                    <strong>⚠️ Penting:</strong> Kode ini berlaku selama 60 menit. Jangan bagikan kode ini kepada siapapun.
                 </p>
             </div>
             

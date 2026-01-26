@@ -233,11 +233,11 @@
 
                                 <!-- Action Buttons -->
                                 <div class="car-card-actions">
-                                    <a href="{{ route('car.details', $car->id) }}" class="btn-detail">
-                                        <i class="fa fa-eye"></i>
-                                        <span>Lihat Detail</span>
-                                    </a>
                                     @auth
+                                        <a href="{{ route('car.details', $car->id) }}" class="btn-detail">
+                                            <i class="fa fa-eye"></i>
+                                            <span>Lihat Detail</span>
+                                        </a>
                                         @if(auth()->user()->role === 'buyer')
                                             @php
                                                 $seller = $car->seller;
@@ -250,9 +250,9 @@
                                             @endif
                                         @endif
                                     @else
-                                        <a href="{{ route('login') }}" class="btn-chat">
-                                            <i class="fa fa-comments"></i>
-                                            <span>Login untuk Chat</span>
+                                        <a href="{{ route('login') }}" class="btn-detail" onclick="event.preventDefault(); if (typeof Swal !== 'undefined') { Swal.fire({icon: 'info', title: 'Login Diperlukan', text: 'Silakan login terlebih dahulu untuk melihat detail mobil', confirmButtonText: 'Login', confirmButtonColor: '#df2d24'}).then((result) => { if (result.isConfirmed) window.location.href='{{ route('login') }}'; }); } else { window.location.href='{{ route('login') }}'; } return false;">
+                                            <i class="fa fa-eye"></i>
+                                            <span>Lihat Detail</span>
                                         </a>
                                     @endauth
                                 </div>

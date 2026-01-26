@@ -720,8 +720,7 @@
 
         .table tbody tr:hover {
             background-color: #f8f9fa;
-            transform: translateX(5px);
-            box-shadow: -2px 0 5px rgba(220, 38, 38, 0.2);
+            box-shadow: inset 4px 0 0 #dc2626;
         }
 
         /* Page Title Animation */
@@ -741,11 +740,109 @@
         /* Info Card Animation */
         .info-card {
             transition: all 0.3s ease;
+            overflow: hidden;
         }
 
         .info-card:hover {
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            transform: translateY(-3px);
+        }
+
+        /* Chat Notification Popup */
+        .chat-notification-popup {
+            position: fixed;
+            top: 90px;
+            right: 30px;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .chat-notification-content {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 320px;
+            max-width: 400px;
+            border-left: 4px solid #dc2626;
+            position: relative;
+        }
+
+        .chat-notification-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .chat-notification-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-notification-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .chat-notification-message {
+            font-size: 13px;
+            color: #6c757d;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .chat-notification-close {
+            background: transparent;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .chat-notification-close:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #dc2626;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .chat-notification-popup.hiding {
+            animation: slideOutRight 0.3s ease-out forwards;
         }
     </style>
 </head>
@@ -856,17 +953,7 @@
                 <a href="{{ route('chat.seller.index') }}" class="sidebar-menu-item {{ request()->routeIs('chat.*') ? 'active' : '' }}">
                     <i class="fas fa-comments"></i>
                     <span>Obrolan</span>
-                    @php
-                        $unreadChats = \App\Models\Chat::where('seller_id', Auth::id())
-                            ->whereHas('messages', function($query) {
-                                $query->where('sender_id', '!=', Auth::id())
-                                      ->where('is_read', false);
-                            })
-                            ->count();
-                    @endphp
-                    @if($unreadChats > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $unreadChats }}</span>
-                    @endif
+                    <span id="chatBadge" style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto; display: none;">0</span>
                 </a>
                 <a href="{{ route('seller.reports.index') }}" class="sidebar-menu-item {{ request()->routeIs('seller.reports.*') ? 'active' : '' }}">
                     <i class="fas fa-flag"></i>
@@ -894,17 +981,7 @@
                 <a href="{{ route('chat.index') }}" class="sidebar-menu-item {{ request()->routeIs('chat.*') ? 'active' : '' }}">
                     <i class="fas fa-comments"></i>
                     <span>Obrolan</span>
-                    @php
-                        $unreadChats = \App\Models\Chat::where('buyer_id', Auth::id())
-                            ->whereHas('messages', function($query) {
-                                $query->where('sender_id', '!=', Auth::id())
-                                      ->where('is_read', false);
-                            })
-                            ->count();
-                    @endphp
-                    @if($unreadChats > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $unreadChats }}</span>
-                    @endif
+                    <span id="chatBadge" style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto; display: none;">0</span>
                 </a>
             @endif
         </div>
@@ -946,11 +1023,75 @@
         @yield('content')
     </div>
 
+    <!-- Chat Notification Popup -->
+    <div id="chatNotificationPopup" class="chat-notification-popup" style="display: none;">
+        <div class="chat-notification-content">
+            <div class="chat-notification-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="chat-notification-body">
+                <div class="chat-notification-title" id="chatNotificationTitle">Pesan Baru</div>
+                <div class="chat-notification-message" id="chatNotificationMessage"></div>
+            </div>
+            <button class="chat-notification-close" onclick="closeChatNotification()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Suppress autofill extension errors (bukan dari aplikasi) -->
+    <script>
+        // Suppress autofill extension errors - ini dari extension browser, bukan aplikasi
+        (function() {
+            // Suppress console.error untuk autofill
+            const originalError = console.error;
+            const originalWarn = console.warn;
+            
+            console.error = function(...args) {
+                const message = args.join(' ').toLowerCase();
+                if (message.includes('[autofill]') || 
+                    message.includes('autofill.') || 
+                    message.includes('missing typeid') ||
+                    message.includes('missing itemid') ||
+                    message.includes('typeid or itemid')) {
+                    return; // Suppress error ini
+                }
+                originalError.apply(console, args);
+            };
+            
+            console.warn = function(...args) {
+                const message = args.join(' ').toLowerCase();
+                if (message.includes('[autofill]') || 
+                    message.includes('autofill.') || 
+                    message.includes('missing typeid') ||
+                    message.includes('missing itemid') ||
+                    message.includes('typeid or itemid')) {
+                    return; // Suppress warning ini
+                }
+                originalWarn.apply(console, args);
+            };
+            
+            // Juga catch unhandled errors dari autofill
+            window.addEventListener('error', function(e) {
+                if (e.message && (
+                    e.message.toLowerCase().includes('[autofill]') ||
+                    e.message.toLowerCase().includes('autofill.') ||
+                    e.message.toLowerCase().includes('missing typeid') ||
+                    e.message.toLowerCase().includes('missing itemid')
+                )) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }, true);
+        })();
+    </script>
     
     <script>
         // Sidebar Toggle
@@ -1075,6 +1216,167 @@
             showConfirmButton: true
         });
         @endif
+    </script>
+    
+    <script>
+        // Suppress autofill extension errors (bukan dari aplikasi)
+        (function() {
+            const originalError = console.error;
+            console.error = function(...args) {
+                // Filter out autofill extension errors
+                const message = args.join(' ');
+                if (message.includes('[AUTOFILL]') || 
+                    message.includes('autofill.') || 
+                    message.includes('Missing typeId or itemId')) {
+                    // Suppress these errors - mereka dari extension browser, bukan aplikasi
+                    return;
+                }
+                // Log other errors normally
+                originalError.apply(console, args);
+            };
+        })();
+    </script>
+    
+    <!-- Load Pusher JS -->
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <!-- Load Laravel Echo -->
+    <script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.15.3/dist/echo.iife.min.js"></script>
+    
+    <script>
+        // Initialize Laravel Echo for notifications
+        window.Pusher = Pusher;
+        
+        const pusherKey = '{{ config('broadcasting.connections.pusher.key') }}';
+        const pusherCluster = '{{ config('broadcasting.connections.pusher.options.cluster', 'ap1') }}';
+        const currentUserId = {{ Auth::id() }};
+        
+        if (pusherKey) {
+            window.Echo = new Echo({
+                broadcaster: 'pusher',
+                key: pusherKey,
+                cluster: pusherCluster,
+                forceTLS: true,
+                encrypted: true,
+                authEndpoint: '/broadcasting/auth',
+                auth: {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                },
+                enabledTransports: ['ws', 'wss'],
+                disableStats: true,
+            });
+
+            // Listen for new chat messages
+            window.Echo.private(`user.${currentUserId}`)
+                .listen('.NewChatMessage', (e) => {
+                    console.log('📨 New chat message notification:', e);
+                    
+                    // Update badge
+                    updateChatBadge();
+                    
+                    // Update chat list if on chat list page
+                    if (typeof refreshChatList === 'function' && window.location.pathname.includes('/chat')) {
+                        refreshChatList();
+                    }
+                    
+                    // Show popup notification
+                    showChatNotification(e.notification);
+                    
+                    // Show browser notification if available
+                    if ('Notification' in window && Notification.permission === 'granted') {
+                        new Notification(e.notification.title || 'Pesan Baru', {
+                            body: e.notification.body || 'Anda mendapat pesan baru',
+                            icon: '/img/logo.png',
+                            tag: `chat-${e.chat_id}`,
+                        });
+                    }
+                });
+        }
+
+        // Function to update chat badge
+        function updateChatBadge() {
+            fetch('{{ route('chat.unread-count') }}', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const badge = document.getElementById('chatBadge');
+                    if (badge) {
+                        if (data.unread_count > 0) {
+                            badge.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                            badge.style.display = 'inline-block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching unread count:', error);
+            });
+        }
+
+        // Function to show chat notification popup
+        function showChatNotification(notification) {
+            const popup = document.getElementById('chatNotificationPopup');
+            const title = document.getElementById('chatNotificationTitle');
+            const message = document.getElementById('chatNotificationMessage');
+            
+            if (popup && title && message) {
+                title.textContent = notification.title || 'Pesan Baru';
+                message.textContent = notification.body || 'Anda mendapat pesan baru';
+                
+                popup.style.display = 'block';
+                
+                // Auto hide after 5 seconds
+                setTimeout(() => {
+                    closeChatNotification();
+                }, 5000);
+                
+                // Make popup clickable to go to chat
+                popup.style.cursor = 'pointer';
+                popup.onclick = function() {
+                    if (notification.chat_id) {
+                        // Close popup immediately
+                        closeChatNotification();
+                        // Navigate to chat
+                        window.location.href = '{{ route('chat.show', '') }}/' + notification.chat_id;
+                    }
+                };
+            }
+        }
+
+        // Function to close chat notification
+        function closeChatNotification() {
+            const popup = document.getElementById('chatNotificationPopup');
+            if (popup) {
+                popup.classList.add('hiding');
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                    popup.classList.remove('hiding');
+                }, 300);
+            }
+        }
+
+        // Request notification permission on page load
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                console.log('Notification permission:', permission);
+            });
+        }
+
+        // Load initial badge count
+        document.addEventListener('DOMContentLoaded', function() {
+            updateChatBadge();
+            
+            // Update badge every 30 seconds as fallback
+            setInterval(updateChatBadge, 30000);
+        });
     </script>
     
     @stack('scripts')

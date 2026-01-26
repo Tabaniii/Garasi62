@@ -11,8 +11,8 @@ class IndexController extends Controller
 {
     public function index()
     {
-        // Get cars data for display (latest approved cars, limit to 12 for homepage)
-        $cars = car::where('status', 'approved')->orderBy('created_at', 'desc')->limit(12)->get();
+        // Get cars data for display (latest approved cars, limit to 4 for homepage)
+        $cars = car::where('status', 'approved')->orderBy('created_at', 'desc')->limit(4)->get();
         
         // Get unique values for filters from database (only approved cars)
         $brands = car::where('status', 'approved')->distinct()->whereNotNull('brand')->pluck('brand')->sort()->values();

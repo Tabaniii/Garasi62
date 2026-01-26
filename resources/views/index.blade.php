@@ -287,61 +287,248 @@
 <!-- Feature Section End -->
 
 <!-- Car Section Begin -->
-<section class="car spad">
+<section class="car spad" style="background: #fafbfc; padding: 80px 0;">
     <div class="container">
-        <div class="row">
+        <!-- Header Section -->
+        <div class="row mb-5">
             <div class="col-lg-12">
-                <div class="section-title">
-                    <span>Our Car</span>
-                    <h2>Best Vehicle Offers</h2>
+                <div class="text-center mb-4">
+                    <span style="display: inline-block; font-size: 14px; font-weight: 600; color: #df2d24; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Koleksi Mobil terbaru kami</span>
+                    <h2 style="font-size: 42px; font-weight: 800; color: #1a1a1a; margin: 0; letter-spacing: -0.5px;">Penawaran Terbaik</h2>
+                    <p style="font-size: 16px; color: #6b7280; margin-top: 12px; max-width: 600px; margin-left: auto; margin-right: auto;">Temukan mobil impian Anda dari koleksi terpilih kami</p>
                 </div>
-                <ul class="filter__controls">
-                    <li class="active" data-filter="*">Most Researched</li>
-                    <li data-filter=".sale">Latest on sale</li>
-                </ul>
             </div>
-            <div class="row car-filter">
-                @forelse($cars as $car)
-                <div class="col-lg-3 col-md-4 col-sm-6 mix{{ $car->tipe == 'buy' ? ' sale' : '' }}">
-                    <div class="car__item">
-                        <div class="car__item__pic__slider owl-carousel">
+        </div>
+
+        <!-- Car Grid -->
+        <div class="row car-filter">
+            @forelse($cars as $car)
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4 mix{{ $car->tipe == 'buy' ? ' sale' : '' }}" style="transition: opacity 0.3s ease, transform 0.3s ease, display 0.3s ease;">
+                <div class="car-card-modern" style="background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: all 0.3s; height: 100%; display: flex; flex-direction: column;">
+                    <!-- Car Image -->
+                    <div class="car-image-wrapper" style="position: relative; width: 100%; height: 220px; min-height: 220px; max-height: 220px; overflow: hidden; background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);">
+                        <div class="car__item__pic__slider owl-carousel" style="height: 220px; min-height: 220px; max-height: 220px; width: 100%;">
                             @if($car->image && is_array($car->image) && count($car->image) > 0)
                                 @foreach($car->image as $imagePath)
-                                    <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ $car->brand }} {{ $car->nama ?? '' }}">
+                                    <div style="width: 100%; height: 220px; min-height: 220px; max-height: 220px; overflow: hidden;">
+                                        <img src="{{ asset('storage/' . $imagePath) }}" alt="{{ $car->brand }} {{ $car->nama ?? '' }}" style="width: 100%; height: 220px; min-height: 220px; max-height: 220px; object-fit: cover; display: block;">
+                                    </div>
                                 @endforeach
                             @else
-                                <img src="{{ asset('garasi62/img/cars/car-8.jpg') }}" alt="{{ $car->brand }} {{ $car->nama ?? '' }}">
+                                <div style="width: 100%; height: 220px; min-height: 220px; max-height: 220px; overflow: hidden;">
+                                    <img src="{{ asset('garasi62/img/cars/car-8.jpg') }}" alt="{{ $car->brand }} {{ $car->nama ?? '' }}" style="width: 100%; height: 220px; min-height: 220px; max-height: 220px; object-fit: cover; display: block;">
+                                </div>
                             @endif
                         </div>
-                        <div class="car__item__text">
-                            <div class="car__item__text__inner">
-                                <div class="label-date">{{ $car->tahun ?? '' }}</div>
-                                <h5><a href="{{ route('car.details', $car->id) }}">{{ $car->brand ?? '' }}@if($car->nama) {{ $car->nama }}@endif</a></h5>
-                                <ul>
-                                    <li><span>{{ number_format($car->kilometer ?? 0, 0, ',', '.') }}</span> km</li>
-                                    <li>{{ $car->transmisi ?? '-' }}</li>
-                                    <li><span>{{ $car->kapasitasmesin ?? '-' }}</span></li>
-                                </ul>
+                        <!-- Badge -->
+                        <div style="position: absolute; top: 12px; left: 12px; background: {{ $car->tipe == 'buy' ? 'linear-gradient(135deg, #10b981, #34d399)' : 'linear-gradient(135deg, #3b82f6, #2563eb)' }}; color: #fff; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                            {{ $car->tipe == 'rent' ? 'Sewa' : 'Jual' }}
+                        </div>
+                        <!-- Year Badge -->
+                        @if($car->tahun)
+                        <div style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,0.7); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; backdrop-filter: blur(10px);">
+                            {{ $car->tahun }}
+                        </div>
+                        @endif
+                    </div>
+
+                    <!-- Car Info -->
+                    <div class="car-info-content" style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
+                        <!-- Title -->
+                        <h5 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700; color: #1a1a1a; line-height: 1.4;">
+                            @auth
+                                <a href="{{ route('car.details', $car->id) }}" style="color: #1a1a1a; text-decoration: none; transition: color 0.3s;">{{ $car->brand ?? '' }}@if($car->nama) {{ $car->nama }}@endif</a>
+                            @else
+                                <a href="{{ route('login') }}" onclick="event.preventDefault(); if (typeof Swal !== 'undefined') { Swal.fire({icon: 'info', title: 'Login Diperlukan', text: 'Silakan login terlebih dahulu untuk melihat detail mobil', confirmButtonText: 'Login', confirmButtonColor: '#df2d24'}).then((result) => { if (result.isConfirmed) window.location.href='{{ route('login') }}'; }); } else { window.location.href='{{ route('login') }}'; } return false;" style="color: #1a1a1a; text-decoration: none; transition: color 0.3s;">{{ $car->brand ?? '' }}@if($car->nama) {{ $car->nama }}@endif</a>
+                            @endauth
+                        </h5>
+
+                        <!-- Specs -->
+                        <div class="car-specs" style="display: flex; gap: 16px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #f3f4f6; flex-wrap: wrap;">
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6b7280;">
+                                <i class="fa fa-tachometer" style="color: #df2d24; font-size: 14px;"></i>
+                                <span><strong style="color: #1a1a1a;">{{ number_format($car->kilometer ?? 0, 0, ',', '.') }}</strong> km</span>
                             </div>
-                            <div class="car__item__price">
-                                <span class="car-option{{ $car->tipe == 'buy' ? ' sale' : '' }}">{{ $car->tipe == 'rent' ? 'For Rent' : 'For Sale' }}</span>
-                                <h6>Rp {{ number_format($car->harga ?? 0, 0, ',', '.') }}@if($car->tipe == 'rent' && $car->metode)<span>/{{ $car->metode }}</span>@endif</h6>
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6b7280;">
+                                <i class="fa fa-cog" style="color: #df2d24; font-size: 14px;"></i>
+                                <span style="color: #1a1a1a;">{{ $car->transmisi ?? '-' }}</span>
+                            </div>
+                            @if($car->kapasitasmesin)
+                            <div style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6b7280;">
+                                <i class="fa fa-car" style="color: #df2d24; font-size: 14px;"></i>
+                                <span style="color: #1a1a1a;">{{ $car->kapasitasmesin }}</span>
+                            </div>
+                            @endif
+                        </div>
+
+                        <!-- Price -->
+                        <div class="car-price" style="margin-top: auto;">
+                            <div style="font-size: 24px; font-weight: 800; color: #df2d24; line-height: 1.2;">
+                                Rp {{ number_format($car->harga ?? 0, 0, ',', '.') }}
+                                @if($car->tipe == 'rent' && $car->metode)
+                                <span style="font-size: 14px; font-weight: 600; color: #6b7280;">/{{ $car->metode }}</span>
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
-                @empty
-                <div class="col-12">
-                    <div class="text-center" style="padding: 40px;">
-                        <h4>Tidak ada mobil tersedia</h4>
-                        <p>Silakan tambahkan mobil melalui admin panel.</p>
-                    </div>
-                </div>
-                @endforelse
             </div>
+            @empty
+            <div class="col-12">
+                <div class="text-center" style="padding: 80px 20px; background: #fff; border-radius: 12px;">
+                    <div style="font-size: 64px; color: #e5e7eb; margin-bottom: 20px;">
+                        <i class="fa fa-car"></i>
+                    </div>
+                    <h4 style="font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 12px;">Tidak ada mobil tersedia</h4>
+                    <p style="font-size: 16px; color: #6b7280; margin: 0;">Silakan tambahkan mobil melalui admin panel.</p>
+                </div>
+            </div>
+            @endforelse
         </div>
     </div>
 </section>
+
+<style>
+/* Fixed Image Size */
+.car-image-wrapper {
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+}
+
+.car__item__pic__slider {
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+}
+
+.car__item__pic__slider .owl-item,
+.car__item__pic__slider .owl-item > div {
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+}
+
+.car__item__pic__slider img {
+    width: 100% !important;
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+    object-fit: cover !important;
+    object-position: center !important;
+}
+
+/* Car Card Hover Effect */
+.car-card-modern:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12) !important;
+}
+
+.car-card-modern:hover h5 a {
+    color: #df2d24;
+}
+
+/* Filter Button Active State */
+.filter-btn.active {
+    background: #df2d24 !important;
+    color: #fff !important;
+}
+
+.filter-btn:not(.active):hover {
+    background: #f3f4f6 !important;
+    color: #1a1a1a !important;
+}
+
+/* Filter Items Transition */
+.car-filter .mix {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    will-change: opacity, transform;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .car-card-modern {
+        margin-bottom: 24px;
+    }
+    
+    .filter-controls-modern {
+        flex-direction: column;
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .filter-btn {
+        width: 100%;
+    }
+    
+    .car-image-wrapper,
+    .car__item__pic__slider,
+    .car__item__pic__slider .owl-item,
+    .car__item__pic__slider .owl-item > div,
+    .car__item__pic__slider img {
+        height: 200px !important;
+        min-height: 200px !important;
+        max-height: 200px !important;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter functionality
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const filterItems = document.querySelectorAll('.mix');
+    const filterContainer = document.querySelector('.car-filter');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (!btn.classList.contains('active')) {
+                    btn.style.background = 'transparent';
+                    btn.style.color = '#6b7280';
+                }
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            this.style.background = '#df2d24';
+            this.style.color = '#fff';
+            
+            const filterValue = this.getAttribute('data-filter');
+            
+            // Filter items
+            filterItems.forEach(item => {
+                const shouldShow = filterValue === '*' || item.classList.contains(filterValue.replace('.', ''));
+                
+                if (shouldShow) {
+                    item.style.display = 'block';
+                    item.style.opacity = '0';
+                    item.style.transform = 'scale(0.95)';
+                    
+                    // Trigger reflow
+                    item.offsetHeight;
+                    
+                    // Animate in
+                    setTimeout(() => {
+                        item.style.opacity = '1';
+                        item.style.transform = 'scale(1)';
+                    }, 10);
+                } else {
+                    // Animate out then hide
+                    item.style.opacity = '0';
+                    item.style.transform = 'scale(0.95)';
+                    
+                    setTimeout(() => {
+                        item.style.display = 'none';
+                    }, 300);
+                }
+            });
+        });
+    });
+});
+</script>
 <!-- Car Section End -->
 
 <!-- Chooseus Section Begin -->

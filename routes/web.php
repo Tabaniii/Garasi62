@@ -47,9 +47,11 @@ Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 // Public Comment Routes (auth checked in controller)
 Route::post('/blog/{slug}/comment', [CommentController::class, 'store'])->name('comments.store');
 Route::get('/about', [AboutController::class, 'index'])->name('about');
-//car
+//car - Listing bisa dilihat semua, detail perlu login
 Route::get('/car', [CarController::class, 'show'])->name('cars');
-Route::get('/car/{id}', [CarController::class, 'showDetail'])->name('car.details');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/car/{id}', [CarController::class, 'showDetail'])->name('car.details');
+});
 
 // Contact Routes (Auth checked in controller)
 Route::get('/contact', function () {
@@ -138,8 +140,13 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Common routes (both buyer and seller)
+        Route::get('/unread-count', [ChatController::class, 'getUnreadCount'])->name('unread-count');
+        Route::post('/{chatId}/mark-read', [ChatController::class, 'markAsRead'])->name('mark-read');
         Route::get('/{chatId}', [ChatController::class, 'show'])->name('show');
         Route::post('/{chatId}/message', [ChatController::class, 'store'])->name('store');
+        Route::post('/{chatId}/reply', [ChatController::class, 'reply'])->name('reply');
+        Route::put('/{chatId}/message/{messageId}', [ChatController::class, 'edit'])->name('edit');
+        Route::delete('/{chatId}/message/{messageId}', [ChatController::class, 'delete'])->name('delete');
         Route::get('/{chatId}/messages', [ChatController::class, 'getMessages'])->name('messages');
         Route::delete('/delete', [ChatController::class, 'destroy'])->name('destroy');
         Route::delete('/{chatId}', [ChatController::class, 'destroySingle'])->name('destroy.single');

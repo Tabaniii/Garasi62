@@ -20,3 +20,8 @@ Broadcast::channel('chat.{chatId}', function ($user, $chatId) {
     return in_array($user->id, [$buyerId, $sellerId]);
 });
 
+Broadcast::channel('user.{userId}', function ($user, $userId) {
+    // User can only listen to their own notifications
+    return (int)$user->id === (int)$userId;
+});
+

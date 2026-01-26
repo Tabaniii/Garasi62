@@ -204,7 +204,7 @@ class CarController extends Controller
                 'kilometer' => 'required|string|max:6',
                 'transmisi' => 'required|string|max:10',
                 'harga' => 'required|string|max:10',
-                'metode' => 'required|string|max:5',
+                'metode' => 'required|string|max:10',
                 'kapasitasmesin' => 'required|string|max:50',
                 'stock' => 'nullable|string|max:50',
                 'vin' => 'nullable|string|max:50',

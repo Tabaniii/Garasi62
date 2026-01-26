@@ -16,7 +16,7 @@
                     <button id="deleteSelectedBtn" class="btn btn-sm btn-danger" onclick="deleteSelectedChats()" style="display: none;">
                         <i class="fas fa-trash"></i> Hapus Terpilih
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="window.location.reload()">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="refreshChatList()" title="Refresh">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
@@ -31,7 +31,7 @@
             </div>
 
             @php
-                // Group chats by buyer_id safely
+                // Group chats by buyer_id (since this is seller view)
                 $shortcuts = collect([]);
                 if ($chats && $chats->count() > 0) {
                     $shortcuts = $chats->groupBy(function($chat) {
@@ -52,14 +52,14 @@
                         // Use other_user if available, otherwise fallback to buyer
                         $buyer = $firstChat->other_user ?? $firstChat->buyer ?? null;
                         
-                        // Double check: make sure we're not showing seller's own name
+                        // Ensure we're not showing the current seller's own name
                         if ($buyer && $buyer->id == Auth::id()) {
                             $buyer = $firstChat->buyer ?? null;
                         }
                         
                         if (!$buyer) continue;
                         
-                        // Calculate unread count safely
+                        // Calculate total unread count for this buyer
                         $unread = 0;
                         foreach ($buyerChats as $chat) {
                             if (isset($chat->unread_count)) {
@@ -67,9 +67,12 @@
                             }
                         }
                     @endphp
-                    <a href="{{ route('chat.show', $firstChat->id) }}" class="chat-shortcut-item" title="Chat dengan {{ $buyer->name }}">
+                    <a href="{{ route('chat.show', $firstChat->id) }}" 
+                       class="chat-shortcut-item" 
+                       title="Chat dengan {{ $buyer->name }}" 
+                       onclick="loadChat(event, '{{ $firstChat->id }}')">
                         <div class="shortcut-avatar">
-                            <span>{{ strtoupper(substr($buyer->name,0,1)) }}</span>
+                            <span>{{ strtoupper(substr($buyer->name, 0, 1)) }}</span>
                         </div>
                         <div class="shortcut-name">{{ Str::limit($buyer->name, 10) }}</div>
                         @if($unread > 0)
@@ -85,40 +88,43 @@
                 @if($chats && $chats->count() > 0)
                     @foreach($chats as $chat)
                         @php
-                            // Use other_user if available (set in ChatController), otherwise fallback to buyer
+                            // Determine the other participant (should be buyer in seller view)
                             $otherUser = $chat->other_user ?? $chat->buyer ?? null;
                             
-                            // Double check: make sure we're not showing seller's own name
+                            // Safety check: avoid showing current user as other party
                             if ($otherUser && $otherUser->id == Auth::id()) {
-                                // Wrong user, try buyer
                                 $otherUser = $chat->buyer ?? null;
                             }
                             
                             if (!$otherUser) continue;
                             
-                            // Get last message safely
+                            // Handle last message safely
                             $lastMessage = null;
                             if (isset($chat->last_message)) {
                                 if (is_object($chat->last_message)) {
                                     $lastMessage = $chat->last_message;
                                 } elseif (is_string($chat->last_message)) {
-                                    // If last_message is just a string, create object
                                     $lastMessage = (object)[
                                         'message' => $chat->last_message,
-                                        'created_at' => $chat->last_message->created_at ?? now()
+                                        'created_at' => now()
                                     ];
                                 }
                             }
                             
-                            // Get unread count safely
+                            // Handle unread count
                             $unreadCount = 0;
                             if (isset($chat->unread_count)) {
                                 $unreadCount = (int)$chat->unread_count;
                             }
                         @endphp
+
+                        {{-- ✅ GABUNGAN FINAL: wrapper + checkbox + data-chat-id + loadChat --}}
                         <div class="chat-item-wrapper">
                             <input type="checkbox" class="chat-checkbox" value="{{ $chat->id }}" onchange="updateDeleteButton()">
-                            <a href="{{ route('chat.show', $chat->id) }}" class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}" onclick="return !event.ctrlKey && !event.metaKey;">
+                            <a href="{{ route('chat.show', $chat->id) }}" 
+                               class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}" 
+                               data-chat-id="{{ $chat->id }}" 
+                               onclick="loadChat(event, '{{ $chat->id }}'); return !event.ctrlKey && !event.metaKey;">
                                 <div class="chat-item-avatar">
                                     <i class="fas fa-user"></i>
                                 </div>
@@ -429,27 +435,149 @@
 </style>
 
 <script>
-// Search functionality
-document.getElementById('chatSearch').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const chatItems = document.querySelectorAll('.chat-item');
-    
-    chatItems.forEach(item => {
-        const name = item.querySelector('.chat-item-name').textContent.toLowerCase();
-        const message = item.querySelector('.chat-item-message').textContent.toLowerCase();
-        const car = item.querySelector('.chat-item-car')?.textContent.toLowerCase() || '';
-        
-        if (name.includes(searchTerm) || message.includes(searchTerm) || car.includes(searchTerm)) {
-            item.closest('.chat-item-wrapper').style.display = 'flex';
-        } else {
-            item.closest('.chat-item-wrapper').style.display = 'none';
-        }
-    });
-});
-
-// Selection mode
+// Global state for selection mode
 let isSelectMode = false;
 
+// Load chat without page reload
+function loadChat(event, chatId) {
+    event.preventDefault();
+    
+    // Update URL without reload
+    if (window.history && window.history.pushState) {
+        window.history.pushState({ chatId: chatId }, '', '{{ route("chat.show", "") }}/' + chatId);
+    }
+    
+    // Load chat content via AJAX
+    fetch('{{ route("chat.show", "") }}/' + chatId, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                           document.querySelector('input[name="_token"]')?.value || ''
+        }
+    })
+    .then(response => {
+        // Cek apakah respons JSON atau HTML
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json().then(data => ({ json: data, html: null }));
+        } else {
+            return response.text().then(html => ({ json: null, html: html }));
+        }
+    })
+    .then(({ json, html }) => {
+        if (json && json.success && json.html) {
+            // Handle JSON response with HTML content
+            document.querySelector('.main-content').innerHTML = json.html;
+        } else if (html) {
+            // Handle direct HTML response (fallback)
+            document.querySelector('.main-content').innerHTML = html;
+        } else {
+            throw new Error('Invalid response format');
+        }
+
+        // Re-execute scripts in the loaded content
+        const scripts = document.querySelectorAll('.main-content script');
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+
+        // Initialize post-load functions
+        setTimeout(() => {
+            if (typeof markMessagesAsRead === 'function') markMessagesAsRead();
+            if (typeof initChatScripts === 'function') initChatScripts();
+            attachChatItemListeners(); // Re-attach listeners after load
+        }, 100);
+    })
+    .catch(error => {
+        console.error('Error loading chat:', error);
+        // Fallback to normal navigation
+        window.location.href = '{{ route("chat.show", "") }}/' + chatId;
+    });
+}
+
+// Refresh chat list without reload
+function refreshChatList() {
+    fetch('{{ route("chat.seller.index") }}', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                           document.querySelector('input[name="_token"]')?.value || ''
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newChatList = doc.querySelector('.chat-list-container');
+        const newShortcuts = doc.querySelector('.chat-shortcut-container');
+        
+        if (newChatList) {
+            document.querySelector('.chat-list-container').innerHTML = newChatList.innerHTML;
+        }
+        if (newShortcuts) {
+            const container = document.querySelector('.chat-shortcut-container');
+            if (container) container.innerHTML = newShortcuts.innerHTML;
+        }
+
+        attachChatItemListeners();
+    })
+    .catch(error => {
+        console.error('Error refreshing chat list:', error);
+    });
+}
+
+// Attach event listeners to chat items
+function attachChatItemListeners() {
+    document.querySelectorAll('.chat-item[data-chat-id]').forEach(item => {
+        const chatId = item.getAttribute('data-chat-id');
+        item.onclick = (e) => loadChat(e, chatId);
+    });
+    
+    document.querySelectorAll('.chat-shortcut-item').forEach(item => {
+        const href = item.getAttribute('href');
+        if (href) {
+            const chatId = href.split('/').pop();
+            item.onclick = (e) => loadChat(e, chatId);
+        }
+    });
+}
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('chatSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const wrappers = document.querySelectorAll('.chat-item-wrapper');
+            
+            wrappers.forEach(wrapper => {
+                const item = wrapper.querySelector('.chat-item');
+                if (!item) return;
+                
+                const nameEl = item.querySelector('.chat-item-name');
+                const messageEl = item.querySelector('.chat-item-message');
+                const carEl = item.querySelector('.chat-item-car');
+                
+                const name = nameEl ? nameEl.textContent.toLowerCase() : '';
+                const message = messageEl ? messageEl.textContent.toLowerCase() : '';
+                const car = carEl ? carEl.textContent.toLowerCase() : '';
+                
+                if (name.includes(searchTerm) || message.includes(searchTerm) || car.includes(searchTerm)) {
+                    wrapper.style.display = 'flex';
+                } else {
+                    wrapper.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+
+// Selection mode functions
 function toggleSelectMode() {
     isSelectMode = !isSelectMode;
     const wrappers = document.querySelectorAll('.chat-item-wrapper');
@@ -458,9 +586,7 @@ function toggleSelectMode() {
     const deleteBtn = document.getElementById('deleteSelectedBtn');
     
     if (isSelectMode) {
-        wrappers.forEach(wrapper => {
-            wrapper.classList.add('select-mode');
-        });
+        wrappers.forEach(wrapper => wrapper.classList.add('select-mode'));
         if (selectAllBtn) selectAllBtn.style.display = 'inline-block';
         if (selectModeBtn) {
             selectModeBtn.innerHTML = '<i class="fas fa-times"></i> Batal';
@@ -487,11 +613,7 @@ function toggleSelectMode() {
 function toggleSelectAll() {
     const checkboxes = document.querySelectorAll('.chat-checkbox');
     const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-    
-    checkboxes.forEach(cb => {
-        cb.checked = !allChecked;
-    });
-    
+    checkboxes.forEach(cb => cb.checked = !allChecked);
     updateDeleteButton();
 }
 
@@ -520,7 +642,6 @@ function deleteSelectedChats() {
         return;
     }
     
-    // Show loading
     const deleteBtn = document.getElementById('deleteSelectedBtn');
     const originalHTML = deleteBtn.innerHTML;
     deleteBtn.disabled = true;
@@ -539,7 +660,6 @@ function deleteSelectedChats() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Remove deleted chats from UI
             chatIds.forEach(chatId => {
                 const wrapper = document.querySelector(`.chat-checkbox[value="${chatId}"]`)?.closest('.chat-item-wrapper');
                 if (wrapper) {
@@ -548,11 +668,8 @@ function deleteSelectedChats() {
                     setTimeout(() => wrapper.remove(), 300);
                 }
             });
-            
-            // Reset selection mode
             toggleSelectMode();
             
-            // Show success message
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     icon: 'success',
@@ -587,53 +704,68 @@ function deleteSelectedChats() {
     });
 }
 
-// Enable selection mode with Ctrl/Cmd + Click or long press
-document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
-        e.preventDefault();
-        if (!isSelectMode) {
-            toggleSelectMode();
+// Initialize everything on DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Attach initial listeners
+    attachChatItemListeners();
+    
+    // Handle browser back/forward
+    window.addEventListener('popstate', function(event) {
+        if (event.state && event.state.chatId) {
+            loadChat({ preventDefault: () => {} }, event.state.chatId);
+        } else {
+            window.location.reload();
         }
-    }
-});
+    });
 
-// Right click to enable selection mode
-document.addEventListener('contextmenu', function(e) {
-    if (e.target.closest('.chat-item-wrapper')) {
-        e.preventDefault();
-        if (!isSelectMode) {
-            toggleSelectMode();
+    // Click on chat item to toggle selection in select mode
+    document.addEventListener('click', function(e) {
+        if (isSelectMode && e.target.closest('.chat-item')) {
+            e.preventDefault();
+            const wrapper = e.target.closest('.chat-item-wrapper');
+            const checkbox = wrapper?.querySelector('.chat-checkbox');
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                updateDeleteButton();
+            }
         }
-    }
-});
+    });
 
-// Long press on mobile
-let longPressTimer;
-document.addEventListener('touchstart', function(e) {
-    if (e.target.closest('.chat-item-wrapper')) {
-        longPressTimer = setTimeout(() => {
+    // Right click to enable selection mode
+    document.addEventListener('contextmenu', function(e) {
+        if (e.target.closest('.chat-item-wrapper')) {
+            e.preventDefault();
             if (!isSelectMode) {
                 toggleSelectMode();
             }
-        }, 500);
-    }
-});
-
-document.addEventListener('touchend', function() {
-    clearTimeout(longPressTimer);
-});
-
-// Click on chat item to toggle selection in select mode
-document.addEventListener('click', function(e) {
-    if (isSelectMode && e.target.closest('.chat-item')) {
-        e.preventDefault();
-        const wrapper = e.target.closest('.chat-item-wrapper');
-        const checkbox = wrapper?.querySelector('.chat-checkbox');
-        if (checkbox) {
-            checkbox.checked = !checkbox.checked;
-            updateDeleteButton();
         }
-    }
+    });
+
+    // Long press on mobile
+    let longPressTimer;
+    document.addEventListener('touchstart', function(e) {
+        if (e.target.closest('.chat-item-wrapper')) {
+            longPressTimer = setTimeout(() => {
+                if (!isSelectMode) {
+                    toggleSelectMode();
+                }
+            }, 500);
+        }
+    });
+
+    document.addEventListener('touchend', function() {
+        clearTimeout(longPressTimer);
+    });
+
+    // Ctrl/Cmd + A to enter select mode
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+            e.preventDefault();
+            if (!isSelectMode) {
+                toggleSelectMode();
+            }
+        }
+    });
 });
 </script>
 @endsection

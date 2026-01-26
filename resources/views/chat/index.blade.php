@@ -16,7 +16,7 @@
                     <button id="deleteSelectedBtn" class="btn btn-sm btn-danger" onclick="deleteSelectedChats()" style="display: none;">
                         <i class="fas fa-trash"></i> Hapus Terpilih
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="window.location.reload()">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="refreshChatList()" title="Refresh">
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
@@ -67,7 +67,10 @@
                             }
                         }
                     @endphp
-                    <a href="{{ route('chat.show', $firstChat->id) }}" class="chat-shortcut-item" title="Chat dengan {{ $seller->name }}">
+                    <a href="{{ route('chat.show', $firstChat->id) }}" 
+                       class="chat-shortcut-item" 
+                       title="Chat dengan {{ $seller->name }}" 
+                       onclick="loadChat(event, '{{ $firstChat->id }}')">
                         <div class="shortcut-avatar">
                             <span>{{ strtoupper(substr($seller->name,0,1)) }}</span>
                         </div>
@@ -90,7 +93,6 @@
                             
                             // Double check: make sure we're not showing buyer's own name
                             if ($otherUser && $otherUser->id == Auth::id()) {
-                                // Wrong user, try seller
                                 $otherUser = $chat->seller ?? null;
                             }
                             
@@ -102,10 +104,9 @@
                                 if (is_object($chat->last_message)) {
                                     $lastMessage = $chat->last_message;
                                 } elseif (is_string($chat->last_message)) {
-                                    // If last_message is just a string, create object
                                     $lastMessage = (object)[
                                         'message' => $chat->last_message,
-                                        'created_at' => $chat->last_message->created_at ?? now()
+                                        'created_at' => now()
                                     ];
                                 }
                             }
@@ -116,49 +117,55 @@
                                 $unreadCount = (int)$chat->unread_count;
                             }
                         @endphp
+
+                        {{-- ✅ GABUNGAN KODE: wrapper + checkbox + data-chat-id + loadChat --}}
                         <div class="chat-item-wrapper">
                             <input type="checkbox" class="chat-checkbox" value="{{ $chat->id }}" onchange="updateDeleteButton()" style="display: none;">
-                            <a href="{{ route('chat.show', $chat->id) }}" class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}" onclick="return !event.ctrlKey && !event.metaKey;">
+                            <a href="{{ route('chat.show', $chat->id) }}" 
+                               class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}" 
+                               data-chat-id="{{ $chat->id }}" 
+                               onclick="loadChat(event, '{{ $chat->id }}'); return !event.ctrlKey && !event.metaKey;">
                                 <div class="chat-item-avatar">
                                     <i class="fas fa-user"></i>
                                 </div>
                                 <div class="chat-item-content">
-                                <div class="chat-item-header">
-                                    <span class="chat-item-name">{{ $otherUser->name }}</span>
-                                    @if($lastMessage && isset($lastMessage->created_at))
-                                        @php
-                                            try {
-                                                $lastMessageTime = is_object($lastMessage->created_at) 
-                                                    ? $lastMessage->created_at 
-                                                    : \Carbon\Carbon::parse($lastMessage->created_at);
-                                            } catch (\Exception $e) {
-                                                $lastMessageTime = null;
-                                            }
-                                        @endphp
-                                        @if($lastMessageTime)
-                                            <span class="chat-item-time">{{ $lastMessageTime->diffForHumans() }}</span>
+                                    <div class="chat-item-header">
+                                        <span class="chat-item-name">{{ $otherUser->name }}</span>
+                                        @if($lastMessage && isset($lastMessage->created_at))
+                                            @php
+                                                try {
+                                                    $lastMessageTime = is_object($lastMessage->created_at) 
+                                                        ? $lastMessage->created_at 
+                                                        : \Carbon\Carbon::parse($lastMessage->created_at);
+                                                } catch (\Exception $e) {
+                                                    $lastMessageTime = null;
+                                                }
+                                            @endphp
+                                            @if($lastMessageTime)
+                                                <span class="chat-item-time">{{ $lastMessageTime->diffForHumans() }}</span>
+                                            @endif
                                         @endif
+                                    </div>
+                                    <div class="chat-item-preview">
+                                        @if($lastMessage && isset($lastMessage->message) && $lastMessage->message)
+                                            <span class="chat-item-message">
+                                                {{ Str::limit($lastMessage->message, 50) }}
+                                            </span>
+                                        @else
+                                            <span class="chat-item-message text-muted">Belum ada pesan</span>
+                                        @endif
+                                        @if($unreadCount > 0)
+                                            <span class="chat-item-badge">{{ $unreadCount }}</span>
+                                        @endif
+                                    </div>
+                                    @if(isset($chat->car) && $chat->car)
+                                    <div class="chat-item-car">
+                                        <i class="fas fa-car"></i> {{ $chat->car->brand ?? '' }} {{ $chat->car->nama ?? '' }}
+                                    </div>
                                     @endif
                                 </div>
-                                <div class="chat-item-preview">
-                                    @if($lastMessage && isset($lastMessage->message) && $lastMessage->message)
-                                        <span class="chat-item-message">
-                                            {{ Str::limit($lastMessage->message, 50) }}
-                                        </span>
-                                    @else
-                                        <span class="chat-item-message text-muted">Belum ada pesan</span>
-                                    @endif
-                                    @if($unreadCount > 0)
-                                        <span class="chat-item-badge">{{ $unreadCount }}</span>
-                                    @endif
-                                </div>
-                                @if(isset($chat->car) && $chat->car)
-                                <div class="chat-item-car">
-                                    <i class="fas fa-car"></i> {{ $chat->car->brand ?? '' }} {{ $chat->car->nama ?? '' }}
-                                </div>
-                                @endif
-                            </div>
-                        </a>
+                            </a>
+                        </div>
                     @endforeach
                 @else
                     <div class="chat-empty-state">
@@ -418,27 +425,149 @@
 </style>
 
 <script>
-// Search functionality
-document.getElementById('chatSearch').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const chatItems = document.querySelectorAll('.chat-item');
-    
-    chatItems.forEach(item => {
-        const name = item.querySelector('.chat-item-name').textContent.toLowerCase();
-        const message = item.querySelector('.chat-item-message').textContent.toLowerCase();
-        const car = item.querySelector('.chat-item-car')?.textContent.toLowerCase() || '';
-        
-        if (name.includes(searchTerm) || message.includes(searchTerm) || car.includes(searchTerm)) {
-            item.closest('.chat-item-wrapper').style.display = 'flex';
-        } else {
-            item.closest('.chat-item-wrapper').style.display = 'none';
-        }
-    });
-});
-
-// Selection mode
+// Global state for selection mode
 let isSelectMode = false;
 
+// Load chat without page reload
+function loadChat(event, chatId) {
+    event.preventDefault();
+    
+    // Update URL without reload
+    if (window.history && window.history.pushState) {
+        window.history.pushState({ chatId: chatId }, '', '{{ route("chat.show", "") }}/' + chatId);
+    }
+    
+    // Load chat content via AJAX
+    fetch('{{ route("chat.show", "") }}/' + chatId, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                           document.querySelector('input[name="_token"]')?.value || ''
+        }
+    })
+    .then(response => {
+        // Cek apakah respons JSON atau HTML
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return response.json().then(data => ({ json: data, html: null }));
+        } else {
+            return response.text().then(html => ({ json: null, html: html }));
+        }
+    })
+    .then(({ json, html }) => {
+        if (json && json.success && json.html) {
+            // Handle JSON response with HTML content
+            document.querySelector('.main-content').innerHTML = json.html;
+        } else if (html) {
+            // Handle direct HTML response (fallback)
+            document.querySelector('.main-content').innerHTML = html;
+        } else {
+            throw new Error('Invalid response format');
+        }
+
+        // Re-execute scripts in the loaded content
+        const scripts = document.querySelectorAll('.main-content script');
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            Array.from(oldScript.attributes).forEach(attr => {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+            newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+
+        // Initialize post-load functions
+        setTimeout(() => {
+            if (typeof markMessagesAsRead === 'function') markMessagesAsRead();
+            if (typeof initChatScripts === 'function') initChatScripts();
+            attachChatItemListeners(); // Re-attach listeners after load
+        }, 100);
+    })
+    .catch(error => {
+        console.error('Error loading chat:', error);
+        // Fallback to normal navigation
+        window.location.href = '{{ route("chat.show", "") }}/' + chatId;
+    });
+}
+
+// Refresh chat list without reload
+function refreshChatList() {
+    fetch('{{ route("chat.seller.index") }}', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                           document.querySelector('input[name="_token"]')?.value || ''
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const newChatList = doc.querySelector('.chat-list-container');
+        const newShortcuts = doc.querySelector('.chat-shortcut-container');
+        
+        if (newChatList) {
+            document.querySelector('.chat-list-container').innerHTML = newChatList.innerHTML;
+        }
+        if (newShortcuts) {
+            const container = document.querySelector('.chat-shortcut-container');
+            if (container) container.innerHTML = newShortcuts.innerHTML;
+        }
+
+        attachChatItemListeners();
+    })
+    .catch(error => {
+        console.error('Error refreshing chat list:', error);
+    });
+}
+
+// Attach event listeners to chat items
+function attachChatItemListeners() {
+    document.querySelectorAll('.chat-item[data-chat-id]').forEach(item => {
+        const chatId = item.getAttribute('data-chat-id');
+        item.onclick = (e) => loadChat(e, chatId);
+    });
+    
+    document.querySelectorAll('.chat-shortcut-item').forEach(item => {
+        const href = item.getAttribute('href');
+        if (href) {
+            const chatId = href.split('/').pop();
+            item.onclick = (e) => loadChat(e, chatId);
+        }
+    });
+}
+
+// Search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('chatSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const wrappers = document.querySelectorAll('.chat-item-wrapper');
+            
+            wrappers.forEach(wrapper => {
+                const item = wrapper.querySelector('.chat-item');
+                if (!item) return;
+                
+                const nameEl = item.querySelector('.chat-item-name');
+                const messageEl = item.querySelector('.chat-item-message');
+                const carEl = item.querySelector('.chat-item-car');
+                
+                const name = nameEl ? nameEl.textContent.toLowerCase() : '';
+                const message = messageEl ? messageEl.textContent.toLowerCase() : '';
+                const car = carEl ? carEl.textContent.toLowerCase() : '';
+                
+                if (name.includes(searchTerm) || message.includes(searchTerm) || car.includes(searchTerm)) {
+                    wrapper.style.display = 'flex';
+                } else {
+                    wrapper.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+
+// Selection mode functions
 function toggleSelectMode() {
     isSelectMode = !isSelectMode;
     const wrappers = document.querySelectorAll('.chat-item-wrapper');
@@ -448,10 +577,12 @@ function toggleSelectMode() {
     
     if (isSelectMode) {
         wrappers.forEach(wrapper => wrapper.classList.add('select-mode'));
-        selectAllBtn.style.display = 'inline-block';
-        selectModeBtn.innerHTML = '<i class="fas fa-times"></i> Batal';
-        selectModeBtn.classList.remove('btn-outline-primary');
-        selectModeBtn.classList.add('btn-outline-secondary');
+        if (selectAllBtn) selectAllBtn.style.display = 'inline-block';
+        if (selectModeBtn) {
+            selectModeBtn.innerHTML = '<i class="fas fa-times"></i> Batal';
+            selectModeBtn.classList.remove('btn-outline-primary');
+            selectModeBtn.classList.add('btn-outline-secondary');
+        }
         updateDeleteButton();
     } else {
         wrappers.forEach(wrapper => {
@@ -459,22 +590,20 @@ function toggleSelectMode() {
             const checkbox = wrapper.querySelector('.chat-checkbox');
             if (checkbox) checkbox.checked = false;
         });
-        selectAllBtn.style.display = 'none';
-        deleteBtn.style.display = 'none';
-        selectModeBtn.innerHTML = '<i class="fas fa-check-square"></i> Pilih';
-        selectModeBtn.classList.remove('btn-outline-secondary');
-        selectModeBtn.classList.add('btn-outline-primary');
+        if (selectAllBtn) selectAllBtn.style.display = 'none';
+        if (deleteBtn) deleteBtn.style.display = 'none';
+        if (selectModeBtn) {
+            selectModeBtn.innerHTML = '<i class="fas fa-check-square"></i> Pilih';
+            selectModeBtn.classList.remove('btn-outline-secondary');
+            selectModeBtn.classList.add('btn-outline-primary');
+        }
     }
 }
 
 function toggleSelectAll() {
     const checkboxes = document.querySelectorAll('.chat-checkbox');
     const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-    
-    checkboxes.forEach(cb => {
-        cb.checked = !allChecked;
-    });
-    
+    checkboxes.forEach(cb => cb.checked = !allChecked);
     updateDeleteButton();
 }
 
@@ -503,7 +632,6 @@ function deleteSelectedChats() {
         return;
     }
     
-    // Show loading
     const deleteBtn = document.getElementById('deleteSelectedBtn');
     const originalHTML = deleteBtn.innerHTML;
     deleteBtn.disabled = true;
@@ -522,7 +650,6 @@ function deleteSelectedChats() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Remove deleted chats from UI
             chatIds.forEach(chatId => {
                 const wrapper = document.querySelector(`.chat-checkbox[value="${chatId}"]`)?.closest('.chat-item-wrapper');
                 if (wrapper) {
@@ -531,11 +658,8 @@ function deleteSelectedChats() {
                     setTimeout(() => wrapper.remove(), 300);
                 }
             });
-            
-            // Reset selection mode
             toggleSelectMode();
             
-            // Show success message
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     icon: 'success',
@@ -570,53 +694,68 @@ function deleteSelectedChats() {
     });
 }
 
-// Enable selection mode with Ctrl/Cmd + Click or long press
-document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
-        e.preventDefault();
-        if (!isSelectMode) {
-            toggleSelectMode();
+// Initialize everything on DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Attach initial listeners
+    attachChatItemListeners();
+    
+    // Handle browser back/forward
+    window.addEventListener('popstate', function(event) {
+        if (event.state && event.state.chatId) {
+            loadChat({ preventDefault: () => {} }, event.state.chatId);
+        } else {
+            window.location.reload();
         }
-    }
-});
+    });
 
-// Right click to enable selection mode
-document.addEventListener('contextmenu', function(e) {
-    if (e.target.closest('.chat-item-wrapper')) {
-        e.preventDefault();
-        if (!isSelectMode) {
-            toggleSelectMode();
+    // Click on chat item to toggle selection in select mode
+    document.addEventListener('click', function(e) {
+        if (isSelectMode && e.target.closest('.chat-item')) {
+            e.preventDefault();
+            const wrapper = e.target.closest('.chat-item-wrapper');
+            const checkbox = wrapper?.querySelector('.chat-checkbox');
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                updateDeleteButton();
+            }
         }
-    }
-});
+    });
 
-// Long press on mobile
-let longPressTimer;
-document.addEventListener('touchstart', function(e) {
-    if (e.target.closest('.chat-item-wrapper')) {
-        longPressTimer = setTimeout(() => {
+    // Right click to enable selection mode
+    document.addEventListener('contextmenu', function(e) {
+        if (e.target.closest('.chat-item-wrapper')) {
+            e.preventDefault();
             if (!isSelectMode) {
                 toggleSelectMode();
             }
-        }, 500);
-    }
-});
-
-document.addEventListener('touchend', function() {
-    clearTimeout(longPressTimer);
-});
-
-// Click on chat item to toggle selection in select mode
-document.addEventListener('click', function(e) {
-    if (isSelectMode && e.target.closest('.chat-item')) {
-        e.preventDefault();
-        const wrapper = e.target.closest('.chat-item-wrapper');
-        const checkbox = wrapper?.querySelector('.chat-checkbox');
-        if (checkbox) {
-            checkbox.checked = !checkbox.checked;
-            updateDeleteButton();
         }
-    }
+    });
+
+    // Long press on mobile
+    let longPressTimer;
+    document.addEventListener('touchstart', function(e) {
+        if (e.target.closest('.chat-item-wrapper')) {
+            longPressTimer = setTimeout(() => {
+                if (!isSelectMode) {
+                    toggleSelectMode();
+                }
+            }, 500);
+        }
+    });
+
+    document.addEventListener('touchend', function() {
+        clearTimeout(longPressTimer);
+    });
+
+    // Ctrl/Cmd + A to enter select mode
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+            e.preventDefault();
+            if (!isSelectMode) {
+                toggleSelectMode();
+            }
+        }
+    });
 });
 </script>
 @endsection

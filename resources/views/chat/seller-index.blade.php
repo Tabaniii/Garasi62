@@ -116,9 +116,9 @@
                                 $unreadCount = (int)$chat->unread_count;
                             }
                         @endphp
-                        <div class="chat-item-wrapper">
+                        <div class="chat-item-wrapper" data-chat-id="{{ $chat->id }}" data-last-at="{{ $lastMessageTime ? $lastMessageTime->toIso8601String() : '' }}">
                             <input type="checkbox" class="chat-checkbox" value="{{ $chat->id }}" onchange="updateDeleteButton()">
-                            <a href="{{ route('chat.show', $chat->id) }}" class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}" onclick="return !event.ctrlKey && !event.metaKey;">
+                            <a href="{{ route('chat.show', $chat->id) }}" class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}" onclick="markChatAsRead('{{ $chat->id }}', this); return !event.ctrlKey && !event.metaKey;">
                                 <div class="chat-item-avatar">
                                     <i class="fas fa-user"></i>
                                 </div>
@@ -429,6 +429,86 @@
 </style>
 
 <script>
+function markChatAsRead(chatId, el) {
+    const item = el?.closest('.chat-item');
+    if (item) {
+        item.classList.remove('chat-item-unread');
+        const badge = item.querySelector('.chat-item-badge');
+        if (badge) badge.remove();
+    }
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    if (!chatId || !csrfToken) return;
+    fetch(`/chat/${encodeURIComponent(chatId)}/mark-read`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        keepalive: true
+    }).catch(() => {});
+}
+
+function refreshChatList() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    fetch('/chat/unread-count', {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(res => res.ok ? res.json() : Promise.reject())
+    .then(data => {
+        const perChat = data.per_chat || {};
+        const listContainer = document.querySelector('.chat-list-container');
+        const wrappers = Array.from(document.querySelectorAll('.chat-item-wrapper'));
+        wrappers.forEach(wrapper => {
+            const chatId = wrapper.getAttribute('data-chat-id');
+            const meta = chatId && perChat[chatId] ? perChat[chatId] : null;
+            if (!meta) return;
+            const item = wrapper.querySelector('.chat-item');
+            const preview = wrapper.querySelector('.chat-item-message');
+            const timeEl = wrapper.querySelector('.chat-item-time');
+            const badge = wrapper.querySelector('.chat-item-badge');
+            const unread = parseInt(meta.unread_count || 0);
+            if (preview && meta.last_message) {
+                preview.textContent = meta.last_message;
+            }
+            if (timeEl && meta.last_message_time) {
+                timeEl.textContent = meta.last_message_time;
+            }
+            if (meta.last_message_at) {
+                wrapper.dataset.lastAt = meta.last_message_at;
+            }
+            if (unread > 0) {
+                item?.classList.add('chat-item-unread');
+                if (!badge) {
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'chat-item-badge';
+                    newBadge.textContent = unread;
+                    wrapper.querySelector('.chat-item-preview')?.appendChild(newBadge);
+                } else {
+                    badge.textContent = unread;
+                }
+            } else {
+                item?.classList.remove('chat-item-unread');
+                if (badge) badge.remove();
+            }
+        });
+        if (listContainer) {
+            const sorted = wrappers.sort((a, b) => {
+                const aTime = new Date(a.dataset.lastAt || 0).getTime();
+                const bTime = new Date(b.dataset.lastAt || 0).getTime();
+                return bTime - aTime;
+            });
+            sorted.forEach(w => listContainer.appendChild(w));
+        }
+    })
+    .catch(() => {});
+}
+
 // Search functionality
 document.getElementById('chatSearch').addEventListener('input', function(e) {
     const searchTerm = e.target.value.toLowerCase();
@@ -635,6 +715,7 @@ document.addEventListener('click', function(e) {
         }
     }
 });
+document.addEventListener('DOMContentLoaded', refreshChatList);
+setInterval(refreshChatList, 8000);
 </script>
 @endsection
-

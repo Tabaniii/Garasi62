@@ -60,6 +60,7 @@
                             @if($messages && $messages->count() > 0)
                                 @foreach($messages as $message)
                                     @php
+                                        $isDeleted = ($message->is_deleted ?? false) || ($message->message ?? '') === '';
                                         // Get sender name safely
                                         $senderName = 'User';
                                         if (isset($message->sender_name)) {
@@ -78,28 +79,30 @@
                                             }
                                         }
                                     @endphp
-                                    <div class="message-item {{ ($message->sender_id ?? 0) === Auth::id() ? 'message-sent' : 'message-received' }}">
+                                    <div class="message-item {{ ($message->sender_id ?? 0) === Auth::id() ? 'message-sent' : 'message-received' }} {{ $isDeleted ? 'message-deleted' : '' }}">
                                     <div class="message-content">
-                                        <div class="message-actions">
-                                            <button class="btn-icon reply-btn" onclick="setReply('{{ $message->id }}', '{{ addslashes($senderName) }}', '{{ str_replace(array("\r", "\n"), array('\r', '\n'), addslashes($message->message)) }}')"><i class="fa fa-reply"></i></button>
-                                            @if(($message->sender_id ?? 0) === Auth::id() && !($message->is_read ?? false))
-                                                <button class="btn-icon edit-btn" onclick="openEditModal('{{ $message->id }}', '{{ str_replace(array("\r", "\n"), array('\r', '\n'), addslashes($message->message)) }}')"><i class="fa fa-pencil"></i></button>
-                                            @endif
-                                            @if(($message->sender_id ?? 0) === Auth::id())
-                                                <button class="btn-icon delete-btn" onclick="deleteMessage('{{ $message->id }}')"><i class="fa fa-trash"></i></button>
-                                            @endif
-                                        </div>
+                                        @if(!$isDeleted)
+                                            <div class="message-actions">
+                                                <button class="btn-icon reply-btn" onclick="setReply('{{ $message->id }}', '{{ addslashes($senderName) }}', '{{ str_replace(array("\r", "\n"), array('\r', '\n'), addslashes($message->message)) }}')"><i class="fa fa-reply"></i></button>
+                                                @if(($message->sender_id ?? 0) === Auth::id() && !($message->is_read ?? false))
+                                                    <button class="btn-icon edit-btn" onclick="openEditModal('{{ $message->id }}', '{{ str_replace(array("\r", "\n"), array('\r', '\n'), addslashes($message->message)) }}')"><i class="fa fa-pencil"></i></button>
+                                                @endif
+                                                @if(($message->sender_id ?? 0) === Auth::id())
+                                                    <button class="btn-icon delete-btn" onclick="deleteMessage('{{ $message->id }}')"><i class="fa fa-trash"></i></button>
+                                                @endif
+                                            </div>
+                                        @endif
                                         <div class="message-header">
                                             <span class="message-sender">{{ $senderName }}</span>
                                             <span class="message-time">{{ $createdAt->format('H:i') }}</span>
                                         </div>
-                                        @if(isset($message->reply_to_message) && $message->reply_to_message)
+                                        @if(!$isDeleted && isset($message->reply_to_message) && $message->reply_to_message)
                                             <div class="reply-preview">
                                                 <div class="reply-preview-sender">{{ $message->reply_to_message->sender_name ?? 'User' }}</div>
-                                                <div class="reply-preview-text">{{ $message->reply_to_message->message ?? '' }}</div>
+                                                <div class="reply-preview-text">{{ ($message->reply_to_message->is_deleted ?? false) ? 'Pesan ini dihapus' : ($message->reply_to_message->message ?? '') }}</div>
                                             </div>
                                         @endif
-                                        <div class="message-text" id="msg-text-{{ $message->id }}">{{ $message->message ?? '' }}</div>
+                                        <div class="message-text" id="msg-text-{{ $message->id }}">{{ $isDeleted ? 'Pesan ini dihapus' : ($message->message ?? '') }}</div>
                                     </div>
                                     </div>
                                 @endforeach
@@ -464,6 +467,17 @@
             word-wrap: break-word;
         }
 
+        .message-deleted .message-content {
+            background: #f3f4f6;
+            color: #6b7280;
+            border: 1px dashed #e5e7eb;
+            box-shadow: none;
+        }
+
+        .message-deleted .message-text {
+            font-style: italic;
+        }
+
         .reply-preview {
             border-left: 3px solid rgba(255, 255, 255, 0.6);
             padding: 8px 10px;
@@ -678,21 +692,23 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        function buildMessageElement({ id, sender_id, message, created_at, sender_name, is_read, reply_to_message }) {
+        function buildMessageElement({ id, sender_id, message, created_at, sender_name, is_read, reply_to_message, is_deleted }) {
             const messageDiv = document.createElement('div');
             const timeText = new Date(created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-            messageDiv.className = `message-item ${sender_id === currentUserId ? 'message-sent' : 'message-received'}`;
+            const isDeleted = !!is_deleted || !message;
+            messageDiv.className = `message-item ${sender_id === currentUserId ? 'message-sent' : 'message-received'}${isDeleted ? ' message-deleted' : ''}`;
             messageDiv.dataset.id = id;
             
             const isOwnMessage = sender_id === currentUserId;
-            const showEdit = isOwnMessage && !is_read;
-            const showDelete = isOwnMessage;
+            const showEdit = isOwnMessage && !is_read && !isDeleted;
+            const showDelete = isOwnMessage && !isDeleted;
             
-            const safeMessage = message.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+            const displayMessage = isDeleted ? 'Pesan ini dihapus' : message;
+            const safeMessage = displayMessage.replace(/'/g, "\\'").replace(/"/g, '&quot;');
             const safeSender = (sender_name ?? 'User').replace(/'/g, "\\'").replace(/"/g, '&quot;');
             
-            const actionsHtml = `
+            const actionsHtml = isDeleted ? '' : `
                 <div class="message-actions">
                     <button class="btn-icon reply-btn" onclick="setReply('${id}', '${safeSender}', '${safeMessage}')"><i class="fa fa-reply"></i></button>
                     ${showEdit ? `<button class="btn-icon edit-btn" onclick="openEditModal('${id}', '${safeMessage}')"><i class="fa fa-pencil"></i></button>` : ''}
@@ -700,10 +716,11 @@
                 </div>
             `;
 
-            const replyPreviewHtml = reply_to_message ? `
+            const replyIsDeleted = reply_to_message ? (reply_to_message.is_deleted || !reply_to_message.message) : false;
+            const replyPreviewHtml = !isDeleted && reply_to_message ? `
                 <div class="reply-preview">
                     <div class="reply-preview-sender">${reply_to_message.sender_name ?? 'User'}</div>
-                    <div class="reply-preview-text">${reply_to_message.message ?? ''}</div>
+                    <div class="reply-preview-text">${replyIsDeleted ? 'Pesan ini dihapus' : (reply_to_message.message ?? '')}</div>
                 </div>
             ` : '';
 
@@ -715,7 +732,7 @@
                         <span class="message-time">${timeText}</span>
                     </div>
                     ${replyPreviewHtml}
-                    <div class="message-text" id="msg-text-${id}">${message}</div>
+                    <div class="message-text" id="msg-text-${id}">${displayMessage}</div>
                 </div>
             `;
             return messageDiv;
@@ -1074,11 +1091,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        const msgElement = document.querySelector(`.message-item[data-id="${id}"]`) || 
-                                         document.getElementById(`msg-text-${id}`).closest('.message-item');
-                        if (msgElement) {
-                            msgElement.remove();
-                        }
+                        markMessageDeletedUI(id);
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({
                                 icon: 'success',
@@ -1223,11 +1236,23 @@
             }
         }
 
-        function removeMessageUI(messageId) {
+        function markMessageDeletedUI(messageId) {
             const msgElement = document.querySelector(`.message-item[data-id="${messageId}"]`) || 
                                document.getElementById(`msg-text-${messageId}`)?.closest('.message-item');
-            if (msgElement) {
-                msgElement.remove();
+            if (!msgElement) return;
+
+            msgElement.classList.add('message-deleted');
+            const messageText = msgElement.querySelector('.message-text');
+            if (messageText) {
+                messageText.textContent = 'Pesan ini dihapus';
+            }
+            const replyPreview = msgElement.querySelector('.reply-preview');
+            if (replyPreview) {
+                replyPreview.remove();
+            }
+            const actions = msgElement.querySelector('.message-actions');
+            if (actions) {
+                actions.remove();
             }
         }
 
@@ -1378,12 +1403,12 @@
 
             channel.listen('.MessageDeleted', (e) => {
                 if (!e.message_id) return;
-                removeMessageUI(e.message_id);
+                markMessageDeletedUI(e.message_id);
             });
 
             channel.listen('MessageDeleted', (e) => {
                 if (!e.message_id) return;
-                removeMessageUI(e.message_id);
+                markMessageDeletedUI(e.message_id);
             });
 
             channel.listen('.MessageRead', (e) => {

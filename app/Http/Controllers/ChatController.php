@@ -33,6 +33,9 @@ class ChatController extends Controller
 
         $carId = request()->query('car_id');
         $car = $carId ? car::find($carId) : null;
+        if (!$carId || !$car) {
+            return redirect()->back()->with('error', 'Pilih mobil terlebih dahulu untuk memulai chat.');
+        }
 
         // Generate chat ID from combination
         $chatId = $this->generateChatId($buyer->id, $seller->id, $carId);
@@ -64,12 +67,14 @@ class ChatController extends Controller
                         'chat_id' => $chatId,
                         'sender_id' => $msg->sender_id,
                         'sender_name' => $msg->sender->name ?? 'User',
-                        'message' => $msg->message,
+                        'message' => $msg->is_deleted ? 'Pesan ini dihapus' : $msg->message,
+                        'is_deleted' => $msg->is_deleted ?? false,
                         'is_read' => $msg->is_read,
                         'reply_to_message_id' => $msg->reply_to_message_id,
                         'reply_to_message' => $msg->replyTo ? (object)[
                             'id' => $msg->replyTo->id,
-                            'message' => $msg->replyTo->message,
+                            'message' => $msg->replyTo->is_deleted ? 'Pesan ini dihapus' : $msg->replyTo->message,
+                            'is_deleted' => $msg->replyTo->is_deleted ?? false,
                             'sender_name' => $msg->replyTo->sender->name ?? 'User',
                         ] : null,
                         'created_at' => $msg->created_at,
@@ -115,6 +120,10 @@ class ChatController extends Controller
 
             if ($message->sender_id != $user->id) {
                 return response()->json(['error' => 'Unauthorized to edit this message'], 403);
+            }
+
+            if ($message->is_deleted) {
+                return response()->json(['error' => 'Pesan sudah dihapus, tidak dapat diedit'], 403);
             }
 
             if ($message->is_read) {
@@ -171,9 +180,15 @@ class ChatController extends Controller
                 return response()->json(['error' => 'Unauthorized to delete this message'], 403);
             }
 
-            $message->delete();
+            if (!$message->is_deleted) {
+                $message->update([
+                    'message' => '',
+                    'is_deleted' => true,
+                ]);
+            }
 
-            $this->removeMessageFromCache($chatId, $messageId);
+            $this->updateMessageInCache($chatId, $message);
+            $this->refreshChatLastMessageFromCache($chatId, $chatData);
 
             event(new MessageDeleted($chatId, $messageId));
             
@@ -241,11 +256,56 @@ class ChatController extends Controller
         foreach ($messages as &$msg) {
             if (isset($msg['id']) && $msg['id'] == $updatedMessage->id) {
                 $msg['message'] = $updatedMessage->message;
+                if (isset($updatedMessage->is_deleted)) {
+                    $msg['is_deleted'] = (bool)$updatedMessage->is_deleted;
+                }
                 break;
             }
         }
         
         Cache::put($cacheKey, $messages, now()->addDays(7));
+    }
+
+    private function refreshChatLastMessageFromCache($chatId, $chatData)
+    {
+        $cacheKey = 'chat_messages_' . $chatId;
+        $messages = Cache::get($cacheKey, []);
+        if (empty($messages)) {
+            return;
+        }
+
+        $lastMessage = end($messages);
+        if (!$lastMessage || !isset($lastMessage['message'])) {
+            return;
+        }
+
+        $lastMessageText = $lastMessage['message'];
+        if (!empty($lastMessage['is_deleted'])) {
+            $lastMessageText = 'Pesan ini dihapus';
+        }
+
+        $createdAt = $lastMessage['created_at'] ?? now()->toIso8601String();
+
+        $chatIdValue = $chatId;
+        $buyerId = $chatData['buyer_id'];
+        $sellerId = $chatData['seller_id'];
+        $carId = $chatData['car_id'];
+
+        $buyerChatsKey = 'user_chats_' . $buyerId;
+        $buyerChats = Cache::get($buyerChatsKey, []);
+        if (isset($buyerChats[$chatIdValue])) {
+            $buyerChats[$chatIdValue]['last_message'] = $lastMessageText;
+            $buyerChats[$chatIdValue]['last_message_at'] = $createdAt;
+            Cache::put($buyerChatsKey, $buyerChats, now()->addDays(7));
+        }
+
+        $sellerChatsKey = 'user_chats_' . $sellerId;
+        $sellerChats = Cache::get($sellerChatsKey, []);
+        if (isset($sellerChats[$chatIdValue])) {
+            $sellerChats[$chatIdValue]['last_message'] = $lastMessageText;
+            $sellerChats[$chatIdValue]['last_message_at'] = $createdAt;
+            Cache::put($sellerChatsKey, $sellerChats, now()->addDays(7));
+        }
     }
 
     private function removeMessageFromCache($chatId, $messageId)
@@ -372,6 +432,76 @@ class ChatController extends Controller
         return view('chat.seller-index', compact('chats'));
     }
 
+    public function markAsRead(Request $request, $chatId)
+    {
+        $user = Auth::user();
+        $chatId = urldecode($chatId);
+        $chatData = $this->parseChatId($chatId);
+
+        if (!$chatData) {
+            return response()->json(['error' => 'Invalid chat ID'], 400);
+        }
+
+        if ($chatData['buyer_id'] != $user->id && $chatData['seller_id'] != $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $dbChat = Chat::where('buyer_id', $chatData['buyer_id'])
+            ->where('seller_id', $chatData['seller_id'])
+            ->where('car_id', $chatData['car_id'])
+            ->first();
+
+        if ($dbChat) {
+            $this->markMessagesAsRead($chatId, $dbChat->id, $user->id);
+        }
+
+        $cacheKey = 'user_chats_' . $user->id;
+        $chatsData = Cache::get($cacheKey, []);
+        if (isset($chatsData[$chatId])) {
+            $chatsData[$chatId]['unread_count'] = 0;
+            Cache::put($cacheKey, $chatsData, now()->addDays(7));
+        }
+
+        return response()->json(['success' => true]);
+    }
+
+    public function getUnreadCount()
+    {
+        $user = Auth::user();
+        $cacheKey = 'user_chats_' . $user->id;
+        $chatsData = Cache::get($cacheKey, []);
+        $total = 0;
+        $perChat = [];
+
+        foreach ($chatsData as $chatId => $chatData) {
+            $count = (int)($chatData['unread_count'] ?? 0);
+            $lastMessage = $chatData['last_message'] ?? '';
+            $lastMessageAt = $chatData['last_message_at'] ?? null;
+            $lastMessageTime = null;
+            if ($lastMessageAt) {
+                try {
+                    $lastMessageTime = \Carbon\Carbon::parse($lastMessageAt)->diffForHumans();
+                } catch (\Exception $e) {
+                    $lastMessageTime = null;
+                }
+            }
+            if ($count > 0) {
+                $total += $count;
+            }
+            $perChat[$chatId] = [
+                'unread_count' => $count,
+                'last_message' => $lastMessage,
+                'last_message_at' => $lastMessageAt,
+                'last_message_time' => $lastMessageTime,
+            ];
+        }
+
+        return response()->json([
+            'total' => $total,
+            'per_chat' => $perChat,
+        ]);
+    }
+
     /**
      * Store a new message (save to cache, broadcast real-time)
      */
@@ -481,12 +611,14 @@ class ChatController extends Controller
                             'id' => $user->id,
                             'name' => $lastMessage->sender->name ?? $user->name,
                         ],
-                        'message' => $lastMessage->message,
+                        'message' => $lastMessage->is_deleted ? 'Pesan ini dihapus' : $lastMessage->message,
+                        'is_deleted' => $lastMessage->is_deleted ?? false,
                         'is_read' => $lastMessage->is_read ?? false,
                         'reply_to_message_id' => $lastMessage->reply_to_message_id,
                         'reply_to_message' => $lastMessage->replyTo ? [
                             'id' => $lastMessage->replyTo->id,
-                            'message' => $lastMessage->replyTo->message,
+                            'message' => $lastMessage->replyTo->is_deleted ? 'Pesan ini dihapus' : $lastMessage->replyTo->message,
+                            'is_deleted' => $lastMessage->replyTo->is_deleted ?? false,
                             'sender_name' => $lastMessage->replyTo->sender->name ?? 'User',
                         ] : null,
                         'created_at' => $lastMessage->created_at->toIso8601String(),
@@ -525,11 +657,13 @@ class ChatController extends Controller
             'sender' => $user,
             'sender_name' => $user->name,
             'message' => $request->message,
+            'is_deleted' => false,
             'is_read' => false,
             'reply_to_message_id' => $replyMessageId,
             'reply_to_message' => $replyMessage ? (object)[
                 'id' => $replyMessage->id,
-                'message' => $replyMessage->message,
+                'message' => $replyMessage->is_deleted ? 'Pesan ini dihapus' : $replyMessage->message,
+                'is_deleted' => $replyMessage->is_deleted ?? false,
                 'sender_name' => $replyMessage->sender->name ?? 'User',
             ] : null,
             'created_at' => $dbMessage->created_at,
@@ -592,11 +726,13 @@ class ChatController extends Controller
                     'name' => $user->name,
                 ],
                 'message' => $message->message,
+                'is_deleted' => false,
                 'is_read' => false,
                 'reply_to_message_id' => $replyMessageId,
                 'reply_to_message' => $replyMessage ? [
                     'id' => $replyMessage->id,
-                    'message' => $replyMessage->message,
+                    'message' => $replyMessage->is_deleted ? 'Pesan ini dihapus' : $replyMessage->message,
+                    'is_deleted' => $replyMessage->is_deleted ?? false,
                     'sender_name' => $replyMessage->sender->name ?? 'User',
                 ] : null,
                 'created_at' => $dbMessage->created_at->toIso8601String(),
@@ -666,12 +802,14 @@ class ChatController extends Controller
                         'chat_id' => $chatId,
                         'sender_id' => $msg->sender_id,
                         'sender_name' => $msg->sender->name ?? 'User',
-                        'message' => $msg->message,
+                        'message' => $msg->is_deleted ? 'Pesan ini dihapus' : $msg->message,
+                        'is_deleted' => $msg->is_deleted ?? false,
                         'is_read' => $msg->is_read,
                         'reply_to_message_id' => $msg->reply_to_message_id,
                         'reply_to_message' => $msg->replyTo ? [
                             'id' => $msg->replyTo->id,
-                            'message' => $msg->replyTo->message,
+                            'message' => $msg->replyTo->is_deleted ? 'Pesan ini dihapus' : $msg->replyTo->message,
+                            'is_deleted' => $msg->replyTo->is_deleted ?? false,
                             'sender_name' => $msg->replyTo->sender->name ?? 'User',
                         ] : null,
                         'created_at' => $msg->created_at->toIso8601String(),
@@ -690,12 +828,14 @@ class ChatController extends Controller
         $messages = $this->getChatMessages($chatId);
 
         $formattedMessages = $messages->map(function($msg) {
+            $isDeleted = $msg->is_deleted ?? (($msg->message ?? '') === '');
             return [
                 'id' => $msg->id ?? null,
                 'chat_id' => $msg->chat_id ?? null,
                 'sender_id' => $msg->sender_id ?? null,
                 'sender_name' => $msg->sender_name ?? 'User',
                 'message' => $msg->message ?? '',
+                'is_deleted' => $isDeleted,
                 'is_read' => $msg->is_read ?? false,
                 'reply_to_message_id' => $msg->reply_to_message_id ?? null,
                 'reply_to_message' => $msg->reply_to_message ?? null,
@@ -824,6 +964,7 @@ class ChatController extends Controller
             'sender_id' => $message->sender_id,
             'sender_name' => $senderName,
             'message' => $message->message,
+            'is_deleted' => $message->is_deleted ?? false,
             'is_read' => $message->is_read ?? false,
             'reply_to_message_id' => $message->reply_to_message_id ?? null,
             'reply_to_message' => $message->reply_to_message ?? null,
@@ -899,7 +1040,7 @@ class ChatController extends Controller
             'chat_id' => $chatId,
             'seller_id' => $sellerId,
             'car_id' => $carId,
-            'last_message' => $message->message,
+            'last_message' => $message->is_deleted ? 'Pesan ini dihapus' : $message->message,
             'last_message_at' => $createdAtString,
             'unread_count' => $buyerUnreadCount,
         ];
@@ -923,7 +1064,7 @@ class ChatController extends Controller
             'chat_id' => $chatId,
             'buyer_id' => $buyerId,
             'car_id' => $carId,
-            'last_message' => $message->message,
+            'last_message' => $message->is_deleted ? 'Pesan ini dihapus' : $message->message,
             'last_message_at' => $createdAtString,
             'unread_count' => $sellerUnreadCount,
         ];
@@ -957,8 +1098,9 @@ class ChatController extends Controller
         
         $validChats = [];
         $invalidChatIds = [];
+        $cacheUpdated = false;
         
-        $chats = collect($chatsData)->map(function($chatCacheData, $chatId) use ($role, $userId, &$validChats, &$invalidChatIds) {
+        $chats = collect($chatsData)->map(function($chatCacheData, $chatId) use ($role, $userId, &$validChats, &$invalidChatIds, &$chatsData, &$cacheUpdated) {
             // Parse chat ID to get buyer_id, seller_id, car_id
             $chatData = $this->parseChatId($chatId);
             if (!$chatData) {
@@ -1027,7 +1169,27 @@ class ChatController extends Controller
                 return null;
             }
             
-            // Only include if there's a valid last_message
+            if (!empty($messages)) {
+                $lastFromCache = end($messages);
+                $lastFromCacheText = $lastFromCache['message'] ?? '';
+                if (!empty($lastFromCache['is_deleted'])) {
+                    $lastFromCacheText = 'Pesan ini dihapus';
+                }
+                $lastFromCacheAt = $lastFromCache['created_at'] ?? null;
+                if ($lastFromCacheText !== '' && $lastFromCacheAt) {
+                    try {
+                        $lastMessageAt = \Carbon\Carbon::parse($lastFromCacheAt);
+                        $lastMessage = $lastFromCacheText;
+                        if (($chatCacheData['last_message'] ?? null) !== $lastFromCacheText || ($chatCacheData['last_message_at'] ?? null) !== $lastFromCacheAt) {
+                            $chatsData[$chatId]['last_message'] = $lastFromCacheText;
+                            $chatsData[$chatId]['last_message_at'] = $lastFromCacheAt;
+                            $cacheUpdated = true;
+                        }
+                    } catch (\Exception $e) {
+                    }
+                }
+            }
+
             if (empty($lastMessage)) {
                 $invalidChatIds[] = $chatId;
                 return null;
@@ -1062,6 +1224,10 @@ class ChatController extends Controller
             return $chat->last_message->created_at;
         })->values();
         
+        if ($cacheUpdated) {
+            Cache::put($cacheKey, $chatsData, now()->addDays(7));
+        }
+
         // Clean up invalid chats from cache
         if (!empty($invalidChatIds)) {
             $this->cleanupInvalidChats($userId, $invalidChatIds);

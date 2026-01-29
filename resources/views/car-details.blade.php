@@ -1,7 +1,7 @@
 @extends('template.temp')
 
 <!-- @section('title', 'Home - GARASI62') Set the title for the page -->
-
+@include('components.messages-widget')
 @section('content')
     <!-- Breadcrumb Begin -->
     <div class="breadcrumb-option set-bg" data-setbg="{{ asset('garasi62/img/breadcrumb-bg.jpg') }}">

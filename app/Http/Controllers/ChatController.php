@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\car;
+use App\Models\Chat;
+use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ChatController extends Controller
 {
@@ -33,6 +36,12 @@ class ChatController extends Controller
         // Generate chat ID from combination
         $chatId = $this->generateChatId($buyer->id, $seller->id, $carId);
         
+        // Try to get chat from database first
+        $dbChat = Chat::where('buyer_id', $buyer->id)
+            ->where('seller_id', $seller->id)
+            ->where('car_id', $carId)
+            ->first();
+        
         // Create virtual chat object
         $chat = (object)[
             'id' => $chatId,
@@ -41,8 +50,26 @@ class ChatController extends Controller
             'car_id' => $carId,
         ];
 
-        // Load messages from cache (not database)
-        $messages = $this->getChatMessages($chatId);
+        // Load messages from database if chat exists, otherwise from cache
+        if ($dbChat) {
+            $messages = $dbChat->messages()
+                ->with('sender')
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->map(function($msg) use ($chatId) {
+                    return (object)[
+                        'id' => $msg->id,
+                        'chat_id' => $chatId,
+                        'sender_id' => $msg->sender_id,
+                        'sender_name' => $msg->sender->name ?? 'User',
+                        'message' => $msg->message,
+                        'created_at' => $msg->created_at,
+                    ];
+                });
+        } else {
+            // Fallback to cache
+            $messages = $this->getChatMessages($chatId);
+        }
 
         // Set otherUser for consistency
         $otherUser = $seller;
@@ -82,6 +109,12 @@ class ChatController extends Controller
         
         $car = $chatData['car_id'] ? car::find($chatData['car_id']) : null;
 
+        // Try to get chat from database first
+        $dbChat = Chat::where('buyer_id', $chatData['buyer_id'])
+            ->where('seller_id', $chatData['seller_id'])
+            ->where('car_id', $chatData['car_id'])
+            ->first();
+        
         // Create virtual chat object
         $chat = (object)[
             'id' => $chatId,
@@ -90,8 +123,26 @@ class ChatController extends Controller
             'car_id' => $chatData['car_id'],
         ];
 
-        // Load messages from cache (not database)
-        $messages = $this->getChatMessages($chatId);
+        // Load messages from database if chat exists, otherwise from cache
+        if ($dbChat) {
+            $messages = $dbChat->messages()
+                ->with('sender')
+                ->orderBy('created_at', 'asc')
+                ->get()
+                ->map(function($msg) use ($chatId) {
+                    return (object)[
+                        'id' => $msg->id,
+                        'chat_id' => $chatId,
+                        'sender_id' => $msg->sender_id,
+                        'sender_name' => $msg->sender->name ?? 'User',
+                        'message' => $msg->message,
+                        'created_at' => $msg->created_at,
+                    ];
+                });
+        } else {
+            // Fallback to cache
+            $messages = $this->getChatMessages($chatId);
+        }
 
         // Pass Pusher config for frontend
         $pusherConfig = [
@@ -145,11 +196,22 @@ class ChatController extends Controller
     {
         $user = Auth::user();
         
+        // Decode chat ID if it's URL encoded
+        $chatId = urldecode($chatId);
+        
         // Parse chat ID to get buyer_id, seller_id, car_id
         $chatData = $this->parseChatId($chatId);
         
         if (!$chatData) {
-            return response()->json(['error' => 'Invalid chat ID'], 400);
+            \Log::error('Invalid chat ID', [
+                'chatId' => $chatId,
+                'userId' => $user->id,
+                'userRole' => $user->role
+            ]);
+            return response()->json([
+                'success' => false,
+                'error' => 'Invalid chat ID: ' . $chatId
+            ], 400);
         }
 
         // Verify user is part of this chat
@@ -157,39 +219,78 @@ class ChatController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $request->validate([
-            'message' => 'required|string|max:1000',
-        ]);
+        try {
+            $request->validate([
+                'message' => 'required|string|max:1000',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Pesan tidak valid. Pastikan pesan tidak kosong dan maksimal 1000 karakter.',
+                'errors' => $e->errors()
+            ], 422);
+        }
 
-        // Create virtual chat object
+        // Get or create chat in database
+        $dbChat = Chat::firstOrCreate(
+            [
+                'buyer_id' => $chatData['buyer_id'],
+                'seller_id' => $chatData['seller_id'],
+                'car_id' => $chatData['car_id'],
+            ],
+            [
+                'last_message_at' => now(),
+            ]
+        );
+        
+        // Update last_message_at
+        $dbChat->update(['last_message_at' => now()]);
+        
+        // Create message in database
+        $dbMessage = Message::create([
+            'chat_id' => $dbChat->id,
+            'sender_id' => $user->id,
+            'message' => $request->message,
+            'is_read' => false,
+        ]);
+        
+        // Load sender relationship
+        $dbMessage->load('sender');
+        
+        // Create virtual chat object for cache compatibility
         $chat = (object)[
             'id' => $chatId,
+            'db_id' => $dbChat->id, // Database ID
             'buyer_id' => $chatData['buyer_id'],
             'seller_id' => $chatData['seller_id'],
             'car_id' => $chatData['car_id'],
         ];
 
-        // Create message object
-        $messageId = time() . '_' . uniqid();
+        // Create message object for cache (using database ID)
         $message = (object)[
-            'id' => $messageId,
+            'id' => $dbMessage->id,
             'chat_id' => $chatId,
+            'db_chat_id' => $dbChat->id, // Database chat ID
             'sender_id' => $user->id,
             'sender' => $user,
-            'sender_name' => $user->name, // Add sender_name directly
+            'sender_name' => $user->name,
             'message' => $request->message,
-            'created_at' => now(),
+            'created_at' => $dbMessage->created_at,
         ];
         
-        \Log::info('Broadcasting message', [
+        \Log::info('Saving message to database and cache', [
             'chat_id' => $chatId,
-            'message_id' => $messageId,
+            'db_chat_id' => $dbChat->id,
+            'message_id' => $dbMessage->id,
             'sender_id' => $user->id,
             'sender_name' => $user->name,
         ]);
 
-        // Save message to cache (not database)
+        // Save message to cache (for real-time performance)
         $this->saveMessageToCache($chatId, $message);
+        
+        // Also save to cache using database chat ID for compatibility
+        $this->saveMessageToCache('chat_db_' . $dbChat->id, $message);
 
         // Update chat list cache
         $this->updateChatListCache($chatData['buyer_id'], $chatData['seller_id'], $chatData['car_id'], $message);
@@ -198,7 +299,8 @@ class ChatController extends Controller
         try {
             \Log::info('Broadcasting message event', [
                 'chat_id' => $chatId,
-                'message_id' => $messageId,
+                'db_chat_id' => $dbChat->id,
+                'message_id' => $dbMessage->id,
                 'sender_id' => $user->id,
             ]);
             
@@ -206,31 +308,34 @@ class ChatController extends Controller
             
             \Log::info('Message broadcasted successfully', [
                 'chat_id' => $chatId,
-                'message_id' => $messageId,
+                'db_chat_id' => $dbChat->id,
+                'message_id' => $dbMessage->id,
             ]);
         } catch (\Exception $e) {
             \Log::error('Failed to broadcast message', [
                 'chat_id' => $chatId,
-                'message_id' => $messageId,
+                'db_chat_id' => $dbChat->id,
+                'message_id' => $dbMessage->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            // Continue anyway - message is saved in cache
+            // Continue anyway - message is saved in database and cache
         }
 
         return response()->json([
             'success' => true,
             'message' => [
-                'id' => $message->id,
+                'id' => $dbMessage->id,
                 'chat_id' => $message->chat_id,
+                'db_chat_id' => $dbChat->id,
                 'sender_id' => $message->sender_id,
-                'sender_name' => $user->name, // Add sender_name directly
+                'sender_name' => $user->name,
                 'sender' => [
                     'id' => $user->id,
                     'name' => $user->name,
                 ],
                 'message' => $message->message,
-                'created_at' => $message->created_at->toIso8601String(),
+                'created_at' => $dbMessage->created_at->toIso8601String(),
             ],
         ]);
     }
@@ -258,8 +363,23 @@ class ChatController extends Controller
         // Load messages from cache
         $messages = $this->getChatMessages($chatId);
 
+        // Format messages properly for JSON response
+        $formattedMessages = $messages->map(function($msg) {
+            return [
+                'id' => $msg->id ?? null,
+                'chat_id' => $msg->chat_id ?? null,
+                'sender_id' => $msg->sender_id ?? null,
+                'sender_name' => $msg->sender_name ?? 'User',
+                'message' => $msg->message ?? '',
+                'created_at' => isset($msg->created_at) ? 
+                    (is_string($msg->created_at) ? $msg->created_at : 
+                     (is_object($msg->created_at) ? $msg->created_at->toIso8601String() : now()->toIso8601String())) : 
+                    now()->toIso8601String(),
+            ];
+        })->values()->all();
+
         return response()->json([
-            'messages' => $messages->values()->all(),
+            'messages' => $formattedMessages,
         ]);
     }
 
@@ -345,8 +465,8 @@ class ChatController extends Controller
             }
         }
         
-        // Add new message
-        $messages[] = [
+        // Add new message with proper format
+        $newMessage = [
             'id' => $message->id,
             'chat_id' => $message->chat_id,
             'sender_id' => $message->sender_id,
@@ -354,6 +474,19 @@ class ChatController extends Controller
             'message' => $message->message,
             'created_at' => $createdAt->toIso8601String(),
         ];
+        
+        // Check if message already exists (prevent duplicates)
+        $exists = false;
+        foreach ($messages as $existingMsg) {
+            if (isset($existingMsg['id']) && $existingMsg['id'] === $message->id) {
+                $exists = true;
+                break;
+            }
+        }
+        
+        if (!$exists) {
+            $messages[] = $newMessage;
+        }
         
         // Keep only last 100 messages per chat (to prevent cache from growing too large)
         if (count($messages) > 100) {
@@ -433,6 +566,7 @@ class ChatController extends Controller
 
     /**
      * Get user chats from cache
+     * Only return chats that have actual messages
      */
     private function getUserChats($userId, $role)
     {
@@ -449,33 +583,53 @@ class ChatController extends Controller
             return collect([]);
         }
         
-        $chats = collect($chatsData)->map(function($chatCacheData, $chatId) use ($role) {
+        $validChats = [];
+        $invalidChatIds = [];
+        
+        $chats = collect($chatsData)->map(function($chatCacheData, $chatId) use ($role, $userId, &$validChats, &$invalidChatIds) {
             // Parse chat ID to get buyer_id, seller_id, car_id
             $chatData = $this->parseChatId($chatId);
             if (!$chatData) {
                 \Log::warning('Failed to parse chat ID', ['chatId' => $chatId]);
+                $invalidChatIds[] = $chatId;
                 return null;
             }
             
             // Get other user based on role
-            if ($role === 'buyer') {
-                $otherUser = User::find($chatData['seller_id']);
-            } else {
-                $otherUser = User::find($chatData['buyer_id']);
+            // IMPORTANT: For buyer, we want to show seller. For seller, we want to show buyer.
+            $otherUserId = ($chatData['buyer_id'] == $userId) ? $chatData['seller_id'] : $chatData['buyer_id'];
+            $otherUser = User::find($otherUserId);
+            
+            // Double check: make sure otherUser is not the current user
+            if ($otherUser && $otherUser->id == $userId) {
+                // This shouldn't happen, but handle it
+                \Log::warning('Other user is same as current user', [
+                    'chatId' => $chatId,
+                    'userId' => $userId,
+                    'role' => $role,
+                    'buyer_id' => $chatData['buyer_id'],
+                    'seller_id' => $chatData['seller_id'],
+                    'otherUserId' => $otherUserId,
+                ]);
+                $invalidChatIds[] = $chatId;
+                return null;
             }
             
             if (!$otherUser) {
                 \Log::warning('Other user not found', [
                     'role' => $role,
+                    'userId' => $userId,
                     'buyer_id' => $chatData['buyer_id'],
                     'seller_id' => $chatData['seller_id'],
+                    'otherUserId' => $otherUserId,
                 ]);
+                $invalidChatIds[] = $chatId;
                 return null;
             }
             
             $car = $chatData['car_id'] ? car::find($chatData['car_id']) : null;
             
-            // Get last message from cache data (use $chatCacheData directly)
+            // Get last message from cache data
             $lastMessage = $chatCacheData['last_message'] ?? '';
             $lastMessageAt = now();
             if (isset($chatCacheData['last_message_at'])) {
@@ -490,13 +644,38 @@ class ChatController extends Controller
             }
             $unreadCount = $chatCacheData['unread_count'] ?? 0;
             
+            // IMPORTANT: Only include chats that have actual messages
+            // Check if there are messages in cache for this chat
+            $messagesCacheKey = 'chat_messages_' . $chatId;
+            $messages = Cache::get($messagesCacheKey, []);
+            
+            // If no messages exist and no last_message, skip this chat
+            if (empty($messages) && empty($lastMessage)) {
+                $invalidChatIds[] = $chatId;
+                return null;
+            }
+            
+            // Only include if there's a valid last_message
+            if (empty($lastMessage)) {
+                $invalidChatIds[] = $chatId;
+                return null;
+            }
+            
+            $validChats[] = $chatId;
+            
+            // Get buyer and seller objects for proper access
+            $buyerObj = User::find($chatData['buyer_id']);
+            $sellerObj = User::find($chatData['seller_id']);
+            
             return (object)[
                 'id' => $chatId,
                 'buyer_id' => $chatData['buyer_id'],
                 'seller_id' => $chatData['seller_id'],
                 'car_id' => $chatData['car_id'],
-                'seller' => $role === 'buyer' ? $otherUser : null,
-                'buyer' => $role === 'seller' ? $otherUser : null,
+                'buyer' => $buyerObj, // Always set buyer object
+                'seller' => $sellerObj, // Always set seller object
+                'other_user' => $otherUser, // The user we're chatting with (seller for buyer, buyer for seller)
+                'other_user_id' => $otherUser->id, // Other user ID for reference
                 'car' => $car,
                 'last_message' => (object)[
                     'message' => $lastMessage,
@@ -505,12 +684,181 @@ class ChatController extends Controller
                 'unread_count' => $unreadCount,
             ];
         })->filter(function($chat) {
+            // Filter out null chats (invalid or no messages)
             return $chat !== null;
         })->sortByDesc(function($chat) {
             return $chat->last_message->created_at;
         })->values();
         
+        // Clean up invalid chats from cache
+        if (!empty($invalidChatIds)) {
+            $this->cleanupInvalidChats($userId, $invalidChatIds);
+        }
+        
         return $chats;
+    }
+    
+    /**
+     * Clean up invalid chats from cache
+     */
+    private function cleanupInvalidChats($userId, $invalidChatIds)
+    {
+        $cacheKey = 'user_chats_' . $userId;
+        $chatsData = Cache::get($cacheKey, []);
+        
+        foreach ($invalidChatIds as $chatId) {
+            if (isset($chatsData[$chatId])) {
+                unset($chatsData[$chatId]);
+            }
+        }
+        
+        Cache::put($cacheKey, $chatsData, now()->addDays(7));
+    }
+    
+    /**
+     * Delete single chat
+     */
+    public function destroySingle($chatId)
+    {
+        $user = Auth::user();
+        
+        // Decode chat ID if it's URL encoded
+        $chatId = urldecode($chatId);
+        
+        // Parse chat ID to get buyer_id, seller_id, car_id
+        $chatData = $this->parseChatId($chatId);
+        
+        if (!$chatData) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Invalid chat ID'
+            ], 400);
+        }
+        
+        // Verify user is part of this chat
+        if ($chatData['buyer_id'] != $user->id && $chatData['seller_id'] != $user->id) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Unauthorized'
+            ], 403);
+        }
+        
+        return $this->deleteChat($chatId, $chatData, $user->id);
+    }
+    
+    /**
+     * Delete multiple chats
+     */
+    public function destroy(Request $request)
+    {
+        $user = Auth::user();
+        
+        $request->validate([
+            'chat_ids' => 'required|array',
+            'chat_ids.*' => 'required|string',
+        ]);
+        
+        $chatIds = $request->chat_ids;
+        $deletedCount = 0;
+        $errors = [];
+        
+        foreach ($chatIds as $chatId) {
+            // Decode chat ID if it's URL encoded
+            $chatId = urldecode($chatId);
+            
+            // Parse chat ID to get buyer_id, seller_id, car_id
+            $chatData = $this->parseChatId($chatId);
+            
+            if (!$chatData) {
+                $errors[] = "Invalid chat ID: {$chatId}";
+                continue;
+            }
+            
+            // Verify user is part of this chat
+            if ($chatData['buyer_id'] != $user->id && $chatData['seller_id'] != $user->id) {
+                $errors[] = "Unauthorized for chat: {$chatId}";
+                continue;
+            }
+            
+            $result = $this->deleteChat($chatId, $chatData, $user->id);
+            
+            if ($result->getData()->success ?? false) {
+                $deletedCount++;
+            } else {
+                $errors[] = "Failed to delete chat: {$chatId}";
+            }
+        }
+        
+        return response()->json([
+            'success' => true,
+            'deleted_count' => $deletedCount,
+            'errors' => $errors,
+            'message' => "Berhasil menghapus {$deletedCount} obrolan"
+        ]);
+    }
+    
+    /**
+     * Delete chat from database and cache
+     */
+    private function deleteChat($chatId, $chatData, $userId)
+    {
+        try {
+            // Delete from database
+            $dbChat = Chat::where('buyer_id', $chatData['buyer_id'])
+                ->where('seller_id', $chatData['seller_id'])
+                ->where('car_id', $chatData['car_id'])
+                ->first();
+            
+            if ($dbChat) {
+                // Delete all messages
+                Message::where('chat_id', $dbChat->id)->delete();
+                // Delete chat
+                $dbChat->delete();
+            }
+            
+            // Delete from cache for buyer
+            $buyerChatsKey = 'user_chats_' . $chatData['buyer_id'];
+            $buyerChats = Cache::get($buyerChatsKey, []);
+            if (isset($buyerChats[$chatId])) {
+                unset($buyerChats[$chatId]);
+                Cache::put($buyerChatsKey, $buyerChats, now()->addDays(7));
+            }
+            
+            // Delete from cache for seller
+            $sellerChatsKey = 'user_chats_' . $chatData['seller_id'];
+            $sellerChats = Cache::get($sellerChatsKey, []);
+            if (isset($sellerChats[$chatId])) {
+                unset($sellerChats[$chatId]);
+                Cache::put($sellerChatsKey, $sellerChats, now()->addDays(7));
+            }
+            
+            // Delete messages from cache
+            $messagesCacheKey = 'chat_messages_' . $chatId;
+            Cache::forget($messagesCacheKey);
+            
+            // Also delete using database chat ID if exists
+            if ($dbChat) {
+                $messagesCacheKeyDb = 'chat_messages_chat_db_' . $dbChat->id;
+                Cache::forget($messagesCacheKeyDb);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Obrolan berhasil dihapus'
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to delete chat', [
+                'chat_id' => $chatId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'error' => 'Gagal menghapus obrolan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
 

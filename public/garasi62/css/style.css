@@ -507,10 +507,36 @@ ol {
 
 /*---------------------
   Hero
------------------------*/
+------------------------*/
 
 .hero {
-	padding: 140px 0;
+	padding-top: 0;
+	position: relative;
+}
+
+/* Buat gambar hero menempel ke navbar tanpa celah putih */
+.hero.set-bg {
+	background-size: cover;
+	background-position: center top;
+	min-height: 650px;
+	background-color: #000000;
+}
+
+/* Posisikan teks hero tepat di bawah navbar tanpa ter-crop */
+.hero .hero__text {
+	padding-top: 160px;
+}
+
+@media (max-width: 991.98px) {
+	.hero .hero__text {
+		padding-top: 130px;
+	}
+}
+
+@media (max-width: 575.98px) {
+	.hero .hero__text {
+		padding-top: 110px;
+	}
 }
 
 .hero__text {
@@ -580,8 +606,14 @@ ol {
 }
 
 .hero__tab .nav-tabs {
-	border-bottom: none;
+    border-bottom: none;
 }
+
+/* Naikkan posisi kotak form hero agar lebih dekat ke teks dan menghilangkan kesan ada kotak putih terpisah */
+.hero .hero__tab {
+	margin-top: 40px;
+}
+
 
 .hero__tab .nav-tabs .nav-item {
 	margin-bottom: 5px;
@@ -2635,8 +2667,13 @@ ol {
 -----------------------*/
 
 .blog-details-hero {
-	padding-top: 80px;
-	padding-bottom: 400px;
+    padding-top: 80px;
+    padding-bottom: 400px;
+}
+
+.blog-details-hero.set-bg {
+	background-size: contain;
+	background-position: center center;
 }
 
 .blog__details__hero__text {
@@ -3697,4 +3734,14 @@ ol {
 		font-size: 24px;
 		width: 100%;
 	}
+}
+.hero::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.15));
+    pointer-events: none;
 }

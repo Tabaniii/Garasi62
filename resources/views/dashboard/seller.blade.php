@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
+@include('components.messages-widget')
 <h1 class="page-title mb-4">Dashboard Seller</h1>
 
 <!-- Seller Stats Cards -->
@@ -60,12 +61,12 @@
                 <a href="{{ route('chat.seller.index') }}" class="btn btn-outline-primary btn-animate" style="padding: 12px 20px;">
                     <i class="fas fa-comments me-2"></i>Obrolan
                     @php
-                        $unreadChats = \App\Models\Chat::where('seller_id', Auth::id())
-                            ->whereHas('messages', function($query) {
-                                $query->where('sender_id', '!=', Auth::id())
-                                      ->where('is_read', false);
-                            })
-                            ->count();
+                        // Get unread count from cache (same method as ChatController)
+                        $cacheKey = 'user_chats_' . Auth::id();
+                        $chatsData = \Illuminate\Support\Facades\Cache::get($cacheKey, []);
+                        $unreadChats = collect($chatsData)->sum(function($chatData) {
+                            return $chatData['unread_count'] ?? 0;
+                        });
                     @endphp
                     @if($unreadChats > 0)
                         <span class="badge bg-danger ms-2">{{ $unreadChats }}</span>
@@ -81,13 +82,64 @@
 
 <!-- Recent Chats Section -->
 @php
-    $recentChats = \App\Models\Chat::where('seller_id', Auth::id())
-        ->with(['buyer', 'car', 'messages' => function($query) {
-            $query->latest()->limit(1);
-        }])
-        ->orderBy('last_message_at', 'desc')
-        ->limit(5)
-        ->get();
+    // Get chats from cache (same as ChatController)
+    $cacheKey = 'user_chats_' . Auth::id();
+    $chatsData = \Illuminate\Support\Facades\Cache::get($cacheKey, []);
+    
+    $recentChats = collect($chatsData)->map(function($chatCacheData, $chatId) {
+        // Parse chat ID
+        if (!str_starts_with($chatId, 'chat_')) {
+            return null;
+        }
+        
+        $parts = explode('_', $chatId);
+        if (count($parts) < 3) {
+            return null;
+        }
+        
+        $buyerId = (int)$parts[1];
+        $sellerId = (int)$parts[2];
+        $carId = isset($parts[3]) ? (int)$parts[3] : null;
+        
+        // Get other user (buyer for seller)
+        $otherUser = \App\Models\User::find($buyerId);
+        
+        if (!$otherUser) {
+            return null;
+        }
+        
+        $car = $carId ? \App\Models\car::find($carId) : null;
+        
+        // Get last message
+        $lastMessage = $chatCacheData['last_message'] ?? '';
+        $lastMessageAt = now();
+        if (isset($chatCacheData['last_message_at'])) {
+            try {
+                $lastMessageAt = \Carbon\Carbon::parse($chatCacheData['last_message_at']);
+            } catch (\Exception $e) {
+                // Use now() as fallback
+            }
+        }
+        $unreadCount = $chatCacheData['unread_count'] ?? 0;
+        
+        return (object)[
+            'id' => $chatId,
+            'buyer_id' => $buyerId,
+            'seller_id' => $sellerId,
+            'car_id' => $carId,
+            'buyer' => $otherUser,
+            'car' => $car,
+            'last_message' => (object)[
+                'message' => $lastMessage,
+                'created_at' => $lastMessageAt,
+            ],
+            'unread_count' => $unreadCount,
+        ];
+    })->filter(function($chat) {
+        return $chat !== null;
+    })->sortByDesc(function($chat) {
+        return $chat->last_message->created_at;
+    })->take(5)->values();
 @endphp
 @if($recentChats->count() > 0)
 <div class="row g-4 mb-5">
@@ -105,8 +157,8 @@
                 @foreach($recentChats as $chat)
                     @php
                         $otherUser = $chat->buyer;
-                        $lastMessage = $chat->messages->first();
-                        $unreadCount = $chat->getUnreadCount(Auth::id());
+                        $lastMessage = $chat->last_message;
+                        $unreadCount = $chat->unread_count ?? 0;
                     @endphp
                     <a href="{{ route('chat.show', $chat->id) }}" class="recent-chat-item {{ $unreadCount > 0 ? 'recent-chat-unread' : '' }}">
                         <div class="recent-chat-avatar">
@@ -115,12 +167,12 @@
                         <div class="recent-chat-content">
                             <div class="recent-chat-header">
                                 <span class="recent-chat-name">{{ $otherUser->name }}</span>
-                                @if($lastMessage)
+                                @if($lastMessage && $lastMessage->message)
                                     <span class="recent-chat-time">{{ $lastMessage->created_at->diffForHumans() }}</span>
                                 @endif
                             </div>
                             <div class="recent-chat-preview">
-                                @if($lastMessage)
+                                @if($lastMessage && $lastMessage->message)
                                     <span class="recent-chat-message">
                                         {{ Str::limit($lastMessage->message, 40) }}
                                     </span>

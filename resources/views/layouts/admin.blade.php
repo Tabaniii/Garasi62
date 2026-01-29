@@ -952,6 +952,54 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
+    <!-- Suppress autofill extension errors (bukan dari aplikasi) -->
+    <script>
+        // Suppress autofill extension errors - ini dari extension browser, bukan aplikasi
+        (function() {
+            // Suppress console.error untuk autofill
+            const originalError = console.error;
+            const originalWarn = console.warn;
+            
+            console.error = function(...args) {
+                const message = args.join(' ').toLowerCase();
+                if (message.includes('[autofill]') || 
+                    message.includes('autofill.') || 
+                    message.includes('missing typeid') ||
+                    message.includes('missing itemid') ||
+                    message.includes('typeid or itemid')) {
+                    return; // Suppress error ini
+                }
+                originalError.apply(console, args);
+            };
+            
+            console.warn = function(...args) {
+                const message = args.join(' ').toLowerCase();
+                if (message.includes('[autofill]') || 
+                    message.includes('autofill.') || 
+                    message.includes('missing typeid') ||
+                    message.includes('missing itemid') ||
+                    message.includes('typeid or itemid')) {
+                    return; // Suppress warning ini
+                }
+                originalWarn.apply(console, args);
+            };
+            
+            // Juga catch unhandled errors dari autofill
+            window.addEventListener('error', function(e) {
+                if (e.message && (
+                    e.message.toLowerCase().includes('[autofill]') ||
+                    e.message.toLowerCase().includes('autofill.') ||
+                    e.message.toLowerCase().includes('missing typeid') ||
+                    e.message.toLowerCase().includes('missing itemid')
+                )) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }, true);
+        })();
+    </script>
+    
     <script>
         // Sidebar Toggle
         document.getElementById('sidebarToggle').addEventListener('click', function() {
@@ -1075,6 +1123,25 @@
             showConfirmButton: true
         });
         @endif
+    </script>
+    
+    <script>
+        // Suppress autofill extension errors (bukan dari aplikasi)
+        (function() {
+            const originalError = console.error;
+            console.error = function(...args) {
+                // Filter out autofill extension errors
+                const message = args.join(' ');
+                if (message.includes('[AUTOFILL]') || 
+                    message.includes('autofill.') || 
+                    message.includes('Missing typeId or itemId')) {
+                    // Suppress these errors - mereka dari extension browser, bukan aplikasi
+                    return;
+                }
+                // Log other errors normally
+                originalError.apply(console, args);
+            };
+        })();
     </script>
     
     @stack('scripts')

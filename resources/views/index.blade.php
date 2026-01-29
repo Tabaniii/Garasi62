@@ -7,7 +7,7 @@
 <section class="hero spad set-bg" data-setbg="img/hero-bg.jpg">
     <div class="container">
         <div class="row">
-            <div class="col-lg-7">
+            <div class="col-lg-7 col-md-12">
                 <div class="hero__text">
                     <div class="hero__text__title">
                         <span>TEMUKAN MOBIL IMPIANMU DISINI</span>
@@ -17,11 +17,13 @@
                         <div class="car-model">Model 2019</div>
                         <h2>IDR 2.2M</h2>
                     </div>
-                    <a href="#" class="primary-btn"><img src="img/wheel.png" alt=""> Test Drive</a>
-                    <a href="{{ route('about') }}" class="primary-btn more-btn">Learn More</a>
+                    <div class="hero__text__btn d-flex flex-wrap gap-2">
+                        <a href="#" class="primary-btn"><img src="img/wheel.png" alt=""> Test Drive</a>
+                        <a href="{{ route('about') }}" class="primary-btn more-btn">Learn More</a>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-5">
+            <div class="col-lg-5 col-md-12 mt-4 mt-lg-0">
                 <div class="hero__tab">
                     <ul class="nav nav-tabs" role="tablist">
                         <li class="nav-item">
@@ -36,56 +38,48 @@
                             <div class="hero__tab__form">
                                 <form action="{{ route('cars') }}" method="GET" id="rentForm">
                                     <input type="hidden" name="tipe" value="rent">
+                                    
                                     <div class="select-list">
                                         <div class="select-list-item">
-                                            <p>Pilih Tahun</p>
+                                            <p>Select Year</p>
                                             <select name="tahun">
-                                                <option value="" data-display="Pilih Tahun">Pilih Tahun</option>
+                                                <option value="" data-display="Select Year">Select Year</option>
                                                 @foreach($tahunList as $tahun)
                                                 <option value="{{ $tahun }}">{{ $tahun }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         <div class="select-list-item">
-                                            <p>Merk Mobil</p>
+                                            <p>Select Brand</p>
                                             <select name="brand">
-                                                <option value="" data-display="Pilih Brand">Pilih Brand</option>
+                                                <option value="" data-display="Select Brand">Select Brand</option>
                                                 @foreach($brands as $brand)
                                                 <option value="{{ $brand }}">{{ $brand }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         <div class="select-list-item">
-                                            <p>Transmisi</p>
+                                            <p>Select Model</p>
                                             <select name="transmisi">
-                                                <option value="" data-display="Pilih Transmisi">Pilih Transmisi</option>
+                                                <option value="" data-display="Select Model">Select Model</option>
                                                 @foreach($transmisiList as $transmisi)
                                                 <option value="{{ $transmisi }}">{{ $transmisi }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         <div class="select-list-item">
-                                            <p>Kapasitas Mesin</p>
+                                            <p>Select Mileage</p>
                                             <select name="kapasitasmesin">
-                                                <option value="" data-display="Pilih Kapasitas Mesin">Pilih Kapasitas Mesin</option>
+                                                <option value="" data-display="Select Mileage">Select Mileage</option>
                                                 @foreach($kapasitasmesinList as $kapasitasmesin)
                                                 <option value="{{ $kapasitasmesin }}">{{ $kapasitasmesin }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="filter-price">
-                                        <p>Harga:</p>
-                                        <div class="price-input-row" style="margin-bottom: 25px;">
-                                            <div class="price-input-item">
-                                                <label>Harga Min:</label>
-                                                <input type="number" name="min_price" id="rentMinPrice" placeholder="Min" value="{{ $minPrice ?? 0 }}" min="0">
-                                            </div>
-                                            <div class="price-input-item">
-                                                <label>Harga Max:</label>
-                                                <input type="number" name="max_price" id="rentMaxPrice" placeholder="Max" value="{{ $maxPrice ?? 1000000000 }}" min="0">
-                                            </div>
-                                        </div>
+                                    <div class="filter-price" style="margin-bottom: 25px;">
+                                        <p>Price Range: <span id="filterAmount"></span></p>
+                                        <div class="filter-price-range"></div>
                                     </div>
                                     <button type="submit" class="site-btn">Searching</button>
                                 </form>
@@ -95,38 +89,39 @@
                             <div class="hero__tab__form">
                                 <form action="{{ route('cars') }}" method="GET" id="buyForm">
                                     <input type="hidden" name="tipe" value="buy">
+                                    
                                     <div class="select-list">
                                         <div class="select-list-item">
-                                            <p>Pilih Tahun</p>
+                                            <p>Select Year</p>
                                             <select name="tahun">
-                                                <option value="" data-display="Pilih Tahun">Pilih Tahun</option>
+                                                <option value="" data-display="Select Year">Select Year</option>
                                                 @foreach($tahunList as $tahun)
                                                 <option value="{{ $tahun }}">{{ $tahun }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         <div class="select-list-item">
-                                            <p>Merk Mobil</p>
+                                            <p>Select Brand</p>
                                             <select name="brand">
-                                                <option value="" data-display="Pilih Brand">Pilih Brand</option>
+                                                <option value="" data-display="Select Brand">Select Brand</option>
                                                 @foreach($brands as $brand)
                                                 <option value="{{ $brand }}">{{ $brand }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         <div class="select-list-item">
-                                            <p>Transmisi</p>
+                                            <p>Select Model</p>
                                             <select name="transmisi">
-                                                <option value="" data-display="Pilih Transmisi">Pilih Transmisi</option>
+                                                <option value="" data-display="Select Model">Select Model</option>
                                                 @foreach($transmisiList as $transmisi)
                                                 <option value="{{ $transmisi }}">{{ $transmisi }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                         <div class="select-list-item">
-                                            <p>Kapasitas Mesin</p>
+                                            <p>Select Mileage</p>
                                             <select name="kapasitasmesin">
-                                                <option value="" data-display="Pilih Kapasitas Mesin">Pilih Kapasitas Mesin</option>
+                                                <option value="" data-display="Select Mileage">Select Mileage</option>
                                                 @foreach($kapasitasmesinList as $kapasitasmesin)
                                                 <option value="{{ $kapasitasmesin }}">{{ $kapasitasmesin }}</option>
                                                 @endforeach
@@ -134,17 +129,8 @@
                                         </div>
                                     </div>
                                     <div class="filter-price" style="margin-bottom: 25px;">
-                                        <p>Harga:</p>
-                                        <div class="price-input-row">
-                                            <div class="price-input-item">
-                                                <label>Harga Min:</label>
-                                                <input type="number" name="min_price" id="buyMinPrice" placeholder="Min" value="{{ $minPrice ?? 0 }}" min="0">
-                                            </div>
-                                            <div class="price-input-item">
-                                                <label>Harga Max:</label>
-                                                <input type="number" name="max_price" id="buyMaxPrice" placeholder="Max" value="{{ $maxPrice ?? 1000000000 }}" min="0">
-                                            </div>
-                                        </div>
+                                        <p>Price Range: <span id="filterAmount"></span></p>
+                                        <div class="filter-price-range"></div>
                                     </div>
                                     <button type="submit" class="site-btn">Searching</button>
                                 </form>
@@ -491,10 +477,61 @@
         color: #999;
     }
 
+    /* Hero Section Responsive */
+    .hero__text__btn {
+        gap: 10px;
+    }
+
+    .hero__text__btn .primary-btn {
+        margin-bottom: 10px;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 991.98px) {
+        .hero__text {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .hero__tab {
+            margin-top: 20px;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .hero__text__title h2 {
+            font-size: 32px;
+        }
+        
+        .hero__text__price h2 {
+            font-size: 28px;
+        }
+        
+        .select-list-item {
+            margin-bottom: 15px;
+        }
+    }
+
     @media (max-width: 575px) {
         .price-input-row {
             flex-direction: column;
             gap: 10px;
+        }
+        
+        .hero__text__title h2 {
+            font-size: 24px;
+        }
+        
+        .hero__text__price h2 {
+            font-size: 22px;
+        }
+        
+        .hero__text__btn {
+            flex-direction: column;
+        }
+        
+        .hero__text__btn .primary-btn {
+            width: 100%;
         }
     }
 </style>

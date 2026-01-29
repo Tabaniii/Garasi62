@@ -1,5 +1,6 @@
 @extends('template.temp')
 
+@include('components.messages-widget')
 @section('content')
 <!-- Breadcrumb End -->
 <div class="breadcrumb-option set-bg" data-setbg="img/breadcrumb-bg.jpg">

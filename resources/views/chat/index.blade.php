@@ -693,6 +693,172 @@ document.addEventListener('touchstart', function(e) {
     }
 });
 
+// Selection mode
+let isSelectMode = false;
+
+function toggleSelectMode() {
+    isSelectMode = !isSelectMode;
+    const wrappers = document.querySelectorAll('.chat-item-wrapper');
+    const selectModeBtn = document.getElementById('selectModeBtn');
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    
+    if (isSelectMode) {
+        wrappers.forEach(wrapper => wrapper.classList.add('select-mode'));
+        selectAllBtn.style.display = 'inline-block';
+        selectModeBtn.innerHTML = '<i class="fas fa-times"></i> Batal';
+        selectModeBtn.classList.remove('btn-outline-primary');
+        selectModeBtn.classList.add('btn-outline-secondary');
+        updateDeleteButton();
+    } else {
+        wrappers.forEach(wrapper => {
+            wrapper.classList.remove('select-mode');
+            const checkbox = wrapper.querySelector('.chat-checkbox');
+            if (checkbox) checkbox.checked = false;
+        });
+        selectAllBtn.style.display = 'none';
+        deleteBtn.style.display = 'none';
+        selectModeBtn.innerHTML = '<i class="fas fa-check-square"></i> Pilih';
+        selectModeBtn.classList.remove('btn-outline-secondary');
+        selectModeBtn.classList.add('btn-outline-primary');
+    }
+}
+
+function toggleSelectAll() {
+    const checkboxes = document.querySelectorAll('.chat-checkbox');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(cb => {
+        cb.checked = !allChecked;
+    });
+    
+    updateDeleteButton();
+}
+
+function updateDeleteButton() {
+    const checkboxes = document.querySelectorAll('.chat-checkbox:checked');
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    
+    if (checkboxes.length > 0) {
+        deleteBtn.style.display = 'inline-block';
+        deleteBtn.innerHTML = `<i class="fas fa-trash"></i> Hapus (${checkboxes.length})`;
+    } else {
+        deleteBtn.style.display = 'none';
+    }
+}
+
+function deleteSelectedChats() {
+    const checkboxes = document.querySelectorAll('.chat-checkbox:checked');
+    const chatIds = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (chatIds.length === 0) {
+        alert('Pilih obrolan yang ingin dihapus');
+        return;
+    }
+    
+    if (!confirm(`Apakah Anda yakin ingin menghapus ${chatIds.length} obrolan?`)) {
+        return;
+    }
+    
+    // Show loading
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    const originalHTML = deleteBtn.innerHTML;
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+    
+    fetch('{{ route("chat.destroy") }}', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                           document.querySelector('input[name="_token"]')?.value || '',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ chat_ids: chatIds })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove deleted chats from UI
+            chatIds.forEach(chatId => {
+                const wrapper = document.querySelector(`.chat-checkbox[value="${chatId}"]`)?.closest('.chat-item-wrapper');
+                if (wrapper) {
+                    wrapper.style.transition = 'opacity 0.3s';
+                    wrapper.style.opacity = '0';
+                    setTimeout(() => wrapper.remove(), 300);
+                }
+            });
+            
+            // Reset selection mode
+            toggleSelectMode();
+            
+            // Show success message
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: data.message || `Berhasil menghapus ${data.deleted_count} obrolan`,
+                    confirmButtonColor: '#df2d24',
+                    timer: 2000
+                });
+            } else {
+                alert(data.message || `Berhasil menghapus ${data.deleted_count} obrolan`);
+            }
+        } else {
+            throw new Error(data.error || 'Gagal menghapus obrolan');
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting chats:', error);
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: error.message || 'Gagal menghapus obrolan',
+                confirmButtonColor: '#df2d24'
+            });
+        } else {
+            alert('Gagal menghapus obrolan: ' + error.message);
+        }
+    })
+    .finally(() => {
+        deleteBtn.disabled = false;
+        deleteBtn.innerHTML = originalHTML;
+    });
+}
+
+// Enable selection mode with Ctrl/Cmd + Click or long press
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        e.preventDefault();
+        if (!isSelectMode) {
+            toggleSelectMode();
+        }
+    }
+});
+
+// Right click to enable selection mode
+document.addEventListener('contextmenu', function(e) {
+    if (e.target.closest('.chat-item-wrapper')) {
+        e.preventDefault();
+        if (!isSelectMode) {
+            toggleSelectMode();
+        }
+    }
+});
+
+// Long press on mobile
+let longPressTimer;
+document.addEventListener('touchstart', function(e) {
+    if (e.target.closest('.chat-item-wrapper')) {
+        longPressTimer = setTimeout(() => {
+            if (!isSelectMode) {
+                toggleSelectMode();
+            }
+        }, 500);
+    }
+});
+
 document.addEventListener('touchend', function() {
     clearTimeout(longPressTimer);
 });

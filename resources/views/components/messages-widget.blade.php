@@ -936,6 +936,11 @@ function openMiniChat(chatId, userName, otherUserId) {
     // Load messages
     loadMiniChatMessages();
     
+    // Start polling for new messages
+    if (messagesInterval) {
+        clearInterval(messagesInterval);
+    }
+    messagesInterval = setInterval(loadMiniChatMessages, 3000);
     // Setup realtime listeners or fallback to polling
     const realtimeReady = setupMiniChatRealtime(chatId, otherUserId);
     if (!realtimeReady) {
@@ -1496,3 +1501,4 @@ window.addEventListener('load', function() {
 </script>
 @endif
 @endauth
+

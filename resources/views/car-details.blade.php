@@ -1,7 +1,7 @@
 @extends('template.temp')
 
 <!-- @section('title', 'Home - GARASI62') Set the title for the page -->
-
+@include('components.messages-widget')
 @section('content')
     <!-- Breadcrumb Begin -->
     <div class="breadcrumb-option set-bg" data-setbg="{{ asset('garasi62/img/breadcrumb-bg.jpg') }}">
@@ -41,21 +41,18 @@
                             </div>
                         </div>
                         <div class="car-thumbs-modern">
-                            <div class="car-thumbs-grid">
+                            @php
+                                $imageCount = $car->image && is_array($car->image) ? count($car->image) : 0;
+                                $gridClass = $imageCount > 5 ? 'car-thumbs-grid-scrollable' : 'car-thumbs-grid-fixed';
+                            @endphp
+                            <div class="car-thumbs-grid {{ $gridClass }}">
                                 @if($car->image && is_array($car->image) && count($car->image) > 0)
-                                    @foreach(array_slice($car->image, 0, 5) as $index => $imagePath)
+                                    @foreach($car->image as $index => $imagePath)
                                         <div class="thumb-item {{ $index === 0 ? 'active' : '' }}" data-imgbigurl="{{ asset('storage/' . $imagePath) }}">
                                             <img src="{{ asset('storage/' . $imagePath) }}" alt="Thumbnail {{ $index + 1 }}">
                                             <div class="thumb-overlay"></div>
                                         </div>
                                     @endforeach
-                                    @if(count($car->image) < 5)
-                                        @for($i = count($car->image); $i < 5; $i++)
-                                            <div class="thumb-item placeholder">
-                                                <i class="fa fa-image"></i>
-                                            </div>
-                                        @endfor
-                                    @endif
                                 @else
                                     @for($i = 0; $i < 5; $i++)
                                         <div class="thumb-item placeholder">
@@ -537,8 +534,46 @@
 
         .car-thumbs-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
             gap: 10px;
+            max-width: 100%;
+        }
+        
+        /* Grid fixed untuk 1-5 gambar - otomatis menyesuaikan jumlah kolom */
+        .car-thumbs-grid-fixed {
+            grid-template-columns: repeat(auto-fit, minmax(80px, 120px));
+            justify-content: start;
+        }
+        
+        /* Grid scrollable untuk lebih dari 5 gambar */
+        .car-thumbs-grid-scrollable {
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 5px;
+        }
+        
+        /* Batasi ukuran maksimal thumb-item agar tidak terlalu besar */
+        .thumb-item {
+            max-width: 120px;
+            width: 100%;
+        }
+        
+        .car-thumbs-grid::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .car-thumbs-grid::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 5px;
+        }
+        
+        .car-thumbs-grid::-webkit-scrollbar-thumb {
+            background: #df2d24;
+            border-radius: 5px;
+        }
+        
+        .car-thumbs-grid::-webkit-scrollbar-thumb:hover {
+            background: #b91c1c;
         }
 
         .thumb-item {
@@ -719,7 +754,6 @@
 
         .info-item:hover {
             background: linear-gradient(135deg, #ffffff, #fafbfc);
-            transform: translateX(4px);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
@@ -1139,12 +1173,14 @@
             }
 
             .car-thumbs-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
                 gap: 8px;
+                overflow-x: auto;
             }
             
             .thumb-item {
                 height: 70px;
+                min-width: 70px;
             }
             
             .sidebar-card {

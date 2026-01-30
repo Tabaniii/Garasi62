@@ -1,6 +1,7 @@
 @extends('template.temp')
 
 @section('title', $blog->title . ' - GARASI62')
+@include('components.messages-widget')
 
 @section('content')
     <!-- Blog Details Hero Begin -->

@@ -239,6 +239,7 @@
                                 $unreadChatCount = $chat->unread_count ?? 0;
                             @endphp
                             <div class="messages-item {{ $unreadChatCount > 0 ? 'messages-item-unread' : '' }}" 
+                                 data-chat-id="{{ $chat->id }}"
                                  onclick="openMiniChat('{{ $chat->id }}', '{{ addslashes($otherUser->name) }}', {{ $otherUser->id }})">
                                 <div class="messages-item-avatar">
                                     <span>{{ strtoupper(substr($otherUser->name, 0, 1)) }}</span>
@@ -260,6 +261,9 @@
                                         <span class="messages-item-badge">{{ $unreadChatCount }}</span>
                                         @endif
                                     </div>
+                                    @if(isset($chat->car) && $chat->car)
+                                    <div class="messages-item-car">{{ $chat->car->brand ?? '' }} {{ $chat->car->nama ?? '' }}</div>
+                                    @endif
                                 </div>
                             </div>
                         @endforeach
@@ -468,6 +472,27 @@
     font-weight: 700;
 }
 
+.messages-connection-status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: #374151;
+    color: #e5e7eb;
+}
+.messages-connection-status.connected {
+    background: #065f46;
+    color: #ecfdf5;
+}
+.messages-connection-status.polling {
+    background: #6b7280;
+    color: #f3f4f6;
+}
+.messages-connection-status.error {
+    background: #7f1d1d;
+    color: #fee2e2;
+}
+
 .messages-modal-actions {
     display: flex;
     gap: 8px;
@@ -578,6 +603,15 @@
 
 .messages-item-unread .messages-item-message {
     color: #fff;
+}
+
+.messages-item-car {
+    font-size: 11px;
+    color: #777;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .messages-item-badge {
@@ -863,6 +897,8 @@ let currentChatId = null;
 let currentOtherUserId = null;
 let currentOtherUserName = null;
 let messagesInterval = null;
+let miniChatChannel = null;
+let miniChatPresence = null;
 
 function toggleMessagesModal() {
     const modal = document.getElementById('messagesModal');
@@ -917,6 +953,8 @@ function openMiniChat(chatId, userName, otherUserId) {
     
     // Close messages modal
     closeMessagesModal();
+
+    markMiniChatAsRead(chatId);
     
     // Load messages
     loadMiniChatMessages();
@@ -926,12 +964,51 @@ function openMiniChat(chatId, userName, otherUserId) {
         clearInterval(messagesInterval);
     }
     messagesInterval = setInterval(loadMiniChatMessages, 3000);
+    // Setup realtime listeners or fallback to polling
+    const realtimeReady = setupMiniChatRealtime(chatId, otherUserId);
+    if (!realtimeReady) {
+        const status = document.getElementById('messagesConnectionStatus');
+        if (status) {
+            status.textContent = 'Mode polling';
+            status.classList.remove('connected','error');
+            status.classList.add('polling');
+        }
+        if (messagesInterval) {
+            clearInterval(messagesInterval);
+        }
+        messagesInterval = setInterval(loadMiniChatMessages, 3000);
+    }
     
     // Focus on input
     setTimeout(() => {
         const input = document.getElementById('miniChatInput');
         if (input) input.focus();
     }, 100);
+}
+
+function markMiniChatAsRead(chatId) {
+    const item = document.querySelector(`.messages-item[data-chat-id="${chatId}"]`);
+    if (item) {
+        item.classList.remove('messages-item-unread');
+        const badge = item.querySelector('.messages-item-badge');
+        if (badge) badge.remove();
+    }
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    if (!chatId || !csrfToken) {
+        refreshUnreadCounts();
+        return;
+    }
+    fetch(`/chat/${encodeURIComponent(chatId)}/mark-read`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        keepalive: true
+    })
+    .then(() => refreshUnreadCounts())
+    .catch(() => refreshUnreadCounts());
 }
 
 function closeMiniChat() {
@@ -947,6 +1024,14 @@ function closeMiniChat() {
     if (messagesInterval) {
         clearInterval(messagesInterval);
         messagesInterval = null;
+    }
+    if (miniChatChannel && window.Echo) {
+        try { window.Echo.leave(`chat.${currentChatId}`); } catch (_) {}
+        miniChatChannel = null;
+    }
+    if (miniChatPresence && window.Echo) {
+        try { window.Echo.leave(`presence-chat.${currentChatId}`); } catch (_) {}
+        miniChatPresence = null;
     }
     
     // Clear messages
@@ -1028,7 +1113,8 @@ function loadMiniChatMessages() {
                 
                 const bubble = document.createElement('div');
                 bubble.className = 'mini-chat-message-bubble';
-                bubble.textContent = message.message || '';
+                const isDeleted = !!(message.is_deleted) || !message.message;
+                bubble.textContent = isDeleted ? 'Pesan ini dihapus' : (message.message || '');
                 
                 const time = document.createElement('div');
                 time.className = 'mini-chat-message-time';
@@ -1082,6 +1168,193 @@ function loadMiniChatMessages() {
     });
 }
 
+function setupMiniChatRealtime(chatId, otherUserId) {
+    if (typeof Echo === 'undefined' || !window.Echo) return false;
+    try {
+        miniChatChannel = window.Echo.private(`chat.${chatId}`);
+        miniChatPresence = window.Echo.join(`presence-chat.${chatId}`);
+        const status = document.getElementById('messagesConnectionStatus');
+        if (status) {
+            status.textContent = 'Terhubung';
+            status.classList.remove('polling','error');
+            status.classList.add('connected');
+        }
+    } catch (e) {
+        console.warn('Realtime setup failed, fallback to polling', e);
+        const status = document.getElementById('messagesConnectionStatus');
+        if (status) {
+            status.textContent = 'Gagal realtime';
+            status.classList.remove('connected','polling');
+            status.classList.add('error');
+        }
+        return false;
+    }
+    miniChatPresence.here((users) => {
+        const otherOnline = users.some(u => parseInt(u.id) === parseInt(otherUserId));
+        const statusEl = document.getElementById('miniChatUserStatus');
+        if (statusEl) statusEl.textContent = otherOnline ? 'Online' : 'Offline';
+    });
+    miniChatPresence.joining((user) => {
+        if (parseInt(user.id) === parseInt(otherUserId)) {
+            const statusEl = document.getElementById('miniChatUserStatus');
+            if (statusEl) statusEl.textContent = 'Online';
+        }
+    });
+    miniChatPresence.leaving((user) => {
+        if (parseInt(user.id) === parseInt(otherUserId)) {
+            const statusEl = document.getElementById('miniChatUserStatus');
+            if (statusEl) statusEl.textContent = 'Offline';
+        }
+    });
+    const handleSent = (e) => {
+        if (!e.message) return;
+        appendMiniChatMessage(e.message);
+        updateChatListPreview(chatId, e.message);
+    };
+    miniChatChannel.listen('.MessageSent', handleSent);
+    miniChatChannel.listen('MessageSent', handleSent);
+    const handleUpdated = (e) => {
+        if (!e.message) return;
+        updateMiniMessageUI(e.message.id, e.message.message);
+        updateChatListPreview(chatId, e.message);
+    };
+    miniChatChannel.listen('.MessageUpdated', handleUpdated);
+    miniChatChannel.listen('MessageUpdated', handleUpdated);
+    const handleDeleted = (e) => {
+        if (!e.message_id) return;
+        markMiniMessageDeletedUI(e.message_id);
+        updateChatListPreview(chatId, { id: e.message_id, message: '', is_deleted: true, created_at: new Date().toISOString(), sender_id: otherUserId });
+    };
+    miniChatChannel.listen('.MessageDeleted', handleDeleted);
+    miniChatChannel.listen('MessageDeleted', handleDeleted);
+    return true;
+}
+
+function appendMiniChatMessage(msg) {
+    const messagesContainer = document.getElementById('miniChatMessages');
+    if (!messagesContainer) return;
+    const isSent = parseInt(msg.sender_id) === parseInt({{ Auth::id() }});
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `mini-chat-message ${isSent ? 'sent' : 'received'}`;
+    if (msg.id) messageDiv.dataset.messageId = msg.id;
+    const bubble = document.createElement('div');
+    bubble.className = 'mini-chat-message-bubble';
+    const isDeleted = !!(msg.is_deleted) || !msg.message;
+    bubble.textContent = isDeleted ? 'Pesan ini dihapus' : (msg.message || '');
+    const time = document.createElement('div');
+    time.className = 'mini-chat-message-time';
+    try {
+        const d = new Date(msg.created_at);
+        time.textContent = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    } catch (_) {
+        time.textContent = 'Sekarang';
+    }
+    messageDiv.appendChild(bubble);
+    messageDiv.appendChild(time);
+    messagesContainer.appendChild(messageDiv);
+    const chatBody = document.getElementById('miniChatBody');
+    if (chatBody) setTimeout(() => { chatBody.scrollTop = chatBody.scrollHeight; }, 100);
+}
+
+function updateMiniMessageUI(messageId, newText) {
+    const bubble = document.querySelector(`.mini-chat-message[data-message-id="${messageId}"] .mini-chat-message-bubble`);
+    if (!bubble) return;
+    bubble.textContent = newText || '';
+}
+
+function markMiniMessageDeletedUI(messageId) {
+    const bubble = document.querySelector(`.mini-chat-message[data-message-id="${messageId}"] .mini-chat-message-bubble`);
+    if (!bubble) return;
+    bubble.textContent = 'Pesan ini dihapus';
+}
+
+function updateChatListPreview(chatId, message) {
+    const item = document.querySelector(`.messages-item[data-chat-id="${chatId}"]`);
+    if (!item) return;
+    const preview = item.querySelector('.messages-item-message');
+    const timeEl = item.querySelector('.messages-item-time');
+    const badge = item.querySelector('.messages-item-badge');
+    const isDeleted = !!(message.is_deleted) || !message.message;
+    if (preview) preview.textContent = isDeleted ? 'Pesan ini dihapus' : (message.message || '');
+    if (timeEl && message.created_at) {
+        try {
+            const d = new Date(message.created_at);
+            timeEl.textContent = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        } catch (_) {}
+    }
+    if (badge && parseInt(message.sender_id) !== parseInt({{ Auth::id() }})) {
+        const current = parseInt(badge.textContent || '0');
+        badge.textContent = String(current + 1);
+        item.classList.add('messages-item-unread');
+    }
+}
+
+function refreshUnreadCounts() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    fetch('/chat/unread-count', {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(res => res.ok ? res.json() : Promise.reject())
+    .then(data => {
+        const total = parseInt(data.total || 0);
+        const btn = document.getElementById('messagesBtn');
+        const modalTitle = document.querySelector('.messages-modal-title');
+        let badgeBtn = btn?.querySelector('.messages-badge');
+        let badgeHeader = modalTitle?.querySelector('.messages-badge-header');
+        if (total > 0) {
+            if (!badgeBtn && btn) {
+                badgeBtn = document.createElement('span');
+                badgeBtn.className = 'messages-badge';
+                btn.appendChild(badgeBtn);
+            }
+            if (!badgeHeader && modalTitle) {
+                badgeHeader = document.createElement('span');
+                badgeHeader.className = 'messages-badge-header';
+                modalTitle.appendChild(badgeHeader);
+            }
+            if (badgeBtn) badgeBtn.textContent = total;
+            if (badgeHeader) badgeHeader.textContent = total;
+        } else {
+            if (badgeBtn) badgeBtn.remove();
+            if (badgeHeader) badgeHeader.remove();
+        }
+
+        const perChat = data.per_chat || {};
+        document.querySelectorAll('.messages-item').forEach(item => {
+            const chatId = item.getAttribute('data-chat-id');
+            const meta = chatId && perChat[chatId] ? perChat[chatId] : null;
+            const count = meta ? parseInt(meta.unread_count || 0) : 0;
+            let badge = item.querySelector('.messages-item-badge');
+            const preview = item.querySelector('.messages-item-message');
+            const timeEl = item.querySelector('.messages-item-time');
+            if (meta && preview && meta.last_message) {
+                preview.textContent = meta.last_message;
+            }
+            if (meta && timeEl && meta.last_message_time) {
+                timeEl.textContent = meta.last_message_time;
+            }
+            if (count > 0) {
+                item.classList.add('messages-item-unread');
+                if (!badge) {
+                    badge = document.createElement('span');
+                    badge.className = 'messages-item-badge';
+                    const previewWrap = item.querySelector('.messages-item-preview');
+                    if (previewWrap) previewWrap.appendChild(badge);
+                }
+                badge.textContent = count;
+            } else {
+                item.classList.remove('messages-item-unread');
+                if (badge) badge.remove();
+            }
+        });
+    })
+    .catch(() => {});
+}
 function sendMiniChatMessage(event) {
     // Prevent default form submission
     if (event) {
@@ -1261,6 +1534,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         });
     }
+    refreshUnreadCounts();
+    setInterval(refreshUnreadCounts, 8000);
 });
 
 // Ensure form doesn't cause page refresh
@@ -1292,3 +1567,4 @@ window.addEventListener('load', function() {
 </script>
 @endif
 @endauth
+

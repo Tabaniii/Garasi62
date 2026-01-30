@@ -101,18 +101,10 @@
             color:#fff !important;
             background:#1a1a1a !important;
             transition:border-color .2s,box-shadow .2s;
-            will-change:border-color;
+            will-change:border-color,box-shadow;
             position:relative;
             z-index:1;
             -webkit-text-fill-color:#fff !important;
-            -webkit-autofill,
-            -webkit-autofill:hover,
-            -webkit-autofill:focus{
-                -webkit-text-fill-color:#fff !important;
-                -webkit-box-shadow:0 0 0 1000px #1a1a1a inset !important;
-                box-shadow:0 0 0 1000px #1a1a1a inset !important;
-                transition:background-color 5000s ease-in-out 0s
-            }
         }
         .form-control:focus{
             outline:none;
@@ -130,6 +122,14 @@
             color:#fff !important;
             -webkit-text-fill-color:#fff !important;
             font-family:'Poppins',sans-serif
+        }
+        /* Fix background autofill (Chrome) agar tidak berubah jadi putih/biru */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus{
+            -webkit-text-fill-color:#fff !important;
+            -webkit-box-shadow:0 0 0 1000px #1a1a1a inset !important;
+            box-shadow:0 0 0 1000px #1a1a1a inset !important;
         }
         .password-wrapper{
             position:relative

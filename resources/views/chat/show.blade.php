@@ -89,11 +89,11 @@
 
                         <!-- Chat Input -->
                         <div class="chat-input-container">
-                            <form id="chatForm" class="chat-form">
+                            <form id="chatForm" class="chat-form" onsubmit="return false;">
                                 @csrf
                                 <div class="chat-input-wrapper">
                                     <input type="text" id="messageInput" class="chat-input" placeholder="Ketik pesan..." autocomplete="off">
-                                    <button type="submit" class="chat-send-btn">
+                                    <button type="button" id="sendMessageBtn" class="chat-send-btn">
                                         <i class="fa fa-paper-plane"></i>
                                     </button>
                                 </div>
@@ -416,46 +416,95 @@
             }, 100);
         }
 
-        // Send message
-        document.getElementById('chatForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
+        // Function to send message
+        function sendChatMessage() {
             const messageInput = document.getElementById('messageInput');
+            if (!messageInput) {
+                console.error('Message input not found');
+                return false;
+            }
+            
             const message = messageInput.value.trim();
             
             if (!message) {
-                return;
+                return false;
             }
 
-            const sendBtn = document.querySelector('.chat-send-btn');
+            const sendBtn = document.getElementById('sendMessageBtn') || document.querySelector('.chat-send-btn');
+            if (!sendBtn) {
+                console.error('Send button not found');
+                return false;
+            }
+
             const originalHTML = sendBtn.innerHTML;
             sendBtn.disabled = true;
             sendBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
 
-            fetch(`{{ route('chat.store', $chat->id) }}`, {
+            const chatId = '{{ $chat->id }}';
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                             document.querySelector('input[name="_token"]')?.value || '';
+            
+            if (!csrfToken) {
+                console.error('CSRF token not found');
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = originalHTML;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'CSRF token tidak ditemukan. Silakan refresh halaman.',
+                        confirmButtonColor: '#df2d24'
+                    });
+                } else {
+                    alert('CSRF token tidak ditemukan. Silakan refresh halaman.');
+                }
+                return false;
+            }
+
+            // Ensure chat ID is properly encoded
+            const encodedChatId = encodeURIComponent(chatId);
+            const url = `/chat/${encodedChatId}/message`;
+            
+            console.log('Sending message to:', url);
+            console.log('Message:', message);
+            console.log('Chat ID:', chatId);
+            console.log('Encoded Chat ID:', encodedChatId);
+            console.log('CSRF Token:', csrfToken ? 'Found' : 'Missing');
+
+            fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ message: message })
             })
             .then(response => {
+                console.log('Response status:', response.status);
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    return response.text().then(text => {
+                        try {
+                            const json = JSON.parse(text);
+                            throw new Error(json.error || 'Network response was not ok');
+                        } catch (e) {
+                            throw new Error(text || 'Network response was not ok');
+                        }
+                    });
                 }
                 return response.json();
             })
             .then(data => {
+                console.log('Response data:', data);
                 if (data.success) {
                     messageInput.value = '';
                     
                     // Get sender name safely
                     let senderName = 'User';
-                    if (data.message.sender && data.message.sender.name) {
+                    if (data.message && data.message.sender && data.message.sender.name) {
                         senderName = data.message.sender.name;
-                    } else if (data.message.sender_name) {
+                    } else if (data.message && data.message.sender_name) {
                         senderName = data.message.sender_name;
                     }
                     
@@ -477,28 +526,113 @@
                     }
                 } else {
                     console.error('Failed to send message:', data);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: data.error || 'Gagal mengirim pesan. Silakan coba lagi.',
-                        confirmButtonColor: '#df2d24'
-                    });
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: data.error || 'Gagal mengirim pesan. Silakan coba lagi.',
+                            confirmButtonColor: '#df2d24'
+                        });
+                    } else {
+                        alert('Gagal mengirim pesan: ' + (data.error || 'Silakan coba lagi.'));
+                    }
                 }
             })
             .catch(error => {
                 console.error('Error sending message:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error!',
-                    text: 'Gagal mengirim pesan. Silakan coba lagi.',
-                    confirmButtonColor: '#df2d24'
-                });
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Gagal mengirim pesan: ' + error.message,
+                        confirmButtonColor: '#df2d24'
+                    });
+                } else {
+                    alert('Gagal mengirim pesan: ' + error.message);
+                }
             })
             .finally(() => {
                 sendBtn.disabled = false;
                 sendBtn.innerHTML = originalHTML;
+                messageInput.focus();
             });
-        });
+            
+            return false;
+        }
+
+        // Attach event listeners when DOM is ready
+        function attachChatEventListeners() {
+            const chatForm = document.getElementById('chatForm');
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendMessageBtn') || document.querySelector('.chat-send-btn');
+            
+            if (!chatForm || !messageInput || !sendBtn) {
+                console.warn('Chat form elements not found, retrying...');
+                setTimeout(attachChatEventListeners, 100);
+                return;
+            }
+            
+            // Remove existing listeners by cloning
+            const newForm = chatForm.cloneNode(true);
+            chatForm.parentNode.replaceChild(newForm, chatForm);
+            
+            // Get new references
+            const newChatForm = document.getElementById('chatForm');
+            const newMessageInput = document.getElementById('messageInput');
+            const newSendBtn = document.getElementById('sendMessageBtn') || document.querySelector('.chat-send-btn');
+            
+            // Prevent form submission
+            if (newChatForm) {
+                newChatForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    sendChatMessage();
+                    return false;
+                }, true);
+                
+                // Also set onsubmit to prevent default
+                newChatForm.onsubmit = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    sendChatMessage();
+                    return false;
+                };
+            }
+            
+            // Handle button click
+            if (newSendBtn) {
+                newSendBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    sendChatMessage();
+                });
+            }
+            
+            // Handle Enter key
+            if (newMessageInput) {
+                newMessageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        sendChatMessage();
+                    }
+                });
+            }
+            
+            console.log('✅ Chat event listeners attached successfully');
+        }
+        
+        // Try to attach immediately if DOM is already loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', attachChatEventListeners);
+        } else {
+            // DOM already loaded
+            attachChatEventListeners();
+        }
+        
+        // Also try after a short delay as fallback
+        setTimeout(attachChatEventListeners, 500);
 
         // Listen real-time via Echo
         if (typeof Echo !== 'undefined' && window.Echo) {

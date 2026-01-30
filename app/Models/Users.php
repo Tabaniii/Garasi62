@@ -17,7 +17,8 @@ class Users extends Authenticatable implements CanResetPasswordContract
     protected $primaryKey = "id";
 
     protected $fillable = [
-        'name', 'email', 'phone', 'gender', 'city', 'institution', 'password', 'role'
+        'name', 'email', 'phone', 'gender', 'city', 'institution', 'password', 'role',
+        'verification_code', 'code_expires_at', 'email_verified_at'
     ];
 
     protected $hidden = [

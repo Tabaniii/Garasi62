@@ -77,7 +77,26 @@
             margin-bottom:18px;
             min-height:48px;
             display:flex;
-            align-items:center
+            align-items:center;
+            flex-wrap:wrap;
+            overflow:visible;
+        }
+        /* Pastikan field password sejajar dengan input lain (ikon di kiri, kotak full width) */
+        .input-group.password-wrapper{
+            flex-direction:row;
+            align-items:center;
+            position:relative;
+            overflow:visible;
+        }
+        .input-group.password-wrapper::before{
+            content:'';
+            position:absolute;
+            left:0;
+            top:0;
+            right:0;
+            bottom:0;
+            pointer-events:none;
+            z-index:0;
         }
         .input-icon{
             position:absolute;
@@ -88,13 +107,31 @@
             font-size:1rem;
             z-index:100 !important;
             pointer-events:none;
-            display:block !important;
+            display:flex !important;
+            align-items:center;
+            justify-content:center;
             visibility:visible !important;
-            opacity:1 !important
+            opacity:1 !important;
+            width:20px;
+            height:20px;
+            line-height:1;
+            margin:0;
+            padding:0;
+            transition:none !important;
+            will-change:auto;
         }
         .input-group:focus-within .input-icon{
             color:#dc3545 !important;
-            z-index:100 !important
+            z-index:100 !important;
+            transform:translateY(-50%) !important;
+            top:50% !important;
+        }
+        .password-wrapper .input-icon{
+            position:absolute;
+            left:15px;
+            top:50%;
+            transform:translateY(-50%);
+            z-index:101 !important;
         }
         .form-control,.form-select{
             width:100%;
@@ -106,18 +143,15 @@
             background:#1a1a1a !important;
             transition:border-color .2s,box-shadow .2s;
             appearance:none;
-            will-change:border-color;
+            will-change:border-color,box-shadow;
             position:relative;
             z-index:1;
+            line-height:1.5;
+            vertical-align:middle;
             -webkit-text-fill-color:#fff !important;
-            -webkit-autofill,
-            -webkit-autofill:hover,
-            -webkit-autofill:focus{
-                -webkit-text-fill-color:#fff !important;
-                -webkit-box-shadow:0 0 0 1000px #1a1a1a inset !important;
-                box-shadow:0 0 0 1000px #1a1a1a inset !important;
-                transition:background-color 5000s ease-in-out 0s
-            }
+        }
+        .password-wrapper .form-control{
+            padding-right:50px;
         }
         .form-select{
             background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23dc3545' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
@@ -142,16 +176,22 @@
             -webkit-text-fill-color:#fff !important;
             font-family:'Poppins',sans-serif
         }
+        /* Fix background autofill (Chrome) agar tidak berubah jadi putih/biru */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus{
+            -webkit-text-fill-color:#fff !important;
+            -webkit-box-shadow:0 0 0 1000px #1a1a1a inset !important;
+            box-shadow:0 0 0 1000px #1a1a1a inset !important;
+        }
         .form-select option{
             background:#1a1a1a;
             color:#fff;
             padding:10px
         }
-        .password-wrapper{
-            position:relative
-        }
-        .password-wrapper .form-control{
-            padding-right:50px
+        .password-wrapper .password-hint{
+            position:relative;
+            width:100%;
         }
         .toggle-password{
             position:absolute;
@@ -162,14 +202,33 @@
             color:#999;
             font-size:1.1rem;
             transition:color .2s;
-            z-index:100 !important;
+            z-index:102 !important;
             pointer-events:auto;
-            display:block !important;
+            display:flex !important;
+            align-items:center;
+            justify-content:center;
             visibility:visible !important;
-            opacity:1 !important
+            opacity:1 !important;
+            width:24px;
+            height:24px;
+            line-height:1;
+            margin:0;
+            padding:0;
+            will-change:color;
+        }
+        .toggle-password i{
+            display:block;
+            line-height:1;
+            margin:0;
+            padding:0;
         }
         .toggle-password:hover{
             color:#dc3545
+        }
+        .password-wrapper:focus-within .toggle-password,
+        .password-wrapper:focus-within .input-icon{
+            transform:translateY(-50%) !important;
+            top:50% !important;
         }
         .password-strength{
             margin-top:8px;
@@ -177,10 +236,10 @@
             background:#333;
             border-radius: 5px;
             overflow:hidden;
-            display:none
+            display:none;
         }
         .password-strength.active{
-            display:block
+            display:block;
         }
         .password-strength-bar{
             height:100%;
@@ -200,26 +259,19 @@
             width:100%;
             background:#4ade80
         }
-        .password-hint{
-            font-size:.8rem;
-            color:#999;
-            margin-top:5px;
-            display:none
-        }
-        .password-hint.active{
-            display:block
-        }
         .input-hint{
             font-size:.8rem;
             color:#999;
-            margin-top:-10px;
+            margin-top:5px;
             margin-bottom:18px;
             margin-left:0;
             padding-left:45px;
             display:flex;
             align-items:center;
             gap:6px;
-            line-height:1.4
+            line-height:1.4;
+            word-wrap:break-word;
+            white-space:normal
         }
         .input-hint i{
             font-size:.75rem;
@@ -228,15 +280,19 @@
         .password-hint{
             font-size:.8rem;
             color:#999;
-            margin-top:-10px;
+            margin-top:5px;
             margin-bottom:18px;
             margin-left:0;
             padding-left:45px;
+            padding-right:15px;
             display:none;
-            line-height:1.4
+            line-height:1.5;
+            word-wrap:break-word;
+            white-space:normal;
+            overflow:visible;
         }
         .password-hint.active{
-            display:block
+            display:block;
         }
         .match-indicator{
             font-size:.85rem;
@@ -467,12 +523,12 @@
                         <span class="toggle-password" onclick="togglePassword('password')">
                             <i class="fa-solid fa-eye"></i>
                         </span>
-                        <div class="password-strength" id="passwordStrength">
-                            <div class="password-strength-bar" id="passwordStrengthBar"></div>
-                        </div>
-                        <div class="password-hint" id="passwordHint">
-                            Minimal 8 karakter, kombinasi huruf dan angka
-                        </div>
+                    </div>
+                    <div class="password-strength" id="passwordStrength">
+                        <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                    </div>
+                    <div class="password-hint" id="passwordHint">
+                        Minimal 8 karakter, kombinasi huruf dan angka
                     </div>
                     
                     <div class="input-group password-wrapper">

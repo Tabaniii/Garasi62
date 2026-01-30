@@ -23,6 +23,20 @@
     </div>
 </div>
 
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+@endif
+
 <div class="row g-4 mb-5">
     <div class="col-12">
         <div class="info-card animate-fade-in">
@@ -67,7 +81,7 @@
                                     @if($user->role == 'admin')
                                         <span class="badge bg-danger">{{ strtoupper($user->role) }}</span>
                                     @elseif($user->role == 'seller')
-                                        <span class="badge bg-warning">{{ strtoupper($user->role) }}</span>
+                                        <span class="badge bg-warning text-dark">{{ strtoupper($user->role) }}</span>
                                     @else
                                         <span class="badge bg-success">{{ strtoupper($user->role) }}</span>
                                     @endif
@@ -94,13 +108,20 @@
                                     <a href="{{ route('users.edit', $user->id) }}" class="btn-action btn-edit" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline delete-user-form" data-user-id="{{ $user->id }}" data-user-name="{{ $user->name }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn-action btn-delete delete-btn" title="Hapus" data-user-name="{{ $user->name }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    @if($user->id !== Auth::id())
+                                    <button type="button" 
+                                            class="btn-action btn-delete delete-user-btn" 
+                                            title="Hapus" 
+                                            data-user-id="{{ $user->id }}"
+                                            data-user-name="{{ $user->name }}"
+                                            data-delete-url="{{ route('users.destroy', $user->id) }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    @else
+                                    <span class="btn-action btn-disabled" title="Tidak dapat menghapus akun sendiri">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -132,6 +153,12 @@
         <span>Kembali ke Dashboard</span>
     </a>
 </div>
+
+<!-- Hidden form for delete -->
+<form id="deleteUserForm" method="POST" style="display: none;">
+    @csrf
+    @method('DELETE')
+</form>
 
 <style>
 .page-header-section {
@@ -386,6 +413,9 @@
     transition: all 0.3s;
     text-decoration: none;
     font-size: 14px;
+    pointer-events: auto;
+    position: relative;
+    z-index: 10;
 }
 
 .btn-edit {
@@ -412,6 +442,32 @@
     color: #fff;
 }
 
+.btn-disabled {
+    background: linear-gradient(135deg, #9ca3af, #6b7280);
+    color: #fff;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.alert {
+    border-radius: 5px;
+    border: none;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    color: #065f46;
+    border-left: 4px solid #10b981;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #991b1b;
+    border-left: 4px solid #dc2626;
+}
+
 @media (max-width: 768px) {
     .user-table {
         font-size: 12px;
@@ -427,112 +483,96 @@
         align-items: flex-start;
         gap: 12px;
     }
+    
+    .page-header-content {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
 }
+</style>
 
 @push('scripts')
 <script>
-// Handle delete button clicks
-(function() {
-    let initialized = false;
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle delete button clicks
+    const deleteButtons = document.querySelectorAll('.delete-user-btn');
+    const deleteForm = document.getElementById('deleteUserForm');
     
-    function initDeleteButtons() {
-        if (initialized) return;
-        
-        // Tunggu SweetAlert2 siap
-        if (typeof Swal === 'undefined') {
-            setTimeout(initDeleteButtons, 100);
-            return;
-        }
-        
-        // Ambil semua tombol delete yang belum punya listener
-        const deleteButtons = document.querySelectorAll('.delete-btn:not([data-listener-attached])');
-        
-        if (deleteButtons.length === 0) {
-            return;
-        }
-        
-        // Attach event listener ke setiap button
-        deleteButtons.forEach(function(button) {
-            // Tandai button sudah punya listener
-            button.setAttribute('data-listener-attached', 'true');
+    deleteButtons.forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             
-            // Attach event listener
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const userName = this.getAttribute('data-user-name') || 'Pengguna ini';
-                const form = this.closest('form');
-                
-                if (!form) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error!',
-                        text: 'Form tidak ditemukan',
-                        confirmButtonColor: '#dc2626'
-                    });
-                    return false;
-                }
-                
-                // Tampilkan konfirmasi SweetAlert
-                Swal.fire({
-                    title: 'Apakah yakin ingin menghapus user?',
-                    html: `<div style="text-align: left; padding: 10px 0;">
-                            <p style="margin-bottom: 10px;"><strong>Nama Pengguna:</strong> ${userName}</p>
-                            <p style="color: #dc2626; font-size: 14px; font-weight: 600; margin-top: 10px;">
-                                <i class="fas fa-exclamation-triangle me-2"></i>Data yang dihapus tidak dapat dikembalikan!
-                            </p>
-                          </div>`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#dc2626',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: '<i class="fas fa-trash me-2"></i>Ya, Hapus!',
-                    cancelButtonText: '<i class="fas fa-times me-2"></i>Batal',
-                    reverseButtons: true,
-                    customClass: {
-                        popup: 'swal2-popup-custom-delete',
-                        title: 'swal2-title-custom-delete',
-                        htmlContainer: 'swal2-html-container-custom-delete',
-                        confirmButton: 'swal2-confirm-custom-delete',
-                        cancelButton: 'swal2-cancel-custom-delete',
-                        icon: 'swal2-icon-custom-delete'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Tampilkan loading
-                        Swal.fire({
-                            title: 'Menghapus...',
-                            text: 'Mohon tunggu sebentar',
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                            showConfirmButton: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                            }
-                        });
-                        
-                        // Submit form
-                        form.submit();
-                    }
-                });
-                
+            const userId = this.getAttribute('data-user-id');
+            const userName = this.getAttribute('data-user-name');
+            const deleteUrl = this.getAttribute('data-delete-url');
+            
+            if (!deleteUrl || !userId) {
+                console.error('Delete URL or User ID tidak ditemukan');
+                alert('Error: Data tidak lengkap');
                 return false;
+            }
+            
+            // Cek apakah SweetAlert2 tersedia
+            if (typeof Swal === 'undefined') {
+                // Fallback jika SweetAlert2 tidak tersedia
+                if (confirm('Apakah yakin ingin menghapus user "' + userName + '"?\n\nData yang dihapus tidak dapat dikembalikan!')) {
+                    deleteForm.action = deleteUrl;
+                    deleteForm.submit();
+                }
+                return false;
+            }
+            
+            // Tampilkan konfirmasi SweetAlert
+            Swal.fire({
+                title: 'Hapus Pengguna?',
+                html: `<div style="text-align: left; padding: 10px 0;">
+                        <p style="margin-bottom: 10px;"><strong>Nama Pengguna:</strong> ${userName}</p>
+                        <p style="color: #dc2626; font-size: 14px; font-weight: 600; margin-top: 10px;">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Data yang dihapus tidak dapat dikembalikan!
+                        </p>
+                      </div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: '<i class="fas fa-trash me-2"></i>Ya, Hapus!',
+                cancelButtonText: '<i class="fas fa-times me-2"></i>Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'swal2-popup-custom-delete',
+                    title: 'swal2-title-custom-delete',
+                    htmlContainer: 'swal2-html-container-custom-delete',
+                    confirmButton: 'swal2-confirm-custom-delete',
+                    cancelButton: 'swal2-cancel-custom-delete',
+                    icon: 'swal2-icon-custom-delete'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Tampilkan loading
+                    Swal.fire({
+                        title: 'Menghapus...',
+                        text: 'Mohon tunggu sebentar',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    
+                    // Set form action dan submit
+                    deleteForm.action = deleteUrl;
+                    deleteForm.submit();
+                }
             });
+            
+            return false;
         });
-        
-        initialized = true;
-    }
+    });
     
-    // Initialize ketika DOM ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(initDeleteButtons, 500);
-        });
-    } else {
-        setTimeout(initDeleteButtons, 500);
-    }
-})();
+    console.log('User management script initialized. Found ' + deleteButtons.length + ' delete buttons.');
+});
 </script>
 
 <style>
@@ -603,4 +643,3 @@
 </style>
 @endpush
 @endsection
-

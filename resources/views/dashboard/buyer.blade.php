@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
+@include('components.messages-widget')
 <h1 class="page-title mb-4">Dashboard Buyer</h1>
 
 <!-- Buyer Stats Cards -->

@@ -98,6 +98,7 @@
                             
                             // Get last message safely
                             $lastMessage = null;
+                            $lastMessageTime = null;
                             if (isset($chat->last_message)) {
                                 if (is_object($chat->last_message)) {
                                     $lastMessage = $chat->last_message;
@@ -107,6 +108,15 @@
                                         'message' => $chat->last_message,
                                         'created_at' => $chat->last_message->created_at ?? now()
                                     ];
+                                }
+                            }
+                            if ($lastMessage && isset($lastMessage->created_at)) {
+                                try {
+                                    $lastMessageTime = is_object($lastMessage->created_at)
+                                        ? $lastMessage->created_at
+                                        : \Carbon\Carbon::parse($lastMessage->created_at);
+                                } catch (\Exception $e) {
+                                    $lastMessageTime = null;
                                 }
                             }
                             
@@ -125,19 +135,8 @@
                                 <div class="chat-item-content">
                                     <div class="chat-item-header">
                                         <span class="chat-item-name">{{ $otherUser->name }}</span>
-                                        @if($lastMessage && isset($lastMessage->created_at))
-                                            @php
-                                                try {
-                                                    $lastMessageTime = is_object($lastMessage->created_at) 
-                                                        ? $lastMessage->created_at 
-                                                        : \Carbon\Carbon::parse($lastMessage->created_at);
-                                                } catch (\Exception $e) {
-                                                    $lastMessageTime = null;
-                                                }
-                                            @endphp
-                                            @if($lastMessageTime)
-                                                <span class="chat-item-time">{{ $lastMessageTime->diffForHumans() }}</span>
-                                            @endif
+                                        @if($lastMessageTime)
+                                            <span class="chat-item-time">{{ $lastMessageTime->diffForHumans() }}</span>
                                         @endif
                                     </div>
                                     <div class="chat-item-preview">

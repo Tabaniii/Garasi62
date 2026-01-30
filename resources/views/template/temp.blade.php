@@ -25,6 +25,47 @@
     <link rel="stylesheet" href="{{ asset('garasi62/css/owl.carousel.min.css')}}" type="text/css">
     <link rel="stylesheet" href="{{ asset('garasi62/css/slicknav.min.css')}}" type="text/css">
     <link rel="stylesheet" href="{{ asset('garasi62/css/style.css')}}" type="text/css">
+
+    <style>
+    @media (max-width: 360px) { 
+      
+    }  
+    
+    @media (min-width: 361px) and (max-width: 480px) { 
+      
+    }  
+      
+    /* Extra small devices (portrait phones, <576px) */ 
+    @media (min-width: 481px) and (max-width: 575.98px) { 
+      /* CSS khusus HP kecil */ 
+    
+    } 
+    
+    /* Small devices (landscape phones, ≥576px and <768px) */ 
+    @media (min-width: 576px) and (max-width: 767.98px) { 
+    
+    } 
+    
+    /* Medium devices (tablets, ≥768px and <992px) */ 
+    @media (min-width: 768px) and (max-width: 991.98px) { 
+    
+    } 
+    
+    /* Large devices (desktops, ≥992px and <1200px) */ 
+    @media (min-width: 992px) and (max-width: 1199.98px) { 
+      
+    } 
+    
+    /* Extra large devices (large desktops, ≥1200px and <1400px) */ 
+    @media (min-width: 1200px) and (max-width: 1399.98px) { 
+     
+    } 
+    
+    /* Extra extra large devices (ultra wide, ≥1400px) */ 
+    @media (min-width: 1400px) { 
+     
+    }
+    </style>
     
     @stack('head')
 </head>
@@ -45,6 +86,27 @@
         </div>
         <div class="offcanvas__logo">
             <a href="./index.html"><img src="img/logo.svg" alt=""></a>
+        </div>
+        <nav class="offcanvas__nav">
+            <ul>
+                <li><a href="/" class="{{ request()->routeIs('home') || request()->routeIs('index') ? 'active' : '' }}">Home</a></li>
+                <li><a href="/car" class="{{ request()->routeIs('cars') ? 'active' : '' }}">Cars</a></li>
+                <li><a href="/blog" class="{{ request()->routeIs('blog') ? 'active' : '' }}">Blog</a></li>
+                <li><a href="/about" class="{{ request()->routeIs('about') ? 'active' : '' }}">About</a></li>
+                <li><a href="/contact" class="{{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="offcanvas__auth">
+            @auth
+                <a href="{{ route('dashboard') }}" class="site-btn">Dashboard</a>
+                <form action="{{ route('logout') }}" method="POST" class="m-0">
+                    @csrf
+                    <button type="submit" class="site-btn">Keluar</button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="site-btn">Masuk</a>
+                <a href="{{ route('register') }}" class="site-btn">Daftar</a>
+            @endauth
         </div>
         <div id="mobile-menu-wrap"></div>
         <ul class="offcanvas__widget__add">

@@ -169,6 +169,22 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
+    <script>
+    (function() {
+        function updateHeaderHeightVar() {
+            var header = document.querySelector('.header');
+            if (!header) return;
+            var h = header.offsetHeight || 90;
+            document.documentElement.style.setProperty('--header-height', h + 'px');
+        }
+        document.addEventListener('DOMContentLoaded', updateHeaderHeightVar);
+        window.addEventListener('load', updateHeaderHeightVar);
+        window.addEventListener('resize', function() {
+            updateHeaderHeightVar();
+        });
+    })();
+    </script>
+    
     @stack('scripts')
 </body>
 

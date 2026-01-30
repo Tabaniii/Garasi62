@@ -135,8 +135,19 @@
                                 <div class="chat-item-content">
                                     <div class="chat-item-header">
                                         <span class="chat-item-name">{{ $otherUser->name }}</span>
-                                        @if($lastMessageTime)
-                                            <span class="chat-item-time">{{ $lastMessageTime->diffForHumans() }}</span>
+                                        @if($lastMessage && isset($lastMessage->created_at))
+                                            @php
+                                                try {
+                                                    $lastMessageTime = is_object($lastMessage->created_at) 
+                                                        ? $lastMessage->created_at 
+                                                        : \Carbon\Carbon::parse($lastMessage->created_at);
+                                                } catch (\Exception $e) {
+                                                    $lastMessageTime = null;
+                                                }
+                                            @endphp
+                                            @if($lastMessageTime)
+                                                <span class="chat-item-time">{{ $lastMessageTime->diffForHumans() }}</span>
+                                            @endif
                                         @endif
                                     </div>
                                     <div class="chat-item-preview">

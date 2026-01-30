@@ -550,31 +550,42 @@ ol {
 
 .hero {
 	padding-top: 0;
+	margin-top: var(--header-height, 90px);
 	position: relative;
+}
+/* Override spad bottom padding for hero to avoid white gap */
+.hero.spad {
+	padding-bottom: 0;
 }
 
 /* Buat gambar hero menempel ke navbar tanpa celah putih */
 .hero.set-bg {
 	background-size: cover;
 	background-position: center top;
-	min-height: 650px;
-	background-color: #000000;
+	min-height: calc(100vh - var(--header-height, 90px));
+	background-color: #0e0e0e;
 }
 
 /* Posisikan teks hero tepat di bawah navbar tanpa ter-crop */
 .hero .hero__text {
-	padding-top: 160px;
+	padding-top: 190px;
 }
 
 @media (max-width: 991.98px) {
 	.hero .hero__text {
-		padding-top: 130px;
+		padding-top: 150px;
+	}
+	.hero.set-bg {
+		min-height: calc(100vh - var(--header-height, 90px));
 	}
 }
 
 @media (max-width: 575.98px) {
 	.hero .hero__text {
-		padding-top: 110px;
+		padding-top: 120px;
+	}
+	.hero.set-bg {
+		min-height: calc(100vh - var(--header-height, 90px));
 	}
 }
 
@@ -650,7 +661,13 @@ ol {
 
 /* Naikkan posisi kotak form hero agar lebih dekat ke teks dan menghilangkan kesan ada kotak putih terpisah */
 .hero .hero__tab {
-	margin-top: 40px;
+	margin-top: 140px;
+}
+
+@media (min-width: 1200px) {
+	.hero.set-bg {
+		min-height: calc(100vh - var(--header-height, 90px));
+	}
 }
 
 
@@ -3786,41 +3803,13 @@ ol {
 		width: 100%;
 	}
 }
-@media (max-width: 360px) {
-
-}
-
-@media (min-width: 361px) and (max-width: 480px) {
-
-}
-
-/* Extra small devices (portrait phones, <576px) */
-@media (min-width: 481px) and (max-width: 575.98px) {
-  /* CSS khusus HP kecil */
-
-}
-
-/* Small devices (landscape phones, ≥576px and <768px) */
-@media (min-width: 576px) and (max-width: 767.98px) {
-
-}
-
-/* Medium devices (tablets, ≥768px and <992px) */
-@media (min-width: 768px) and (max-width: 991.98px) {
-
-}
-
-/* Large devices (desktops, ≥992px and <1200px) */
-@media (min-width: 992px) and (max-width: 1199.98px) {
-  
-}
-
-/* Extra large devices (large desktops, ≥1200px and <1400px) */
-@media (min-width: 1200px) and (max-width: 1399.98px) {
- 
-}
-
-/* Extra extra large devices (ultra wide, ≥1400px) */
-@media (min-width: 1400px) {
- 
+.hero::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.15));
+    pointer-events: none;
 }

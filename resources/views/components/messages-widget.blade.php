@@ -164,6 +164,9 @@
             <div class="messages-modal-header">
                 <h3 class="messages-modal-title">
                     Messages
+                    @if($unreadCount > 0)
+                    <span class="messages-badge-header">{{ $unreadCount }}</span>
+                    @endif
                 </h3>
                 <div class="messages-modal-actions">
                     <button class="messages-modal-btn" onclick="maximizeMessages()" title="Maximize">
@@ -1101,7 +1104,7 @@ function loadMiniChatMessages() {
         
         if (data.messages && Array.isArray(data.messages) && data.messages.length > 0) {
             data.messages.forEach(message => {
-                if (!message) return;
+                if (!message || !message.message) return;
                 
                 const isSent = parseInt(message.sender_id) === parseInt({{ Auth::id() }});
                 const messageDiv = document.createElement('div');

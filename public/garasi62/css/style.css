@@ -321,6 +321,9 @@ ol {
 -----------------------*/
 .header {
 	background:#252525;
+	position: sticky;
+	top: 0;
+	z-index: 1000;
 }
 .header__top {
 	background: #323232;
@@ -503,6 +506,42 @@ ol {
 
 .canvas__open {
 	display: none;
+}
+
+.offcanvas__nav ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.offcanvas__nav li {
+	margin-bottom: 10px;
+}
+
+.offcanvas__nav a {
+	display: block;
+	font-size: 15px;
+	color: #353535;
+	font-weight: 700;
+	text-transform: uppercase;
+	padding: 6px 0;
+}
+
+.offcanvas__nav a.active {
+	color: #db2d2e;
+}
+
+.offcanvas__auth {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 20px;
+}
+
+.offcanvas__auth .site-btn {
+	width: 100%;
+	text-align: center;
+	padding: 12px 18px;
 }
 
 /*---------------------
@@ -3263,7 +3302,13 @@ ol {
 		display: none;
 	}
 	.header__nav {
-		display: none;
+		display: none !important;
+	}
+	.header__menu {
+		display: none !important;
+	}
+	.header__nav__widget {
+		display: none !important;
 	}
 	.header .container {
 		position: relative;
@@ -3495,7 +3540,13 @@ ol {
 		display: none;
 	}
 	.header__nav {
-		display: none;
+		display: none !important;
+	}
+	.header__menu {
+		display: none !important;
+	}
+	.header__nav__widget {
+		display: none !important;
 	}
 	.offcanvas-menu-wrapper {
 		display: block;
@@ -3735,13 +3786,41 @@ ol {
 		width: 100%;
 	}
 }
-.hero::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.15));
-    pointer-events: none;
+@media (max-width: 360px) {
+
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+
+}
+
+/* Extra small devices (portrait phones, <576px) */
+@media (min-width: 481px) and (max-width: 575.98px) {
+  /* CSS khusus HP kecil */
+
+}
+
+/* Small devices (landscape phones, ≥576px and <768px) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+
+}
+
+/* Medium devices (tablets, ≥768px and <992px) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+
+}
+
+/* Large devices (desktops, ≥992px and <1200px) */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  
+}
+
+/* Extra large devices (large desktops, ≥1200px and <1400px) */
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+ 
+}
+
+/* Extra extra large devices (ultra wide, ≥1400px) */
+@media (min-width: 1400px) {
+ 
 }

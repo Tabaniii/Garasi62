@@ -411,6 +411,44 @@
         .card {
             animation: fadeIn 0.8s ease-out;
         }
+        @media (max-width: 360px) {
+        
+        }
+        
+        @media (min-width: 361px) and (max-width: 480px) {
+        
+        }
+        
+        /* Extra small devices (portrait phones, <576px) */
+        @media (min-width: 481px) and (max-width: 575.98px) {
+          /* CSS khusus HP kecil */
+        
+        }
+        
+        /* Small devices (landscape phones, ≥576px and <768px) */
+        @media (min-width: 576px) and (max-width: 767.98px) {
+        
+        }
+        
+        /* Medium devices (tablets, ≥768px and <992px) */
+        @media (min-width: 768px) and (max-width: 991.98px) {
+        
+        }
+        
+        /* Large devices (desktops, ≥992px and <1200px) */
+        @media (min-width: 992px) and (max-width: 1199.98px) {
+          
+        }
+        
+        /* Extra large devices (large desktops, ≥1200px and <1400px) */
+        @media (min-width: 1200px) and (max-width: 1399.98px) {
+         
+        }
+        
+        /* Extra extra large devices (ultra wide, ≥1400px) */
+        @media (min-width: 1400px) {
+         
+        }
     </style>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -659,4 +697,3 @@
     </script>
 </body>
 </html>
-

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Dashboard Admin - Garasi62</title>
+    <title>Dashboard - Garasi62</title>
     
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -747,6 +747,44 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
             transform: translateY(-3px);
         }
+        @media (max-width: 360px) {
+        
+        }
+        
+        @media (min-width: 361px) and (max-width: 480px) {
+        
+        }
+        
+        /* Extra small devices (portrait phones, <576px) */
+        @media (min-width: 481px) and (max-width: 575.98px) {
+          /* CSS khusus HP kecil */
+        
+        }
+        
+        /* Small devices (landscape phones, ≥576px and <768px) */
+        @media (min-width: 576px) and (max-width: 767.98px) {
+        
+        }
+        
+        /* Medium devices (tablets, ≥768px and <992px) */
+        @media (min-width: 768px) and (max-width: 991.98px) {
+        
+        }
+        
+        /* Large devices (desktops, ≥992px and <1200px) */
+        @media (min-width: 992px) and (max-width: 1199.98px) {
+          
+        }
+        
+        /* Extra large devices (large desktops, ≥1200px and <1400px) */
+        @media (min-width: 1200px) and (max-width: 1399.98px) {
+         
+        }
+        
+        /* Extra extra large devices (ultra wide, ≥1400px) */
+        @media (min-width: 1400px) {
+         
+        }
     </style>
 </head>
 <body>
@@ -834,6 +872,10 @@
                     @if($pendingReports > 0)
                     <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $pendingReports }}</span>
                     @endif
+                </a>
+                <a href="{{ route('admin.footer.edit') }}" class="sidebar-menu-item {{ request()->routeIs('admin.footer.*') ? 'active' : '' }}">
+                    <i class="fas fa-cog"></i>
+                    <span>Site Setting</span>
                 </a>
                 <a href="{{ route('about') }}" class="sidebar-menu-item">
                     <i class="fas fa-info-circle"></i>

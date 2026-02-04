@@ -83,13 +83,27 @@
                                     <div class="message-content">
                                         @if(!$isDeleted)
                                             <div class="message-actions">
-                                                <button class="btn-icon reply-btn" onclick="setReply('{{ $message->id }}', '{{ addslashes($senderName) }}', '{{ str_replace(array("\r", "\n"), array('\r', '\n'), addslashes($message->message)) }}')"><i class="fa fa-reply"></i></button>
-                                                @if(($message->sender_id ?? 0) === Auth::id() && !($message->is_read ?? false))
-                                                    <button class="btn-icon edit-btn" onclick="openEditModal('{{ $message->id }}', '{{ str_replace(array("\r", "\n"), array('\r', '\n'), addslashes($message->message)) }}')"><i class="fa fa-pencil"></i></button>
-                                                @endif
-                                                @if(($message->sender_id ?? 0) === Auth::id())
-                                                    <button class="btn-icon delete-btn" onclick="deleteMessage('{{ $message->id }}')"><i class="fa fa-trash"></i></button>
-                                                @endif
+                                                <button type="button" class="message-actions-trigger" aria-label="Opsi pesan">
+                                                    <i class="fa fa-ellipsis-h"></i>
+                                                </button>
+                                                <div class="message-actions-menu">
+                                                    <button class="message-action-item reply-btn" onclick="setReply('{{ $message->id }}', '{{ addslashes($senderName) }}', '{{ str_replace(array("\r", "\n"), array('\r', '\n'), addslashes($message->message)) }}')">
+                                                        <i class="fa fa-reply"></i>
+                                                        <span>Balas</span>
+                                                    </button>
+                                                    @if(($message->sender_id ?? 0) === Auth::id() && !($message->is_read ?? false))
+                                                        <button class="message-action-item edit-btn" onclick="openEditModal('{{ $message->id }}', '{{ str_replace(array("\r", "\n"), array('\r', '\n'), addslashes($message->message)) }}')">
+                                                            <i class="fa fa-pencil"></i>
+                                                            <span>Edit</span>
+                                                        </button>
+                                                    @endif
+                                                    @if(($message->sender_id ?? 0) === Auth::id())
+                                                        <button class="message-action-item delete-btn" onclick="deleteMessage('{{ $message->id }}')">
+                                                            <i class="fa fa-trash"></i>
+                                                            <span>Hapus</span>
+                                                        </button>
+                                                    @endif
+                                                </div>
                                             </div>
                                         @endif
                                         <div class="message-header">
@@ -164,17 +178,11 @@
             position: absolute;
             top: 8px;
             right: 8px;
-            display: flex;
-            gap: 6px;
-            padding: 6px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.95);
             opacity: 0;
             transform: translateY(-4px);
             transition: all 0.2s;
             pointer-events: none;
             z-index: 10;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
         }
         
         .message-content:hover .message-actions {
@@ -183,36 +191,71 @@
             pointer-events: auto;
         }
         
-        .btn-icon {
-            background: transparent;
+        .message-actions-trigger {
             border: none;
             width: 28px;
             height: 28px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 13px;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: rgba(255, 255, 255, 0.95);
             color: #444;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
             transition: all 0.2s;
         }
         
-        .btn-icon:hover {
+        .message-actions-trigger:hover {
             background: rgba(223, 45, 36, 0.12);
             color: #df2d24;
         }
 
-        .message-sent .message-actions {
-            background: rgba(255, 255, 255, 0.15);
+        .message-actions-menu {
+            position: absolute;
+            top: 34px;
+            right: 0;
+            min-width: 140px;
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+            padding: 6px;
+            display: none;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        .message-sent .btn-icon {
+        .message-actions.open .message-actions-menu {
+            display: flex;
+        }
+
+        .message-action-item {
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #1f2937;
+            transition: all 0.2s;
+        }
+
+        .message-action-item:hover {
+            background: rgba(223, 45, 36, 0.12);
+            color: #df2d24;
+        }
+
+        .message-sent .message-actions-trigger {
+            background: rgba(255, 255, 255, 0.18);
             color: #fff;
         }
-        
-        .message-sent .btn-icon:hover {
-            background: rgba(255, 255, 255, 0.2);
+
+        .message-sent .message-actions-trigger:hover {
+            background: rgba(255, 255, 255, 0.28);
             color: #fff;
         }
 
@@ -614,17 +657,63 @@
 
             .message-content {
                 max-width: 85%;
+                padding: 32px 12px 10px;
             }
 
             .message-actions {
-                position: static;
-                padding: 0;
-                background: transparent;
+                position: absolute;
+                top: 6px;
+                right: 8px;
                 opacity: 1;
                 transform: none;
                 pointer-events: auto;
                 justify-content: flex-end;
                 margin-bottom: 6px;
+            }
+            
+            .message-actions .edit-btn { display: none; }
+            
+            .message-actions-trigger {
+                width: 26px;
+                height: 26px;
+                font-size: 12px;
+            }
+            
+            .reply-preview {
+                padding: 6px 8px;
+                font-size: 11px;
+                border-radius: 8px;
+            }
+            
+            .reply-preview-text {
+                max-width: 160px;
+            }
+            
+            .reply-bar {
+                padding: 6px 10px;
+            }
+            
+            .reply-bar-label {
+                font-size: 11px;
+            }
+            
+            .reply-bar-text {
+                font-size: 12px;
+            }
+            
+            .chat-send-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 14px;
+            }
+            
+            .chat-input {
+                padding: 12px 14px;
+                font-size: 13px;
+            }
+            
+            .chat-header {
+                padding: 12px 16px;
             }
         }
     </style>
@@ -710,9 +799,17 @@
             
             const actionsHtml = isDeleted ? '' : `
                 <div class="message-actions">
-                    <button class="btn-icon reply-btn" onclick="setReply('${id}', '${safeSender}', '${safeMessage}')"><i class="fa fa-reply"></i></button>
-                    ${showEdit ? `<button class="btn-icon edit-btn" onclick="openEditModal('${id}', '${safeMessage}')"><i class="fa fa-pencil"></i></button>` : ''}
-                    ${showDelete ? `<button class="btn-icon delete-btn" onclick="deleteMessage('${id}')"><i class="fa fa-trash"></i></button>` : ''}
+                    <button type="button" class="message-actions-trigger" aria-label="Opsi pesan">
+                        <i class="fa fa-ellipsis-h"></i>
+                    </button>
+                    <div class="message-actions-menu">
+                        <button class="message-action-item reply-btn" onclick="setReply('${id}', '${safeSender}', '${safeMessage}')">
+                            <i class="fa fa-reply"></i>
+                            <span>Balas</span>
+                        </button>
+                        ${showEdit ? `<button class="message-action-item edit-btn" onclick="openEditModal('${id}', '${safeMessage}')"><i class="fa fa-pencil"></i><span>Edit</span></button>` : ''}
+                        ${showDelete ? `<button class="message-action-item delete-btn" onclick="deleteMessage('${id}')"><i class="fa fa-trash"></i><span>Hapus</span></button>` : ''}
+                    </div>
                 </div>
             `;
 
@@ -1266,6 +1363,31 @@
                 if (editBtn) editBtn.remove();
             });
         }
+
+        document.addEventListener('click', function(event) {
+            const trigger = event.target.closest('.message-actions-trigger');
+            if (trigger) {
+                event.preventDefault();
+                event.stopPropagation();
+                const container = trigger.closest('.message-actions');
+                document.querySelectorAll('.message-actions.open').forEach((item) => {
+                    if (item !== container) item.classList.remove('open');
+                });
+                if (container) container.classList.toggle('open');
+                return;
+            }
+
+            const actionItem = event.target.closest('.message-action-item');
+            if (actionItem) {
+                const container = actionItem.closest('.message-actions');
+                if (container) container.classList.remove('open');
+                return;
+            }
+
+            if (!event.target.closest('.message-actions')) {
+                document.querySelectorAll('.message-actions.open').forEach((item) => item.classList.remove('open'));
+            }
+        });
 
         if (typeof Echo !== 'undefined' && window.Echo) {
             console.log('🔌 Connecting to Pusher channel: chat.' + chatId);

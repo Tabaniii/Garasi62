@@ -1,24 +1,57 @@
 <header class="header">
+    @php
+        $siteName = \App\Models\SiteSetting::get('site_name', 'GARASI62');
+        $siteEmail = \App\Models\SiteSetting::get('site_email', \App\Models\SiteSetting::get('footer_email', 'Colorlib@gmail.com'));
+        $siteOperationalHours = \App\Models\SiteSetting::get('site_operational_hours', 'Sales: 08:00 am to 18:00 pm');
+        $siteLogo = \App\Models\SiteSetting::get('site_logo', 'img/logo.svg');
+        $sitePhone = \App\Models\SiteSetting::get('footer_phone', '(+12) 345 678 910');
+        
+        // Dynamic Social Links Logic
+        $socialLinksJson = \App\Models\SiteSetting::get('footer_social_links', '');
+        $socialLinks = [];
+        if (!empty($socialLinksJson)) {
+            $socialLinks = json_decode($socialLinksJson, true) ?? [];
+        } else {
+            // Legacy Header Fallback
+            $legacyPlatforms = [
+                'facebook' => 'site_facebook',
+                'twitter' => 'site_twitter',
+                'google' => 'site_google',
+                'instagram' => 'site_instagram'
+            ];
+            $defaultUrls = [
+                'facebook' => 'https://www.facebook.com/',
+                'twitter' => 'https://twitter.com/',
+                'google' => 'https://www.google.com/',
+                'instagram' => 'https://www.instagram.com/'
+            ];
+            foreach ($legacyPlatforms as $icon => $key) {
+                $url = \App\Models\SiteSetting::get($key, $defaultUrls[$icon]);
+                if ($url) {
+                    $socialLinks[] = ['platform' => ucfirst($icon), 'url' => $url, 'icon' => $icon];
+                }
+            }
+        }
+    @endphp
     <div class="header__top">
         <div class="container">
             <div class="row">
                 <div class="col-lg-7">
                     <ul class="header__top__widget">
-                        <li><i class="fa fa-clock-o"></i> Sales: 08:00 am to 18:00 pm</li>
-                        <li><i class="fa fa-envelope-o"></i> info@garasi62.co.id</li>
+                        <li><i class="fa fa-clock-o"></i> {{ $siteOperationalHours }}</li>
+                        <li><i class="fa fa-envelope-o"></i> {{ $siteEmail }}</li>
                     </ul>
                 </div>
                 <div class="col-lg-5">
                     <div class="header__top__right">
                         <div class="header__top__phone">
                             <i class="fa fa-phone"></i>
-                            <span>(WA) 08210008062</span>
+                            <span>{{ $sitePhone }}</span>
                         </div>
                         <div class="header__top__social">
-                            <a href="#"><i class="fa fa-facebook"></i></a>
-                            <a href="#"><i class="fa fa-twitter"></i></a>
-                            <a href="#"><i class="fa fa-google"></i></a>
-                            <a href="#"><i class="fa fa-instagram"></i></a>
+                            @foreach($socialLinks as $social)
+                                <a href="{{ $social['url'] }}" target="_blank" title="{{ $social['platform'] ?? '' }}"><i class="fa fa-{{ $social['icon'] ?? 'link' }}"></i></a>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -29,7 +62,7 @@
         <div class="row align-items-center">
             <div class="col-lg-2">
                 <div class="header__logo">
-                    <a href="/"><img src="img/logo.svg" alt=""></a>
+                    <a href="/"><img src="{{ asset($siteLogo) }}" alt="{{ $siteName }}"></a>
                 </div>
             </div>
             <div class="col-lg-10">
@@ -39,13 +72,6 @@
                             <li class="mx-3"><a href="/" class="text-white text-uppercase text-decoration-none fw-normal {{ request()->routeIs('home') || request()->routeIs('index') ? 'active' : '' }}" style="{{ request()->routeIs('home') || request()->routeIs('index') ? 'border-bottom: 2px solid #dc3545; padding-bottom: 2px;' : '' }}">Home</a></li>
                             <li class="mx-3"><a href="/car" class="text-white text-uppercase text-decoration-none fw-normal {{ request()->routeIs('cars') ? 'active' : '' }}" style="{{ request()->routeIs('cars') ? 'border-bottom: 2px solid #dc3545; padding-bottom: 2px;' : '' }}">Cars</a></li>
                             <li class="mx-3"><a href="/blog" class="text-white text-uppercase text-decoration-none fw-normal {{ request()->routeIs('blog') ? 'active' : '' }}" style="{{ request()->routeIs('blog') ? 'border-bottom: 2px solid #dc3545; padding-bottom: 2px;' : '' }}">Blog</a></li>
-                            <li class="mx-3"><a href="#" class="text-white text-uppercase text-decoration-none fw-normal">Pages</a>
-                                <ul class="dropdown">
-                                    <li><a href="/about">About Us</a></li>
-                                    <li><a href="/car-details">Car Details</a></li>
-                                    <li><a href="/blog-details">Blog Details</a></li>
-                                </ul>
-                            </li>
                             <li class="mx-3"><a href="/about" class="text-white text-uppercase text-decoration-none fw-normal {{ request()->routeIs('about') ? 'active' : '' }}" style="{{ request()->routeIs('about') ? 'border-bottom: 2px solid #dc3545; padding-bottom: 2px;' : '' }}">About</a></li>
                             <li class="mx-3"><a href="/contact" class="text-white text-uppercase text-decoration-none fw-normal {{ request()->routeIs('contact') ? 'active' : '' }}" style="{{ request()->routeIs('contact') ? 'border-bottom: 2px solid #dc3545; padding-bottom: 2px;' : '' }}">Contact</a></li>
                         </ul>
@@ -73,7 +99,7 @@
     
     @if(request()->routeIs('dashboard'))
     <!-- Breadcrumb Begin -->
-    <div class="breadcrumb-option set-bg" data-setbg="img/breadcrumb-bg.jpg">
+    <div class="breadcrumb-option set-bg" data-setbg="{{ asset('img/breadcrumb-bg.jpg') }}">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">

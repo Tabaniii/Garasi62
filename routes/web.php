@@ -18,6 +18,8 @@ use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\FooterSettingController;
+use App\Http\Controllers\AboutSettingController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 
@@ -102,6 +104,17 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{testimonial}/edit', [TestimonialController::class, 'edit'])->name('edit');
         Route::put('/{testimonial}', [TestimonialController::class, 'update'])->name('update');
         Route::delete('/{testimonial}', [TestimonialController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('sitesetting')->name('admin.footer.')->middleware('role:admin')->group(function () {
+        Route::get('/', [FooterSettingController::class, 'edit'])->name('edit');
+        Route::put('/', [FooterSettingController::class, 'update'])->name('update');
+        Route::post('/fetch-og', [FooterSettingController::class, 'fetchOgData'])->name('fetch-og');
+    });
+
+    Route::prefix('admin/about')->name('admin.about.')->middleware('role:admin')->group(function () {
+        Route::get('/', [AboutSettingController::class, 'edit'])->name('edit');
+        Route::put('/', [AboutSettingController::class, 'update'])->name('update');
     });
 
     // Comment Management (Admin Only)
@@ -205,4 +218,4 @@ Route::post('/password/reset', [App\Http\Controllers\Auth\ResetPasswordControlle
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');

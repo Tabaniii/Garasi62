@@ -164,9 +164,6 @@
             <div class="messages-modal-header">
                 <h3 class="messages-modal-title">
                     Messages
-                    @if($unreadCount > 0)
-                    <span class="messages-badge-header">{{ $unreadCount }}</span>
-                    @endif
                 </h3>
                 <div class="messages-modal-actions">
                     <button class="messages-modal-btn" onclick="maximizeMessages()" title="Maximize">
@@ -470,6 +467,27 @@
     padding: 2px 8px;
     font-size: 12px;
     font-weight: 700;
+}
+
+.messages-connection-status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: #374151;
+    color: #e5e7eb;
+}
+.messages-connection-status.connected {
+    background: #065f46;
+    color: #ecfdf5;
+}
+.messages-connection-status.polling {
+    background: #6b7280;
+    color: #f3f4f6;
+}
+.messages-connection-status.error {
+    background: #7f1d1d;
+    color: #fee2e2;
 }
 
 .messages-modal-actions {
@@ -932,6 +950,8 @@ function openMiniChat(chatId, userName, otherUserId) {
     
     // Close messages modal
     closeMessagesModal();
+
+    markMiniChatAsRead(chatId);
     
     // Load messages
     loadMiniChatMessages();
@@ -939,6 +959,12 @@ function openMiniChat(chatId, userName, otherUserId) {
     // Setup realtime listeners or fallback to polling
     const realtimeReady = setupMiniChatRealtime(chatId, otherUserId);
     if (!realtimeReady) {
+        const status = document.getElementById('messagesConnectionStatus');
+        if (status) {
+            status.textContent = 'Mode polling';
+            status.classList.remove('connected','error');
+            status.classList.add('polling');
+        }
         if (messagesInterval) {
             clearInterval(messagesInterval);
         }
@@ -950,6 +976,31 @@ function openMiniChat(chatId, userName, otherUserId) {
         const input = document.getElementById('miniChatInput');
         if (input) input.focus();
     }, 100);
+}
+
+function markMiniChatAsRead(chatId) {
+    const item = document.querySelector(`.messages-item[data-chat-id="${chatId}"]`);
+    if (item) {
+        item.classList.remove('messages-item-unread');
+        const badge = item.querySelector('.messages-item-badge');
+        if (badge) badge.remove();
+    }
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    if (!chatId || !csrfToken) {
+        refreshUnreadCounts();
+        return;
+    }
+    fetch(`/chat/${encodeURIComponent(chatId)}/mark-read`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        keepalive: true
+    })
+    .then(() => refreshUnreadCounts())
+    .catch(() => refreshUnreadCounts());
 }
 
 function closeMiniChat() {
@@ -1114,8 +1165,20 @@ function setupMiniChatRealtime(chatId, otherUserId) {
     try {
         miniChatChannel = window.Echo.private(`chat.${chatId}`);
         miniChatPresence = window.Echo.join(`presence-chat.${chatId}`);
+        const status = document.getElementById('messagesConnectionStatus');
+        if (status) {
+            status.textContent = 'Terhubung';
+            status.classList.remove('polling','error');
+            status.classList.add('connected');
+        }
     } catch (e) {
         console.warn('Realtime setup failed, fallback to polling', e);
+        const status = document.getElementById('messagesConnectionStatus');
+        if (status) {
+            status.textContent = 'Gagal realtime';
+            status.classList.remove('connected','polling');
+            status.classList.add('error');
+        }
         return false;
     }
     miniChatPresence.here((users) => {

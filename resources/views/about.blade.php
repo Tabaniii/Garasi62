@@ -1,8 +1,47 @@
 @extends('template.temp')
 
-<!-- @section('title', 'Home - GARASI62') Set the title for the page -->
+@section('meta')
+    <meta name="description" content="Tentang Garasi62 - Kami menyediakan segala kebutuhan mobil Anda. Jual beli dan sewa mobil terpercaya.">
+    <meta name="keywords" content="Tentang Garasi62, Profil Garasi62, Dealer Mobil">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Tentang Kami - Garasi62">
+    <meta property="og:description" content="Tentang Garasi62 - Kami menyediakan segala kebutuhan mobil Anda. Jual beli dan sewa mobil terpercaya.">
+    <meta property="og:image" content="{{ asset('garasi62/img/about/about-pic.jpg') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="GARASI62">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Tentang Kami - Garasi62">
+    <meta name="twitter:description" content="Tentang Garasi62 - Kami menyediakan segala kebutuhan mobil Anda.">
+    <meta name="twitter:image" content="{{ asset('garasi62/img/about/about-pic.jpg') }}">
+@endsection
+
+
 @include('components.messages-widget')
 @section('content')
+    @php
+        $aboutTitle = \App\Models\SiteSetting::get('about_title', 'Wellcome To HVAC Auto Online');
+        $aboutSubtitle = \App\Models\SiteSetting::get('about_subtitle', 'We Provide Everything You Need To A Car');
+        $aboutDescription = \App\Models\SiteSetting::get('about_description', 'First I will explain what contextual advertising is. Contextual advertising means the advertising of products on a website according to the content the page is displaying. For example if the content of a website was information on a Ford truck then the advertisements');
+        $aboutFeature1Title = \App\Models\SiteSetting::get('about_feature_1_title', 'Quality Assurance System');
+        $aboutFeature1Text = \App\Models\SiteSetting::get('about_feature_1_text', 'It seems though that some of the biggest problems with the internet advertising trends are the lack of');
+        $aboutFeature1Icon = \App\Models\SiteSetting::get('about_feature_1_icon', 'img/about/af-1.png');
+        $aboutFeature2Title = \App\Models\SiteSetting::get('about_feature_2_title', 'Accurate Testing Processes');
+        $aboutFeature2Text = \App\Models\SiteSetting::get('about_feature_2_text', 'Where do you register your complaints? How can you protest in any form against companies whose');
+        $aboutFeature2Icon = \App\Models\SiteSetting::get('about_feature_2_icon', 'img/about/af-2.png');
+        $aboutFeature3Title = \App\Models\SiteSetting::get('about_feature_3_title', 'Infrastructure Integration Technology');
+        $aboutFeature3Text = \App\Models\SiteSetting::get('about_feature_3_text', 'So in final analysis: it’s true, I hate peeping Toms, but if I had to choose, I’d take one any day over an');
+        $aboutFeature3Icon = \App\Models\SiteSetting::get('about_feature_3_icon', 'img/about/af-3.png');
+        $aboutImage = \App\Models\SiteSetting::get('about_image', 'img/about/about-pic.jpg');
+        $aboutMissionTitle = \App\Models\SiteSetting::get('about_mission_title', 'Our Mission');
+        $aboutMissionText = \App\Models\SiteSetting::get('about_mission_text', 'Now, I’m not like Robin, that weirdo from my cultural anthropology class; I think that advertising is something that has its place in our society; which for better or worse is structured along a marketplace economy. But, simply because I feel advertising has a right to exist, doesn’t mean that I like or agree with it, in its');
+        $aboutVisionTitle = \App\Models\SiteSetting::get('about_vision_title', 'Our Vision');
+        $aboutVisionText = \App\Models\SiteSetting::get('about_vision_text', 'Where do you register your complaints? How can you protest in any form against companies whose advertising techniques you don’t agree with? You don’t. And on another point of difference between traditional products and their advertising and those of the internet nature, simply ignoring internet advertising is');
+    @endphp
+
     <!-- Breadcrumb End -->
     <div class="breadcrumb-option set-bg" data-setbg="img/breadcrumb-bg.jpg">
         <div class="container">
@@ -27,11 +66,8 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section-title about-title">
-                        <h2>Wellcome To HVAC Auto Online <br />We Provide Everything You Need To A Car</h2>
-                        <p>First I will explain what contextual advertising is. Contextual advertising means the
-                            advertising of products on a website according to<br /> the content the page is displaying.
-                            For example if the content of a website was information on a Ford truck then the
-                            advertisements</p>
+                        <h2>{{ $aboutTitle }} <br />{{ $aboutSubtitle }}</h2>
+                        <p>{{ $aboutDescription }}</p>
                     </div>
                 </div>
             </div>
@@ -39,26 +75,23 @@
                 <div class="row">
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="about__feature__item">
-                            <img src="img/about/af-1.png" alt="">
-                            <h5>Quality Assurance System</h5>
-                            <p>It seems though that some of the biggest problems with the internet advertising trends
-                                are the lack of</p>
+                            <img src="{{ asset($aboutFeature1Icon) }}" alt="">
+                            <h5>{{ $aboutFeature1Title }}</h5>
+                            <p>{{ $aboutFeature1Text }}</p>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="about__feature__item">
-                            <img src="img/about/af-2.png" alt="">
-                            <h5>Accurate Testing Processes</h5>
-                            <p>Where do you register your complaints? How can you protest in any form against companies
-                                whose</p>
+                            <img src="{{ asset($aboutFeature2Icon) }}" alt="">
+                            <h5>{{ $aboutFeature2Title }}</h5>
+                            <p>{{ $aboutFeature2Text }}</p>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="about__feature__item">
-                            <img src="img/about/af-3.png" alt="">
-                            <h5>Infrastructure Integration Technology</h5>
-                            <p>So in final analysis: it’s true, I hate peeping Toms, but if I had to choose, I’d take
-                                one any day over an</p>
+                            <img src="{{ asset($aboutFeature3Icon) }}" alt="">
+                            <h5>{{ $aboutFeature3Title }}</h5>
+                            <p>{{ $aboutFeature3Text }}</p>
                         </div>
                     </div>
                 </div>
@@ -66,25 +99,19 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="about__pic">
-                        <img src="img/about/about-pic.jpg" alt="">
+                        <img src="{{ asset($aboutImage) }}" alt="">
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6">
                     <div class="about__item">
-                        <h5>Our Mission</h5>
-                        <p>Now, I’m not like Robin, that weirdo from my cultural anthropology class; I think that
-                            advertising is something that has its place in our society; which for better or worse is
-                            structured along a marketplace economy. But, simply because I feel advertising has a right
-                            to exist, doesn’t mean that I like or agree with it, in its</p>
+                        <h5>{{ $aboutMissionTitle }}</h5>
+                        <p>{{ $aboutMissionText }}</p>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6">
                     <div class="about__item">
-                        <h5>Our Vision</h5>
-                        <p>Where do you register your complaints? How can you protest in any form against companies
-                            whose advertising techniques you don’t agree with? You don’t. And on another point of
-                            difference between traditional products and their advertising and those of the internet
-                            nature, simply ignoring internet advertising is </p>
+                        <h5>{{ $aboutVisionTitle }}</h5>
+                        <p>{{ $aboutVisionText }}</p>
                     </div>
                 </div>
             </div>

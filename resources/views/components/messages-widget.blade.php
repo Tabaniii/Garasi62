@@ -956,6 +956,11 @@ function openMiniChat(chatId, userName, otherUserId) {
     // Load messages
     loadMiniChatMessages();
     
+    // Start polling for new messages
+    if (messagesInterval) {
+        clearInterval(messagesInterval);
+    }
+    messagesInterval = setInterval(loadMiniChatMessages, 3000);
     // Setup realtime listeners or fallback to polling
     const realtimeReady = setupMiniChatRealtime(chatId, otherUserId);
     if (!realtimeReady) {
@@ -1096,7 +1101,7 @@ function loadMiniChatMessages() {
         
         if (data.messages && Array.isArray(data.messages) && data.messages.length > 0) {
             data.messages.forEach(message => {
-                if (!message) return;
+                if (!message || !message.message) return;
                 
                 const isSent = parseInt(message.sender_id) === parseInt({{ Auth::id() }});
                 const messageDiv = document.createElement('div');
@@ -1559,3 +1564,4 @@ window.addEventListener('load', function() {
 </script>
 @endif
 @endauth
+

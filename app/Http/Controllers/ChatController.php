@@ -81,6 +81,7 @@ class ChatController extends Controller
                     ];
                 });
         } else {
+            // Fallback to cache
             $messages = $this->getChatMessages($chatId);
         }
 
@@ -384,6 +385,7 @@ class ChatController extends Controller
                     ];
                 });
         } else {
+            // Fallback to cache
             $messages = $this->getChatMessages($chatId);
         }
 
@@ -642,7 +644,7 @@ class ChatController extends Controller
         // Create virtual chat object for cache compatibility
         $chat = (object)[
             'id' => $chatId,
-            'db_id' => $dbChat->id,
+            'db_id' => $dbChat->id, // Database ID
             'buyer_id' => $chatData['buyer_id'],
             'seller_id' => $chatData['seller_id'],
             'car_id' => $chatData['car_id'],
@@ -652,7 +654,7 @@ class ChatController extends Controller
         $message = (object)[
             'id' => $dbMessage->id,
             'chat_id' => $chatId,
-            'db_chat_id' => $dbChat->id,
+            'db_chat_id' => $dbChat->id, // Database chat ID
             'sender_id' => $user->id,
             'sender' => $user,
             'sender_name' => $user->name,

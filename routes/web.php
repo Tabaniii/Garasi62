@@ -149,6 +149,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{chatId}/message/{messageId}', [ChatController::class, 'updateMessage'])->name('update-message');
         Route::delete('/{chatId}/message/{messageId}', [ChatController::class, 'deleteMessage'])->name('delete-message');
         Route::get('/{chatId}/messages', [ChatController::class, 'getMessages'])->name('messages');
+        Route::delete('/delete', [ChatController::class, 'destroy'])->name('destroy');
+        Route::delete('/{chatId}', [ChatController::class, 'destroySingle'])->name('destroy.single');
         Route::post('/{chatId}/typing', [ChatController::class, 'typing'])->name('typing');
     });
 

@@ -1,5 +1,35 @@
 @extends('template.temp')
 
+    @section('meta')
+    <meta name="description" content="{{ Str::limit(strip_tags($blog->content), 150) }}">
+    <meta name="keywords" content="{{ $blog->category ?? 'Blog' }}, Garasi62, Berita Otomotif, {{ $blog->title }}">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ $blog->title }} - Garasi62">
+    <meta property="og:description" content="{{ Str::limit(strip_tags($blog->content), 150) }}">
+    <meta property="og:image" content="{{ $blog->image ? asset('storage/' . $blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="GARASI62">
+    
+    <meta property="article:published_time" content="{{ $blog->published_at ? $blog->published_at->toIso8601String() : $blog->created_at->toIso8601String() }}">
+    <meta property="article:author" content="{{ $blog->author }}">
+    @if($blog->category)
+        <meta property="article:section" content="{{ $blog->category }}">
+    @endif
+    @if($blog->tags && is_array($blog->tags))
+        @foreach($blog->tags as $tag)
+            <meta property="article:tag" content="{{ $tag }}">
+        @endforeach
+    @endif
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $blog->title }} - Garasi62">
+    <meta name="twitter:description" content="{{ Str::limit(strip_tags($blog->content), 150) }}">
+    <meta name="twitter:image" content="{{ $blog->image ? asset('storage/' . $blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
+@endsection
+
 @section('title', $blog->title . ' - GARASI62')
 @include('components.messages-widget')
 

@@ -3,13 +3,42 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="description" content="HVAC Template">
-    <meta name="keywords" content="HVAC, unica, creative, html">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>GARASI62</title>
 
+    @hasSection('meta')
+        @yield('meta')
+    @else
+        @php
+            $appName = config('app.name', 'GARASI62');
+            $pageTitle = trim($__env->yieldContent('title')) ?: $appName;
+            $routeName = \Illuminate\Support\Facades\Route::currentRouteName();
+            $ogTitle = $pageTitle;
+            $ogDescription = $appName . ' - ' . ($routeName ? ucwords(str_replace(['.', '-'], ' ', $routeName)) : 'Platform jual beli dan sewa mobil terpercaya');
+            $heroPath = public_path('garasi62/img/hero-bg.jpg');
+            $logoPath = public_path('garasi62/img/logo.png');
+            $ogImage = file_exists($heroPath) ? asset('garasi62/img/hero-bg.jpg') : (file_exists($logoPath) ? asset('garasi62/img/logo.png') : asset('favicon.ico'));
+            $locale = app()->getLocale();
+            $ogLocale = $locale === 'id' ? 'id_ID' : ($locale === 'en' ? 'en_US' : 'id_ID');
+        @endphp
+        <meta name="description" content="{{ $ogDescription }}">
+        <meta name="keywords" content="{{ $appName }}, Jual Beli Mobil, Sewa Mobil, Mobil Bekas, Mobil Baru">
+        <meta property="og:title" content="{{ $ogTitle }}">
+        <meta property="og:description" content="{{ $ogDescription }}">
+        <meta property="og:image" content="{{ $ogImage }}">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:site_name" content="{{ $appName }}">
+        <meta property="og:locale" content="{{ $ogLocale }}">
+        <meta property="og:type" content="website">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $ogTitle }}">
+        <meta name="twitter:description" content="{{ $ogDescription }}">
+        <meta name="twitter:image" content="{{ $ogImage }}">
+    @endif
+
+    <title>@yield('title', 'GARASI62')</title> 
+    
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 
@@ -25,7 +54,7 @@
     <link rel="stylesheet" href="{{ asset('garasi62/css/owl.carousel.min.css')}}" type="text/css">
     <link rel="stylesheet" href="{{ asset('garasi62/css/slicknav.min.css')}}" type="text/css">
     <link rel="stylesheet" href="{{ asset('garasi62/css/style.css')}}" type="text/css">
-    
+
     @stack('head')
 </head>
 
@@ -45,6 +74,27 @@
         </div>
         <div class="offcanvas__logo">
             <a href="./index.html"><img src="img/logo.svg" alt=""></a>
+        </div>
+        <nav class="offcanvas__nav">
+            <ul>
+                <li><a href="/" class="{{ request()->routeIs('home') || request()->routeIs('index') ? 'active' : '' }}">Home</a></li>
+                <li><a href="/car" class="{{ request()->routeIs('cars') ? 'active' : '' }}">Cars</a></li>
+                <li><a href="/blog" class="{{ request()->routeIs('blog') ? 'active' : '' }}">Blog</a></li>
+                <li><a href="/about" class="{{ request()->routeIs('about') ? 'active' : '' }}">About</a></li>
+                <li><a href="/contact" class="{{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="offcanvas__auth">
+            @auth
+                <a href="{{ route('dashboard') }}" class="site-btn">Dashboard</a>
+                <form action="{{ route('logout') }}" method="POST" class="m-0">
+                    @csrf
+                    <button type="submit" class="site-btn">Keluar</button>
+                </form>
+            @else
+                <a href="{{ route('login') }}" class="site-btn">Masuk</a>
+                <a href="{{ route('register') }}" class="site-btn">Daftar</a>
+            @endauth
         </div>
         <div id="mobile-menu-wrap"></div>
         <ul class="offcanvas__widget__add">

@@ -1,6 +1,28 @@
 @extends('template.temp')
 
-<!-- @section('title', 'Home - GARASI62') Set the title for the page -->
+@section('meta')
+    @php
+        $appName = config('app.name', 'GARASI62');
+        $ogTitle = 'Tentang Kami - ' . $appName;
+        $ogDescription = 'Tentang ' . $appName . ' - Kami menyediakan segala kebutuhan mobil Anda. Jual beli dan sewa mobil terpercaya.';
+        $defaultImgPath = public_path('garasi62/img/about/about-pic.jpg');
+        $ogImage = file_exists($defaultImgPath) ? asset('garasi62/img/about/about-pic.jpg') : asset('garasi62/img/logo.png');
+    @endphp
+    <meta name="description" content="{{ $ogDescription }}">
+    <meta name="keywords" content="Tentang {{ $appName }}, Profil, Dealer Mobil">
+    <meta property="og:title" content="{{ $ogTitle }}">
+    <meta property="og:description" content="{{ $ogDescription }}">
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ $appName }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDescription }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
+@endsection
+
+@section('title', 'About Us - GARASI62')
 @include('components.messages-widget')
 @section('content')
     <!-- Breadcrumb End -->

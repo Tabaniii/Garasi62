@@ -614,6 +614,7 @@
 
             .message-content {
                 max-width: 85%;
+                padding: 10px 12px;
             }
 
             .message-actions {
@@ -625,6 +626,51 @@
                 pointer-events: auto;
                 justify-content: flex-end;
                 margin-bottom: 6px;
+            }
+            
+            .message-actions .edit-btn { display: none; }
+            
+            .btn-icon {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+            
+            .reply-preview {
+                padding: 6px 8px;
+                font-size: 11px;
+                border-radius: 8px;
+            }
+            
+            .reply-preview-text {
+                max-width: 160px;
+            }
+            
+            .reply-bar {
+                padding: 6px 10px;
+            }
+            
+            .reply-bar-label {
+                font-size: 11px;
+            }
+            
+            .reply-bar-text {
+                font-size: 12px;
+            }
+            
+            .chat-send-btn {
+                width: 38px;
+                height: 38px;
+                font-size: 14px;
+            }
+            
+            .chat-input {
+                padding: 12px 14px;
+                font-size: 13px;
+            }
+            
+            .chat-header {
+                padding: 12px 16px;
             }
         }
     </style>

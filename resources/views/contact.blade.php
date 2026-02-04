@@ -1,6 +1,29 @@
 @extends('template.temp')
 
-<!-- @section('title', 'Home - GARASI62') Set the title for the page -->
+@section('meta')
+    @php
+        $appName = config('app.name', 'GARASI62');
+        $ogTitle = 'Hubungi Kami - ' . $appName;
+        $ogDescription = 'Hubungi ' . $appName . ' via WA 08210008062 atau email info@garasi62.co.id.';
+        $fallbackImg = asset('garasi62/img/logo.png');
+        $bannerImgPath = public_path('garasi62/img/footer-bg.jpg');
+        $ogImage = file_exists($bannerImgPath) ? asset('garasi62/img/footer-bg.jpg') : $fallbackImg;
+    @endphp
+    <meta name="description" content="{{ $ogDescription }}">
+    <meta name="keywords" content="Kontak {{ $appName }}, Alamat, Telepon">
+    <meta property="og:title" content="{{ $ogTitle }}">
+    <meta property="og:description" content="{{ $ogDescription }}">
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ $appName }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDescription }}">
+    <meta name="twitter:image" content="{{ $ogImage }}">
+@endsection
+
+@section('title', 'Contact Us - GARASI62')
 @include('components.messages-widget')
 @section('content')
     <!-- Breadcrumb End -->

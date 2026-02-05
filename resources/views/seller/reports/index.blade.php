@@ -5,7 +5,7 @@
 
 <!-- Stats Cards -->
 <div class="row g-4 mb-5">
-    <div class="col-lg-6 col-md-6">
+    <div class="col-lg-4 col-md-6">
         <div class="stat-card animate-fade-in" style="animation-delay: 0.1s;">
             <div class="stat-card-icon yellow animate-bounce-in">
                 <i class="fas fa-hourglass-half"></i>
@@ -14,24 +14,107 @@
             <div class="stat-card-label">Laporan Menunggu Review</div>
         </div>
     </div>
-    <div class="col-lg-6 col-md-6">
+    <div class="col-lg-4 col-md-6">
         <div class="stat-card animate-fade-in" style="animation-delay: 0.2s;">
             <div class="stat-card-icon red animate-bounce-in">
                 <i class="fas fa-flag"></i>
             </div>
             <div class="stat-card-value animate-count-up">{{ $stats['total'] }}</div>
-            <div class="stat-card-label">Total Laporan</div>
+            <div class="stat-card-label">Total Laporan User</div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+        <div class="stat-card animate-fade-in" style="animation-delay: 0.3s;">
+            <div class="stat-card-icon red animate-bounce-in">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-card-value animate-count-up">{{ $stats['rejected_cars'] }}</div>
+            <div class="stat-card-label">Mobil Ditolak Admin</div>
         </div>
     </div>
 </div>
 
 <!-- Reports Table -->
 <div class="row g-4">
+    <!-- Rejected Cars Section -->
+    <div class="col-12 mb-4">
+        <div class="info-card animate-fade-in">
+            <div class="info-card-header">
+                <h5 class="info-card-title text-danger">
+                    <i class="fas fa-times-circle me-2"></i>Mobil Ditolak Admin
+                </h5>
+            </div>
+
+            @if(isset($rejectedCars) && $rejectedCars->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Tanggal Ditolak</th>
+                                <th>Mobil</th>
+                                <th>Alasan Penolakan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($rejectedCars as $car)
+                            @php
+                                $lastRejection = $car->approvals->first();
+                            @endphp
+                            <tr>
+                                <td>
+                                    <div class="date-info">
+                                        <strong>{{ $lastRejection ? $lastRejection->created_at->format('d M Y') : '-' }}</strong><br>
+                                        <small class="text-muted">{{ $lastRejection ? $lastRejection->created_at->format('H:i') : '-' }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="car-info">
+                                        <h6 class="mb-1">{{ strtoupper($car->brand) }} {{ $car->nama }}</h6>
+                                        <div class="d-flex align-items-center">
+                                            @if(isset($car->image[0]))
+                                                <img src="{{ asset('storage/' . $car->image[0]) }}" alt="Car" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin-right: 10px;">
+                                            @endif
+                                            <span class="badge bg-danger">Ditolak</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    @if($lastRejection && $lastRejection->notes)
+                                        <div class="alert alert-danger mb-0 p-2" style="font-size: 0.9rem; background-color: #fef2f2; border-color: #fecaca; color: #991b1b;">
+                                            <i class="fas fa-exclamation-circle me-1"></i>
+                                            {{ $lastRejection->notes }}
+                                        </div>
+                                    @else
+                                        <span class="text-muted">Tidak ada catatan</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('cars.edit', $car->id) }}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit me-1"></i>Edit & Ajukan Ulang
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="text-center py-4">
+                    <div class="text-muted">
+                        <p class="mb-0">Tidak ada mobil yang ditolak oleh admin.</p>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- User Reports Section -->
     <div class="col-12">
         <div class="info-card animate-fade-in">
             <div class="info-card-header">
                 <h5 class="info-card-title">
-                    <i class="fas fa-flag me-2"></i>Daftar Laporan Mobil Saya
+                    <i class="fas fa-flag me-2"></i>Laporan Dari Pengguna (Mobil Di-Unpublish)
                 </h5>
             </div>
 

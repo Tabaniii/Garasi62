@@ -137,6 +137,14 @@
             width: 100%;
             z-index: 9999;
         }
+
+        /* Ensure modals appear above fixed header */
+        .modal {
+            z-index: 10001;
+        }
+        .modal-backdrop {
+            z-index: 10000;
+        }
     </style>
 
     @stack('head')

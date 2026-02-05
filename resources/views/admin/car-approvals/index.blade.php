@@ -1,43 +1,43 @@
 @extends('layouts.admin')
 
 @section('content')
-<h1 class="page-title mb-4">Persetujuan Mobil</h1>
+<h1 class="page-title mb-3">Persetujuan Mobil</h1>
 
 <!-- Stats Cards -->
-<div class="row g-4 mb-5">
+<div class="row g-3 mb-3">
     <div class="col-lg-4 col-md-6">
-        <div class="stat-card animate-fade-in" style="animation-delay: 0.1s;">
-            <div class="stat-card-icon yellow animate-bounce-in">
+        <div class="stat-card animate-fade-in" style="padding: 16px; animation-delay: 0.1s;">
+            <div class="stat-card-icon yellow" style="width: 48px; height: 48px; font-size: 22px; margin-bottom: 12px;">
                 <i class="fas fa-clock"></i>
             </div>
-            <div class="stat-card-value animate-count-up">{{ $stats['pending'] }}</div>
-            <div class="stat-card-label">Menunggu Persetujuan</div>
+            <div class="stat-card-value animate-count-up" style="font-size: 22px;">{{ $stats['pending'] }}</div>
+            <div class="stat-card-label" style="font-size: 12px;">Menunggu Persetujuan</div>
         </div>
     </div>
     <div class="col-lg-4 col-md-6">
-        <div class="stat-card animate-fade-in" style="animation-delay: 0.2s;">
-            <div class="stat-card-icon green animate-bounce-in">
+        <div class="stat-card animate-fade-in" style="padding: 16px; animation-delay: 0.2s;">
+            <div class="stat-card-icon green" style="width: 48px; height: 48px; font-size: 22px; margin-bottom: 12px;">
                 <i class="fas fa-check-circle"></i>
             </div>
-            <div class="stat-card-value animate-count-up">{{ $stats['approved'] }}</div>
-            <div class="stat-card-label">Disetujui</div>
+            <div class="stat-card-value animate-count-up" style="font-size: 22px;">{{ $stats['approved'] }}</div>
+            <div class="stat-card-label" style="font-size: 12px;">Disetujui</div>
         </div>
     </div>
     <div class="col-lg-4 col-md-6">
-        <div class="stat-card animate-fade-in" style="animation-delay: 0.3s;">
-            <div class="stat-card-icon red animate-bounce-in">
+        <div class="stat-card animate-fade-in" style="padding: 16px; animation-delay: 0.3s;">
+            <div class="stat-card-icon red" style="width: 48px; height: 48px; font-size: 22px; margin-bottom: 12px;">
                 <i class="fas fa-times-circle"></i>
             </div>
-            <div class="stat-card-value animate-count-up">{{ $stats['rejected'] }}</div>
-            <div class="stat-card-label">Ditolak</div>
+            <div class="stat-card-value animate-count-up" style="font-size: 22px;">{{ $stats['rejected'] }}</div>
+            <div class="stat-card-label" style="font-size: 12px;">Ditolak</div>
         </div>
     </div>
 </div>
 
 <!-- Pending Cars List -->
-<div class="row g-4">
+<div class="row g-3">
     <div class="col-12">
-        <div class="info-card animate-fade-in">
+        <div class="info-card animate-fade-in" style="padding: 20px;">
             <div class="info-card-header">
                 <h5 class="info-card-title">
                     <i class="fas fa-list me-2"></i>Mobil Menunggu Persetujuan
@@ -51,15 +51,15 @@
 
             @if($pendingCars->count() > 0)
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table table-hover table-sm align-middle">
                         <thead class="table-dark">
                             <tr>
-                                <th>Gambar</th>
+                                <th style="width: 56px;">Gambar</th>
                                 <th>Mobil</th>
                                 <th>Penjual</th>
-                                <th>Harga</th>
-                                <th>Tanggal Post</th>
-                                <th>Aksi</th>
+                                <th class="text-end" style="width: 140px;">Harga</th>
+                                <th style="width: 130px;">Tanggal Post</th>
+                                <th style="width: 120px;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -78,7 +78,7 @@
                                 </td>
                                 <td>
                                     <div class="car-info">
-                                        <h6 class="mb-1">{{ strtoupper($car->brand) }} {{ $car->nama }}</h6>
+                                        <h6 class="mb-1" style="font-size: 13px;">{{ strtoupper($car->brand) }} {{ $car->nama }}</h6>
                                         <small class="text-muted">
                                             <i class="fas fa-calendar-alt me-1"></i>{{ $car->tahun }}
                                             <i class="fas fa-tachometer-alt ms-2 me-1"></i>{{ number_format($car->kilometer, 0, ',', '.') }} km
@@ -96,7 +96,7 @@
                                         <span class="text-muted">N/A</span>
                                     @endif
                                 </td>
-                                <td>
+                                <td class="text-end">
                                     <span class="car-price">Rp {{ number_format($car->harga, 0, ',', '.') }}</span>
                                     @if($car->tipe == 'rent')
                                         <br><small class="text-muted">per hari</small>
@@ -203,20 +203,29 @@
 </div>
 
 <style>
+.table.table-sm thead th {
+    font-size: 12px;
+}
+.table.table-sm tbody td {
+    font-size: 12px;
+}
+.btn-group .btn {
+    padding: 4px 8px;
+}
 .car-thumbnail {
-    width: 60px;
-    height: 45px;
+    width: 48px;
+    height: 36px;
     object-fit: cover;
-    border-radius: 5px;
+    border-radius: 4px;
     border: 1px solid #e9ecef;
 }
 
 .car-thumbnail-placeholder {
-    width: 60px;
-    height: 45px;
+    width: 48px;
+    height: 36px;
     background: #f8f9fa;
     border: 1px solid #e9ecef;
-    border-radius: 5px;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -230,21 +239,21 @@
 }
 
 .car-price {
-    font-weight: 700;
+    font-weight: 600;
     color: #dc2626;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .seller-info {
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .info-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
     border-bottom: 2px solid #f3f4f6;
 }
 </style>

@@ -157,6 +157,26 @@
             <p class="text-muted">Informasi penjual tidak tersedia</p>
             @endif
         </div>
+        
+        @if(!empty($car->resubmission_notes))
+        <div class="info-card animate-slide-in-right mb-4">
+            <div class="info-card-header">
+                <h5 class="info-card-title">
+                    <i class="fas fa-sticky-note me-2"></i>Catatan Pengajuan Ulang Seller
+                </h5>
+            </div>
+            <div>
+                <div class="alert alert-warning mb-0">
+                    {{ $car->resubmission_notes }}
+                    @if(!empty($car->resubmitted_at))
+                        <div class="mt-2">
+                            <small class="text-muted"><i class="fas fa-clock me-1"></i>Dikirim: {{ \Carbon\Carbon::parse($car->resubmitted_at)->format('d M Y, H:i') }}</small>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @endif
 
         <!-- Approval Actions -->
         <div class="info-card animate-slide-in-right">

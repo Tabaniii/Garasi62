@@ -109,17 +109,28 @@ class ReportController extends Controller
     {
         $user = Auth::user();
 
+        // Get reports (cars unpublished due to user reports)
         $reports = Report::with(['car', 'reporter', 'reviewer'])
             ->where('seller_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
+        // Get cars rejected by admin (during initial approval)
+        $rejectedCars = car::with(['approvals' => function($q) {
+                $q->where('action', 'rejected')->orderBy('created_at', 'desc');
+            }])
+            ->where('seller_id', $user->id)
+            ->where('status', 'rejected')
+            ->orderBy('updated_at', 'desc')
+            ->get();
+
         $stats = [
             'pending' => Report::where('seller_id', $user->id)->where('status', 'pending')->count(),
             'total' => Report::where('seller_id', $user->id)->count(),
+            'rejected_cars' => $rejectedCars->count(),
         ];
 
-        return view('seller.reports.index', compact('reports', 'stats'));
+        return view('seller.reports.index', compact('reports', 'stats', 'rejectedCars'));
     }
 
     /**

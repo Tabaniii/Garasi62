@@ -895,7 +895,7 @@
                     <span class="car-status-badge {{ $car->tipe == 'rent' ? 'badge-rent' : 'badge-sale' }}">
                         {{ $car->tipe == 'rent' ? 'For Rent' : 'For Sale' }}
                     </span>
-                    @if(Auth::user()->role === 'admin')
+                    @if(Auth::user()->role === 'admin' || Auth::user()->role === 'seller')
                     <span class="car-status-badge 
                         @if($car->status == 'approved') badge-approved
                         @elseif($car->status == 'pending') badge-pending
@@ -909,6 +909,25 @@
                     @endif
                 </div>
                 @if(Auth::user()->role === 'seller' && $car->status == 'rejected')
+                    @php
+                        $lastApprovalRejection = $car->approvals->where('action', 'rejected')->sortByDesc(function($a){ return $a->approved_at ?? $a->created_at; })->first();
+                    @endphp
+                    @if($lastApprovalRejection)
+                    <div style="margin-top: 10px; padding: 10px 12px; background: #fee2e2; border-left: 3px solid #ef4444; border-radius: 5px;">
+                        <p style="margin: 0; font-size: 11px; color: #7f1d1d; display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-times-circle" style="font-size: 12px;"></i>
+                            <strong>Ditolak oleh admin</strong>
+                            <span style="margin-left: auto; font-size: 10px; color: #991b1b;">
+                                {{ ($lastApprovalRejection->approved_at ?? $lastApprovalRejection->created_at)->format('d M Y, H:i') }}
+                            </span>
+                        </p>
+                        @if($lastApprovalRejection->notes)
+                        <p style="margin: 4px 0 0 0; font-size: 11px; color: #7f1d1d;">
+                            {{ $lastApprovalRejection->notes }}
+                        </p>
+                        @endif
+                    </div>
+                    @endif
                     @php
                         $unpublishReport = $car->reports->where('status', 'resolved')->whereNotNull('admin_notes')->first();
                     @endphp
@@ -1322,5 +1341,3 @@ function confirmDeleteCar(button) {
 </style>
 @endpush
 @endsection
-
-

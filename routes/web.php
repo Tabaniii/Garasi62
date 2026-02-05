@@ -128,6 +128,7 @@ Route::middleware(['auth'])->group(function () {
     // Car Approval Management (Admin Only)
     Route::prefix('admin/car-approvals')->name('admin.car-approvals.')->middleware('role:admin')->group(function () {
         Route::get('/', [CarApprovalController::class, 'index'])->name('index');
+        Route::get('/resubmissions', [CarApprovalController::class, 'resubmissionsIndex'])->name('resubmissions.index');
         Route::get('/history', [CarApprovalController::class, 'history'])->name('history');
         Route::get('/{car}', [CarApprovalController::class, 'show'])->name('show');
         Route::post('/{car}/approve', [CarApprovalController::class, 'approve'])->name('approve');
@@ -199,6 +200,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [ReportController::class, 'sellerIndex'])->name('index');
         Route::get('/{report}', [ReportController::class, 'show'])->name('show');
     });
+    
+    // Seller Resubmissions (Seller Only)
+    Route::prefix('seller/resubmissions')->name('seller.resubmissions.')->middleware('role:seller')->group(function () {
+        Route::get('/', [CarController::class, 'sellerResubmissions'])->name('index');
+        Route::post('/{id}/resubmit', [CarController::class, 'resubmit'])->name('resubmit');
+    });
 });
 
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
@@ -218,4 +225,4 @@ Route::post('/password/reset', [App\Http\Controllers\Auth\ResetPasswordControlle
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
 
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');

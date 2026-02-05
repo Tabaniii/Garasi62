@@ -32,6 +32,8 @@ class car extends Model
         'location',
         'seller_id',
         'status',
+        'resubmission_notes',
+        'resubmitted_at',
     ];
 
     protected $casts = [

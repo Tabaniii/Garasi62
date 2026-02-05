@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\car;
 use App\Models\CarApproval;
+use App\Models\NotificationLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -15,18 +16,51 @@ class CarApprovalController extends Controller
      */
     public function index()
     {
-        $pendingCars = car::with('seller')
+        $pendingCars = car::with([
+                'seller',
+                'approvals' => function($q) {
+                    $q->orderBy('approved_at', 'desc');
+                }
+            ])
             ->where('status', 'pending')
+            ->whereDoesntHave('approvals', function($q) {
+                $q->where('action', 'rejected');
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         $stats = [
-            'pending' => car::where('status', 'pending')->count(),
+            // Hanya pending tanpa riwayat 'rejected' (bukan pengajuan ulang)
+            'pending' => car::where('status', 'pending')
+                ->whereDoesntHave('approvals', function($q) {
+                    $q->where('action', 'rejected');
+                })->count(),
             'approved' => car::where('status', 'approved')->count(),
             'rejected' => car::where('status', 'rejected')->count(),
         ];
 
         return view('admin.car-approvals.index', compact('pendingCars', 'stats'));
+    }
+    
+    /**
+     * Display cars that were previously rejected and have been resubmitted (now pending)
+     */
+    public function resubmissionsIndex()
+    {
+        $resubmittedCars = car::with([
+                'seller',
+                'approvals' => function($q) {
+                    $q->where('action', 'rejected')->orderBy('approved_at', 'desc');
+                }
+            ])
+            ->where('status', 'pending')
+            ->whereHas('approvals', function($q) {
+                $q->where('action', 'rejected');
+            })
+            ->orderBy('updated_at', 'desc')
+            ->paginate(10);
+        
+        return view('admin.car-approvals.resubmissions', compact('resubmittedCars'));
     }
 
     /**
@@ -104,13 +138,18 @@ class CarApprovalController extends Controller
             ]);
 
             // Create notification message for seller
-            $notificationMessage = "Mobil {$car->brand} {$car->nama} yang Anda posting telah diproses.";
+            $notificationMessage = "Mobil {$car->brand} {$car->nama} yang Anda posting telah ditolak.";
             if ($request->notes) {
                 $notificationMessage .= " Catatan: " . $request->notes;
             }
 
-            // Here you can add more advanced notification logic
-            // For example: send email to seller, create notification record in database, push notification, etc.
+            // Create notification record in database
+            NotificationLog::create([
+                'user_id' => $car->seller_id,
+                'title' => 'Mobil Ditolak',
+                'message' => $notificationMessage,
+                'is_read' => false,
+            ]);
         });
 
         return redirect()->route('admin.car-approvals.index')

@@ -96,6 +96,7 @@
                                         <th style="padding: 12px; font-weight: 700; color: #1a1a1a;">Mobil</th>
                                         <th style="padding: 12px; font-weight: 700; color: #1a1a1a;">Alasan</th>
                                         <th style="padding: 12px; font-weight: 700; color: #1a1a1a;">Status</th>
+                                        <th style="padding: 12px; font-weight: 700; color: #1a1a1a;">Catatan Admin</th>
                                         <th style="padding: 12px; font-weight: 700; color: #1a1a1a;">Aksi</th>
                                     </tr>
                                 </thead>
@@ -110,11 +111,20 @@
                                         </td>
                                         <td style="padding: 15px;">
                                             @if($report->car)
-                                                <div>
-                                                    <strong style="color: #1a1a1a;">{{ strtoupper($report->car->brand) }} {{ $report->car->nama }}</strong><br>
+                                                <div style="display: flex; align-items: center; gap: 10px;">
+                                                    @if(is_array($report->car->image ?? null) && count($report->car->image) > 0)
+                                                        <img src="{{ asset('storage/' . $report->car->image[0]) }}" alt="{{ $report->car->brand }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                    @else
+                                                        <div style="width: 40px; height: 40px; border-radius: 4px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #9ca3af;">
+                                                            <i class="fa fa-car"></i>
+                                                        </div>
+                                                    @endif
+                                                    <div>
+                                                        <strong style="color: #1a1a1a;">{{ strtoupper($report->car->brand) }} {{ $report->car->nama }}</strong><br>
                                                     <a href="{{ route('car.details', $report->car->id) }}" target="_blank" style="color: #3b82f6; font-size: 12px;">
                                                         <i class="fa fa-external-link"></i> Lihat Mobil
                                                     </a>
+                                                    </div>
                                                 </div>
                                             @else
                                                 <span style="color: #9ca3af;">Mobil tidak ditemukan</span>
@@ -142,6 +152,15 @@
                                                 <span style="background: #f3f4f6; color: #374151; padding: 5px 12px; border-radius: 5px; font-size: 12px; font-weight: 600;">
                                                     <i class="fa fa-times-circle"></i> Ditolak
                                                 </span>
+                                            @endif
+                                        </td>
+                                        <td style="padding: 15px;">
+                                            @if($report->admin_notes)
+                                                <div style="background: #fef3c7; padding: 10px; border-radius: 5px; border-left: 4px solid #f59e0b; font-size: 12px; color: #92400e;">
+                                                    {{ $report->admin_notes }}
+                                                </div>
+                                            @else
+                                                <span style="color: #9ca3af; font-size: 12px;">Belum ada catatan</span>
                                             @endif
                                         </td>
                                         <td style="padding: 15px;">
@@ -246,4 +265,3 @@
 </section>
 <!-- Reports Section End -->
 @endsection
-

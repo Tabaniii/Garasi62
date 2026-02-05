@@ -837,6 +837,18 @@
                     <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $pendingCars }}</span>
                     @endif
                 </a>
+                <a href="{{ route('admin.car-approvals.resubmissions.index') }}" class="sidebar-menu-item {{ request()->routeIs('admin.car-approvals.resubmissions.*') ? 'active' : '' }}">
+                    <i class="fas fa-undo"></i>
+                    <span>Pengajuan Ulang</span>
+                    @php
+                        $resubCount = \App\Models\car::where('status', 'pending')
+                            ->whereHas('approvals', function($q){ $q->where('action', 'rejected'); })
+                            ->count();
+                    @endphp
+                    @if($resubCount > 0)
+                    <span style="background: #f59e0b; color: #1a1a1a; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $resubCount }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('admin.duplicate-cars.index') }}" class="sidebar-menu-item {{ request()->routeIs('admin.duplicate-cars.*') ? 'active' : '' }}">
                     <i class="fas fa-exclamation-triangle"></i>
                     <span>Deteksi Duplikat</span>
@@ -927,6 +939,10 @@
                     <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $sellerUnpublishedReports }}</span>
                     @endif
                 </a>
+                <a href="{{ route('seller.resubmissions.index') }}" class="sidebar-menu-item {{ request()->routeIs('seller.resubmissions.*') ? 'active' : '' }}">
+                    <i class="fas fa-undo"></i>
+                    <span>Pengajuan Ulang</span>
+                </a>
             @elseif(Auth::user()->role === 'buyer')
                 {{-- Buyer Menu --}}
                 <a href="{{ route('cars') }}" class="sidebar-menu-item">
@@ -946,6 +962,16 @@
                     @endphp
                     @if($unreadChats > 0)
                     <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $unreadChats }}</span>
+                    @endif
+                </a>
+                <a href="{{ route('reports.my-reports') }}" class="sidebar-menu-item {{ request()->routeIs('reports.my-reports') ? 'active' : '' }}">
+                    <i class="fas fa-flag"></i>
+                    <span>Laporan Saya</span>
+                    @php
+                        $myPendingReports = \App\Models\Report::where('reporter_id', Auth::id())->where('status', 'pending')->count();
+                    @endphp
+                    @if($myPendingReports > 0)
+                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $myPendingReports }}</span>
                     @endif
                 </a>
             @endif

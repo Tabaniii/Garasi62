@@ -7,6 +7,8 @@ use App\Models\car;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\CarApproval;
+use App\Models\NotificationLog;
 
 class CarController extends Controller
 {
@@ -129,6 +131,10 @@ class CarController extends Controller
                 $q->where('status', 'resolved')
                   ->whereNotNull('admin_notes')
                   ->latest();
+            },
+            // Eager load rejection approvals to show reason and date
+            'approvals' => function($q) {
+                $q->where('action', 'rejected')->latest();
             }]);
         } else {
             // Buyer cannot access this page
@@ -204,7 +210,7 @@ class CarController extends Controller
                 'kilometer' => 'required|string|max:6',
                 'transmisi' => 'required|string|max:10',
                 'harga' => 'required|string|max:10',
-                'metode' => 'required|string|max:5',
+                'metode' => 'required|string|max:10',
                 'kapasitasmesin' => 'required|string|max:50',
                 'stock' => 'nullable|string|max:50',
                 'vin' => 'nullable|string|max:50',
@@ -502,8 +508,23 @@ class CarController extends Controller
             }
             
             // Hapus gambar dari storage
-            if ($car->image && is_array($car->image)) {
-                foreach ($car->image as $imagePath) {
+            if ($car->image) {
+                // Normalisasi ke array
+                $images = [];
+                if (is_array($car->image)) {
+                    $images = $car->image;
+                } elseif (is_string($car->image)) {
+                    try {
+                        $decoded = json_decode($car->image, true);
+                        if (is_array($decoded)) {
+                            $images = $decoded;
+                        }
+                    } catch (\Exception $e) {
+                        $images = [];
+                    }
+                }
+
+                foreach ($images as $imagePath) {
                     // Cek apakah gambar digunakan oleh mobil lain
                     $isUsedByOtherCar = car::where('id', '!=', $id)
                         ->whereNotNull('image')
@@ -511,6 +532,9 @@ class CarController extends Controller
                         ->filter(function($otherCar) use ($imagePath) {
                             if (is_array($otherCar->image)) {
                                 return in_array($imagePath, $otherCar->image);
+                            } elseif (is_string($otherCar->image)) {
+                                $otherImages = json_decode($otherCar->image, true);
+                                return is_array($otherImages) ? in_array($imagePath, $otherImages) : false;
                             }
                             return false;
                         })
@@ -545,5 +569,56 @@ class CarController extends Controller
             
             return redirect()->route('cars.index')->with('error', 'Terjadi kesalahan saat menghapus mobil.');
         }
+    }
+    
+    /**
+     * Seller: List rejected cars and allow resubmission
+     */
+    public function sellerResubmissions(Request $request)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'seller') {
+            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+        }
+        
+        $cars = car::with(['approvals' => function($q) {
+                $q->orderBy('approved_at', 'desc');
+            }])
+            ->where('seller_id', $user->id)
+            ->where('status', 'rejected')
+            ->orderBy('updated_at', 'desc')
+            ->paginate(12);
+        
+        return view('seller.resubmissions.index', compact('cars'));
+    }
+    
+    /**
+     * Seller: Resubmit a rejected car for approval
+     */
+    public function resubmit(Request $request, $id)
+    {
+        $request->validate([
+            'notes' => 'nullable|string|max:1000',
+        ]);
+        
+        $user = Auth::user();
+        $car = car::findOrFail($id);
+        
+        // Only seller of the car can resubmit and only if currently rejected
+        if ($user->role !== 'seller' || $car->seller_id !== $user->id) {
+            return redirect()->route('seller.resubmissions.index')->with('error', 'Anda tidak memiliki akses untuk mengajukan ulang mobil ini.');
+        }
+        if ($car->status !== 'rejected') {
+            return redirect()->route('seller.resubmissions.index')->with('error', 'Hanya mobil yang ditolak yang dapat diajukan ulang.');
+        }
+        
+        // Set back to pending for admin review and store seller's notes
+        $car->update([
+            'status' => 'pending',
+            'resubmission_notes' => $request->notes,
+            'resubmitted_at' => now(),
+        ]);
+        
+        return redirect()->route('seller.resubmissions.index')->with('success', 'Pengajuan ulang berhasil dikirim. Admin akan meninjau kembali mobil Anda.');
     }
 }

@@ -107,6 +107,13 @@ class TestimonialController extends Controller
 
         $testimonial->delete();
 
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Testimoni berhasil dihapus.'
+            ]);
+        }
+
         return redirect()->route('testimonials.admin.index')->with('success', 'Testimoni berhasil dihapus.');
     }
 }

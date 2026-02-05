@@ -615,6 +615,19 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const submitButton = document.querySelector('button[form="siteSettingForm"]');
+            if (submitButton) {
+                submitButton.addEventListener('click', function (e) {
+                    const form = document.getElementById('siteSettingForm');
+                    if (!form) return;
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit();
+                    } else {
+                        form.submit();
+                    }
+                });
+            }
+            
             // Helper function for creating elements
             function createOperationalHour(index) {
                 return `

@@ -44,6 +44,83 @@
     </div>
 </div>
 
+<!-- My Reports Section -->
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <div class="info-card animate-fade-in">
+            <div class="info-card-header">
+                <h5 class="info-card-title">
+                    <i class="fas fa-flag me-2"></i>Laporan Saya
+                </h5>
+                <a href="{{ route('reports.my-reports') }}" class="btn btn-sm btn-outline-warning">
+                    <i class="fas fa-eye me-1"></i>Lihat Semua
+                </a>
+            </div>
+            @if(isset($stats['my_reports']) && $stats['my_reports']->count() > 0)
+            <div class="recent-cars-grid">
+                @foreach($stats['my_reports'] as $report)
+                <div class="recent-car-card" onclick="window.location.href='{{ $report->car ? route('car.details', $report->car->id) : '#' }}'">
+                    <div class="recent-car-image">
+                        @if($report->car && $report->car->image && is_array($report->car->image) && count($report->car->image) > 0)
+                            <img src="{{ asset('storage/' . $report->car->image[0]) }}" alt="{{ $report->car->brand }}">
+                        @else
+                            <div class="car-placeholder">
+                                <i class="fas fa-flag"></i>
+                            </div>
+                        @endif
+                        <span class="car-type-badge badge-sale">
+                            {{ $report->reason_label }}
+                        </span>
+                        <span class="car-status-badge 
+                            @if($report->status == 'pending') badge-pending
+                            @elseif($report->status == 'reviewed') badge-approved
+                            @elseif($report->status == 'resolved') badge-approved
+                            @else badge-rejected
+                            @endif">
+                            @if($report->status == 'pending')
+                                <i class="fas fa-hourglass-half"></i> Menunggu
+                            @elseif($report->status == 'reviewed')
+                                <i class="fas fa-eye"></i> Ditinjau
+                            @elseif($report->status == 'resolved')
+                                <i class="fas fa-check-circle"></i> Selesai
+                            @else
+                                <i class="fas fa-times-circle"></i> Ditolak
+                            @endif
+                        </span>
+                    </div>
+                    <div class="recent-car-info">
+                        <h6 class="recent-car-brand">
+                            @if($report->car)
+                                {{ strtoupper($report->car->brand) }} {{ $report->car->nama }}
+                            @else
+                                Mobil tidak ditemukan
+                            @endif
+                        </h6>
+                        <p class="recent-car-details">
+                            <i class="fas fa-calendar-alt"></i> {{ $report->created_at->format('d M Y') }}
+                        </p>
+                        <a href="{{ route('reports.my-reports') }}" class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-eye me-1"></i>Detail
+                        </a>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @else
+            <div class="text-center py-5">
+                <div class="text-muted">
+                    <i class="fas fa-flag fa-3x mb-3"></i>
+                    <p>Belum ada laporan yang Anda buat</p>
+                    <a href="{{ route('cars') }}" class="btn btn-sm btn-outline-warning">
+                        <i class="fas fa-car me-1"></i>Lihat Mobil
+                    </a>
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+
 <!-- Quick Actions -->
 <div class="row g-4 mb-5">
     <div class="col-12">

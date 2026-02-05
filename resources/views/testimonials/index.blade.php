@@ -131,14 +131,10 @@
                             <i class="fas fa-edit"></i>
                             <span>Edit</span>
                         </a>
-                        <form action="{{ route('testimonials.admin.destroy', $testimonial) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus testimoni ini?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn-action btn-delete" title="Hapus">
-                                <i class="fas fa-trash"></i>
-                                <span>Hapus</span>
-                            </button>
-                        </form>
+                        <button type="button" class="btn-action btn-delete" title="Hapus" onclick="confirmDelete('{{ route('testimonials.admin.destroy', $testimonial) }}', '{{ $testimonial->name }}')">
+                            <i class="fas fa-trash"></i>
+                            <span>Hapus</span>
+                        </button>
                     </div>
                 </div>
                 @endforeach
@@ -153,6 +149,72 @@
     border-radius: 5px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     overflow: hidden;
+}
+
+/* SweetAlert2 Custom Styling */
+.swal2-popup-custom-delete {
+    border-radius: 5px !important;
+    padding: 35px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid #e9ecef !important;
+    max-width: 550px !important;
+}
+
+.swal2-title-custom-delete {
+    font-size: 28px !important;
+    font-weight: 900 !important;
+    color: #1a1a1a !important;
+    margin-bottom: 20px !important;
+    letter-spacing: -0.5px !important;
+}
+
+.swal2-html-container-custom-delete {
+    font-size: 14px !important;
+    color: #6b7280 !important;
+    line-height: 1.6 !important;
+    text-align: left !important;
+}
+
+.swal2-confirm-custom-delete {
+    background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+    color: #fff !important;
+    padding: 14px 28px !important;
+    border-radius: 5px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    border: none !important;
+    transition: all 0.3s !important;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
+}
+
+.swal2-confirm-custom-delete:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(220, 38, 38, 0.4) !important;
+    background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
+}
+
+.swal2-cancel-custom-delete {
+    background: linear-gradient(135deg, #fff, #fafafa) !important;
+    color: #6b7280 !important;
+    padding: 14px 28px !important;
+    border-radius: 5px !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    border: 2px solid #e9ecef !important;
+    transition: all 0.3s !important;
+}
+
+.swal2-cancel-custom-delete:hover {
+    background: linear-gradient(135deg, #f9fafb, #f3f4f6) !important;
+    border-color: #d1d5db !important;
+    transform: translateY(-2px) !important;
+    color: #4b5563 !important;
+}
+
+.swal2-icon-custom-delete.swal2-warning {
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
+    border-width: 4px !important;
 }
 
 .testimonial-header-section {
@@ -556,5 +618,122 @@
     }
 }
 </style>
+
+@push('scripts')
+<script>
+    function confirmDelete(url, name) {
+        // Check if SweetAlert2 is defined
+        if (typeof Swal === 'undefined') {
+            if (confirm('Apakah Anda yakin ingin menghapus testimoni dari ' + name + '?')) {
+                // Create a form to submit the delete request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = url;
+                
+                const methodInput = document.createElement('input');
+                methodInput.type = 'hidden';
+                methodInput.name = '_method';
+                methodInput.value = 'DELETE';
+                form.appendChild(methodInput);
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = '{{ csrf_token() }}';
+                form.appendChild(csrfInput);
+                
+                document.body.appendChild(form);
+                form.submit();
+            }
+            return;
+        }
+
+        Swal.fire({
+            title: '<strong style="color: #1a1a1a;">Hapus Testimoni?</strong>',
+            html: `<div style="text-align: left; padding: 10px 0;">
+                <p style="color: #6b7280; margin-bottom: 15px;">Anda akan menghapus testimoni dari:</p>
+                <div style="background: #f9fafb; padding: 15px; border-radius: 5px; border-left: 4px solid #dc2626; margin-bottom: 15px;">
+                    <strong style="color: #1a1a1a; display: block; margin-bottom: 5px;">${name}</strong>
+                </div>
+                <p style="color: #dc2626; font-size: 14px; margin: 0; font-weight: 600;">
+                    <i class="fas fa-exclamation-triangle me-2"></i> Tindakan ini tidak dapat dibatalkan!
+                </p>
+            </div>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-trash me-2"></i>Ya, Hapus Testimoni',
+            cancelButtonText: '<i class="fas fa-times me-2"></i>Batal',
+            reverseButtons: true,
+            focusCancel: true,
+            customClass: {
+                popup: 'swal2-popup-custom-delete',
+                title: 'swal2-title-custom-delete',
+                htmlContainer: 'swal2-html-container-custom-delete',
+                confirmButton: 'swal2-confirm-custom-delete',
+                cancelButton: 'swal2-cancel-custom-delete',
+                icon: 'swal2-icon-custom-delete'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading
+                Swal.fire({
+                    title: 'Menghapus...',
+                    text: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: data.message,
+                            timer: 1500,
+                            showConfirmButton: false,
+                            customClass: {
+                                popup: 'swal2-popup-custom-delete',
+                                title: 'swal2-title-custom-delete'
+                            }
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        throw new Error(data.message || 'Gagal menghapus data');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: error.message || 'Terjadi kesalahan saat menghapus data',
+                        confirmButtonText: 'OK',
+                        customClass: {
+                            popup: 'swal2-popup-custom-delete',
+                            title: 'swal2-title-custom-delete',
+                            confirmButton: 'swal2-confirm-custom-delete'
+                        },
+                        buttonsStyling: false
+                    });
+                });
+            }
+        });
+    }
+</script>
+@endpush
 @endsection
 

@@ -138,7 +138,7 @@ class CarApprovalController extends Controller
             ]);
 
             // Create notification message for seller
-            $notificationMessage = "Mobil {$car->brand} {$car->nama} yang Anda posting telah ditolak.";
+            $notificationMessage = "Mobil {$car->brand} {$car->nama} yang Anda posting telah disetujui.";
             if ($request->notes) {
                 $notificationMessage .= " Catatan: " . $request->notes;
             }
@@ -146,7 +146,7 @@ class CarApprovalController extends Controller
             // Create notification record in database
             NotificationLog::create([
                 'user_id' => $car->seller_id,
-                'title' => 'Mobil Ditolak',
+                'title' => 'Mobil Disetujui',
                 'message' => $notificationMessage,
                 'is_read' => false,
             ]);

@@ -339,7 +339,7 @@ class CarController extends Controller
             'kilometer' => 'required|string|max:6',
             'transmisi' => 'required|string|max:10',
             'harga' => 'required|string|max:10',
-            'metode' => 'required|string|max:5',
+            'metode' => 'required|string|max:10',
             'kapasitasmesin' => 'required|string|max:50',
             'stock' => 'nullable|string|max:50',
             'vin' => 'nullable|string|max:50',
@@ -475,6 +475,11 @@ class CarController extends Controller
         }
         if ($request->has('extra_features')) {
             $data['extra_features'] = array_filter($request->input('extra_features', []));
+        }
+
+        // Jika mobil sebelumnya ditolak, ubah status menjadi pending (ajukan ulang otomatis)
+        if ($car->status === 'rejected') {
+            $data['status'] = 'pending';
         }
 
         $car->update($data);

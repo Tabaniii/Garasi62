@@ -595,75 +595,89 @@ function deleteSelectedChats() {
         return;
     }
     
-    if (!confirm(`Apakah Anda yakin ingin menghapus ${chatIds.length} obrolan?`)) {
-        return;
-    }
-    
-    // Show loading
-    const deleteBtn = document.getElementById('deleteSelectedBtn');
-    const originalHTML = deleteBtn.innerHTML;
-    deleteBtn.disabled = true;
-    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
-    
-    fetch('{{ route("chat.destroy") }}', {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                           document.querySelector('input[name="_token"]')?.value || '',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({ chat_ids: chatIds })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Remove deleted chats from UI
-            chatIds.forEach(chatId => {
-                const wrapper = document.querySelector(`.chat-checkbox[value="${chatId}"]`)?.closest('.chat-item-wrapper');
-                if (wrapper) {
-                    wrapper.style.transition = 'opacity 0.3s';
-                    wrapper.style.opacity = '0';
-                    setTimeout(() => wrapper.remove(), 300);
+    const execute = () => {
+        const deleteBtn = document.getElementById('deleteSelectedBtn');
+        const originalHTML = deleteBtn.innerHTML;
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+        
+        fetch('{{ route("chat.destroy") }}', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                               document.querySelector('input[name="_token"]')?.value || '',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ chat_ids: chatIds })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                chatIds.forEach(chatId => {
+                    const wrapper = document.querySelector(`.chat-checkbox[value="${chatId}"]`)?.closest('.chat-item-wrapper');
+                    if (wrapper) {
+                        wrapper.style.transition = 'opacity 0.3s';
+                        wrapper.style.opacity = '0';
+                        setTimeout(() => wrapper.remove(), 300);
+                    }
+                });
+                toggleSelectMode();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: data.message || `Berhasil menghapus ${data.deleted_count} obrolan`,
+                        confirmButtonColor: '#df2d24',
+                        timer: 2000
+                    });
+                } else {
+                    alert(data.message || `Berhasil menghapus ${data.deleted_count} obrolan`);
                 }
-            });
-            
-            // Reset selection mode
-            toggleSelectMode();
-            
-            // Show success message
+            } else {
+                throw new Error(data.error || 'Gagal menghapus obrolan');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting chats:', error);
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: data.message || `Berhasil menghapus ${data.deleted_count} obrolan`,
-                    confirmButtonColor: '#df2d24',
-                    timer: 2000
+                    icon: 'error',
+                    title: 'Error!',
+                    text: error.message || 'Gagal menghapus obrolan',
+                    confirmButtonColor: '#df2d24'
                 });
             } else {
-                alert(data.message || `Berhasil menghapus ${data.deleted_count} obrolan`);
+                alert('Gagal menghapus obrolan: ' + error.message);
             }
-        } else {
-            throw new Error(data.error || 'Gagal menghapus obrolan');
+        })
+        .finally(() => {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = originalHTML;
+        });
+    };
+    
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Hapus obrolan?',
+            text: `Anda akan menghapus ${chatIds.length} obrolan. Tindakan ini tidak bisa dibatalkan.`,
+            showCancelButton: true,
+            confirmButtonText: 'Hapus',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#df2d24',
+            cancelButtonColor: '#6b7280'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                execute();
+            }
+        });
+    } else {
+        if (!confirm(`Apakah Anda yakin ingin menghapus ${chatIds.length} obrolan?`)) {
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error deleting chats:', error);
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: error.message || 'Gagal menghapus obrolan',
-                confirmButtonColor: '#df2d24'
-            });
-        } else {
-            alert('Gagal menghapus obrolan: ' + error.message);
-        }
-    })
-    .finally(() => {
-        deleteBtn.disabled = false;
-        deleteBtn.innerHTML = originalHTML;
-    });
+        execute();
+    }
 }
 
 // Enable selection mode with Ctrl/Cmd + Click or long press

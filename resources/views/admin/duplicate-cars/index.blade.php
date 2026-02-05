@@ -116,13 +116,9 @@
                                                     <a href="{{ route('cars.edit', $car->id) }}" class="btn btn-light text-primary" title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <form action="{{ route('cars.destroy', $car->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin menghapus {{ $index === 0 ? 'data original' : 'duplikat' }} ini?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-light text-danger" title="Hapus">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" class="btn btn-light text-danger" title="Hapus" onclick="confirmDelete('{{ route('cars.destroy', $car->id) }}', {{ $index === 0 ? 'true' : 'false' }}, {{ json_encode($car->brand . ' ' . $car->nama) }})">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -144,4 +140,71 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+<script>
+    function confirmDelete(url, isOriginal, carName) {
+        Swal.fire({
+            title: isOriginal ? 'Hapus Data Original?' : 'Hapus Duplikat?',
+            html: isOriginal 
+                ? `Anda akan menghapus <strong>${carName}</strong>.<br><small class="text-danger">Data ini ditandai sebagai ORIGINAL. Menghapusnya mungkin akan mengubah status duplikat lainnya.</small>` 
+                : `Apakah Anda yakin ingin menghapus <strong>${carName}</strong>?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: '<i class="fas fa-trash me-1"></i> Ya, Hapus',
+            cancelButtonText: '<i class="fas fa-times me-1"></i> Batal',
+            reverseButtons: true,
+            focusCancel: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading
+                Swal.fire({
+                    title: 'Menghapus...',
+                    text: 'Mohon tunggu sebentar',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: data.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        throw new Error(data.message || 'Gagal menghapus data');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: error.message || 'Terjadi kesalahan saat menghapus data',
+                        confirmButtonColor: '#dc2626'
+                    });
+                });
+            }
+        });
+    }
+</script>
+@endpush
 @endsection

@@ -321,6 +321,9 @@ ol {
 -----------------------*/
 .header {
 	background:#252525;
+	position: sticky;
+	top: 0;
+	z-index: 1000;
 }
 .header__top {
 	background: #323232;
@@ -503,6 +506,49 @@ ol {
 
 .canvas__open {
 	display: none;
+}
+
+.offcanvas__nav ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.offcanvas__nav{
+	margin-top: -25px;
+}
+
+.offcanvas__nav li {
+	margin-bottom: 10px;
+	color: white;
+}
+
+.offcanvas__nav a {
+	display: block;
+	text-decoration: none;
+	font-size: 15px;
+	color: #ffffff;
+	font-weight: 700;
+	text-transform: uppercase;
+	padding: 6px 0;
+}
+
+.offcanvas__nav a.active {
+		color: #df2d24;
+}
+
+.offcanvas__auth {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+.offcanvas__auth .site-btn {
+	width: 100%;
+	text-align: center;
+	padding: 12px 18px;
 }
 
 /*---------------------
@@ -3226,7 +3272,13 @@ ol {
 		display: none;
 	}
 	.header__nav {
-		display: none;
+		display: none !important;
+	}
+	.header__menu {
+		display: none !important;
+	}
+	.header__nav__widget {
+		display: none !important;
 	}
 	.header .container {
 		position: relative;
@@ -3268,7 +3320,7 @@ ol {
 		left: -300px;
 		width: 300px;
 		height: 100%;
-		background: #ffffff;
+		background: #1a1a1a;
 		padding: 50px 30px 30px;
 		display: block;
 		z-index: 99;
@@ -3300,21 +3352,27 @@ ol {
 	.slicknav_nav a {
 		padding: 7px 0;
 		margin: 0;
-		color: #353535;
+		color: #ffffff;
 		font-weight: 600;
 	}
 	.slicknav_nav .slicknav_row:hover {
 		border-radius: 0;
 		background: transparent;
-		color: #353535;
+		color: #ffffff;
 	}
 	.slicknav_nav a:hover {
 		border-radius: 0;
 		background: transparent;
-		color: #353535;
+		color: #ffffff;
 	}
 	.slicknav_nav {
-		display: block !important;
+		display: none !important;
+	}
+	.slicknav_menu {
+		display: none !important;
+	}
+	#mobile-menu-wrap {
+		display: none !important;
 	}
 	.offcanvas__logo {
 		margin-bottom: 30px;
@@ -3324,7 +3382,7 @@ ol {
 	}
 	.offcanvas__widget a {
 		font-size: 15px;
-		color: #353535;
+		color: #ffffff;
 		margin-right: 20px;
 		display: inline-block;
 	}
@@ -3336,7 +3394,7 @@ ol {
 	}
 	.offcanvas__widget__add li {
 		font-size: 15px;
-		color: #353535;
+		color: #ffffff;
 		margin-right: 35px;
 		list-style: none;
 		line-height: 30px;
@@ -3346,13 +3404,13 @@ ol {
 	}
 	.offcanvas__widget__add li i {
 		font-size: 18px;
-		color: #353535;
+		color: #ffffff;
 		margin-right: 6px;
 	}
 	.offcanvas__social a {
 		display: inline-block;
 		font-size: 15px;
-		color: #353535;
+		color: #ffffff;
 		margin-right: 16px;
 	}
 	.offcanvas__social a:last-child {
@@ -3362,13 +3420,13 @@ ol {
 		margin-bottom: 20px;
 	}
 	.offcanvas__phone__num i {
-		color: #353535;
+		color: #ffffff;
 		margin-right: 6px;
 		font-size: 15px;
 	}
 	.offcanvas__phone__num span {
 		font-size: 15px;
-		color: #353535;
+		color: #ffffff;
 	}
 	.blog-details-hero {
 		padding-bottom: 150px;
@@ -3458,7 +3516,13 @@ ol {
 		display: none;
 	}
 	.header__nav {
-		display: none;
+		display: none !important;
+	}
+	.header__menu {
+		display: none !important;
+	}
+	.header__nav__widget {
+		display: none !important;
 	}
 	.offcanvas-menu-wrapper {
 		display: block;
@@ -3503,7 +3567,7 @@ ol {
 		left: -300px;
 		width: 300px;
 		height: 100%;
-		background: #ffffff;
+		background: #1a1a1a;
 		padding: 50px 30px 30px;
 		display: block;
 		z-index: 99;
@@ -3571,7 +3635,7 @@ ol {
 	}
 	.offcanvas__widget__add li {
 		font-size: 15px;
-		color: #353535;
+		color: #ffffff;
 		margin-right: 35px;
 		list-style: none;
 		line-height: 30px;
@@ -3581,13 +3645,13 @@ ol {
 	}
 	.offcanvas__widget__add li i {
 		font-size: 18px;
-		color: #353535;
+		color: #ffffff;
 		margin-right: 6px;
 	}
 	.offcanvas__social a {
 		display: inline-block;
 		font-size: 15px;
-		color: #353535;
+		color: #ffffff;
 		margin-right: 16px;
 	}
 	.offcanvas__social a:last-child {
@@ -3597,13 +3661,13 @@ ol {
 		margin-bottom: 20px;
 	}
 	.offcanvas__phone__num i {
-		color: #353535;
+		color: #ffffff;
 		margin-right: 6px;
 		font-size: 15px;
 	}
 	.offcanvas__phone__num span {
 		font-size: 15px;
-		color: #353535;
+		color: #ffffff;
 	}
 	.blog__details__hero__text ul li {
 		margin-right: 25px;
@@ -3697,4 +3761,42 @@ ol {
 		font-size: 24px;
 		width: 100%;
 	}
+}
+@media (max-width: 360px) {
+
+}
+
+@media (min-width: 361px) and (max-width: 480px) {
+
+}
+
+/* Extra small devices (portrait phones, <576px) */
+@media (min-width: 481px) and (max-width: 575.98px) {
+  /* CSS khusus HP kecil */
+
+}
+
+/* Small devices (landscape phones, ≥576px and <768px) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+
+}
+
+/* Medium devices (tablets, ≥768px and <992px) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+
+}
+
+/* Large devices (desktops, ≥992px and <1200px) */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  
+}
+
+/* Extra large devices (large desktops, ≥1200px and <1400px) */
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+ 
+}
+
+/* Extra extra large devices (ultra wide, ≥1400px) */
+@media (min-width: 1400px) {
+ 
 }

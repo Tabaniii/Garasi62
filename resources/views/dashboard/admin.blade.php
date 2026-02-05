@@ -107,6 +107,19 @@
                 </a>
             </div>
         </div>
+        <div class="info-card animate-slide-in-right mt-4">
+            <div class="info-card-header">
+                <h5 class="info-card-title">
+                    <i class="fas fa-cog me-2"></i>Site Setting
+                </h5>
+            </div>
+            <div class="info-card-body">
+                <p class="text-muted mb-3">Atur logo, nama, jam operasional, dan konten About Us serta footer.</p>
+                <a href="{{ route('admin.footer.edit') }}" class="btn btn-danger w-100">
+                    <i class="fas fa-cog me-2"></i>Kelola Site Setting
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 

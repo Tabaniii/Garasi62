@@ -255,6 +255,25 @@
 </div>
 @endif
 
+@if($stats['rejected_cars'] > 0)
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <div class="alert alert-danger animate-fade-in">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-times-circle fa-2x me-3"></i>
+                <div>
+                    <h5 class="alert-heading mb-1">Ada Mobil Ditolak/Di-Unpublish</h5>
+                    <p class="mb-1">Anda memiliki {{ $stats['rejected_cars'] }} mobil yang ditolak atau di-unpublish oleh admin.</p>
+                    <a href="{{ route('seller.reports.index') }}" class="btn btn-sm btn-outline-light">
+                        <i class="fas fa-flag me-1"></i>Lihat Laporan Mobil
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
 <!-- Recent Cars Section -->
 <div class="row g-4 mb-5">
     <div class="col-12">

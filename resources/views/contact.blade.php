@@ -1,8 +1,55 @@
 @extends('template.temp')
 
-<!-- @section('title', 'Home - GARASI62') Set the title for the page -->
+@section('meta')
+    <meta name="description" content="Hubungi Garasi62 - Kami siap membantu Anda. Silakan hubungi kami untuk informasi lebih lanjut.">
+    <meta name="keywords" content="Kontak Garasi62, Alamat Garasi62, Telepon Garasi62">
 
+    <!-- Open Graph -->
+    <meta property="og:title" content="Hubungi Kami - Garasi62">
+    <meta property="og:description" content="Hubungi Garasi62 - Kami siap membantu Anda. Silakan hubungi kami untuk informasi lebih lanjut.">
+    <meta property="og:image" content="{{ asset('garasi62/img/logo.png') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="GARASI62">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Hubungi Kami - Garasi62">
+    <meta name="twitter:description" content="Hubungi Garasi62 - Kami siap membantu Anda.">
+    <meta name="twitter:image" content="{{ asset('garasi62/img/logo.png') }}">
+@endsection
+
+@include('components.messages-widget')
 @section('content')
+    @php
+        $siteEmail = \App\Models\SiteSetting::get('site_email', \App\Models\SiteSetting::get('footer_email', 'Colorlib@gmail.com'));
+        
+        $operationalHoursData = \App\Models\SiteSetting::get('operational_hours', '');
+        $operationalHours = empty($operationalHoursData) ? [
+            ['day' => 'Weekday', 'hours' => '08:00 am to 18:00 pm'],
+            ['day' => 'Saturday', 'hours' => '10:00 am to 16:00 pm'],
+            ['day' => 'Sunday', 'hours' => 'Closed'],
+        ] : (json_decode($operationalHoursData, true) ?? []);
+
+        $showroomsData = \App\Models\SiteSetting::get('showrooms', '');
+        $showrooms = empty($showroomsData) ? [
+            [
+                'title' => 'California Showroom',
+                'address' => '625 Gloria Union, California, United Stated',
+                'phone' => '(+12) 456 678 9100'
+            ],
+            [
+                'title' => 'New York Showroom',
+                'address' => '8235 South Ave. Jamestown, NewYork',
+                'phone' => '(+12) 456 678 9100'
+            ],
+            [
+                'title' => 'Florida Showroom',
+                'address' => '497 Beaver Ridge St. Daytona Beach, Florida',
+                'phone' => '(+12) 456 678 9100'
+            ]
+        ] : (json_decode($showroomsData, true) ?? []);
+    @endphp
     <!-- Breadcrumb End -->
     <div class="breadcrumb-option set-bg" data-setbg="img/breadcrumb-bg.jpg">
         <div class="container">
@@ -31,11 +78,27 @@
                             <h2>Let’s Work Together</h2>
                             <p>To make requests for further information, contact us via our social channels.</p>
                         </div>
-                        <ul>
-                            <li><span>Weekday</span> 08:00 am to 18:00 pm</li>
-                            <li><span>Saturday:</span> 10:00 am to 16:00 pm</li>
-                            <li><span>Sunday:</span> Closed</li>
-                        </ul>
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; background: rgba(220, 53, 69, 0.1); color: #dc3545;">
+                                        <i class="fa fa-clock-o"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">Jam Operasional</div>
+                                        <div class="text-muted" style="font-size: 13px;">Info waktu layanan showroom</div>
+                                    </div>
+                                </div>
+                                <ul class="list-unstyled mb-0">
+                                    @foreach($operationalHours as $hour)
+                                        <li class="d-flex justify-content-between align-items-center py-2 {{ !$loop->last ? 'border-bottom' : '' }}">
+                                            <span class="text-muted fw-semibold">{{ $hour['day'] }}</span>
+                                            <span class="fw-bold">{{ $hour['hours'] }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6">
@@ -103,28 +166,28 @@
     <div class="contact-address">
         <div class="container">
             <div class="contact__address__text">
-                <div class="row">
-                    <div class="col-lg-4 col-md-6 col-sm-6">
-                        <div class="contact__address__item">
-                            <h4>California Showroom</h4>
-                            <p>625 Gloria Union, California, United Stated Colorlib.california@gmail.com</p>
-                            <span>(+12) 456 678 9100</span>
+                <div class="row g-4">
+                    @foreach($showrooms as $showroom)
+                        <div class="col-lg-4 col-md-6 col-sm-6">
+                            <div class="contact__address__item h-100 p-4 border rounded shadow-sm bg-white">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 38px; height: 38px; background: rgba(220, 53, 69, 0.1); color: #dc3545;">
+                                        <i class="fa fa-map-marker"></i>
+                                    </div>
+                                    <h4 class="mb-0">{{ $showroom['title'] }}</h4>
+                                </div>
+                                <div class="text-muted mb-2">{{ $showroom['address'] }}</div>
+                                <div class="d-flex align-items-center mb-2" style="color: #dc3545;">
+                                    <i class="fa fa-envelope-o me-2"></i>
+                                    <span>{{ $siteEmail }}</span>
+                                </div>
+                                <div class="d-flex align-items-center fw-bold" style="color: #111111;">
+                                    <i class="fa fa-phone me-2" style="color: #dc3545;"></i>
+                                    <span>{{ $showroom['phone'] }}</span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-sm-6">
-                        <div class="contact__address__item">
-                            <h4>New York Showroom</h4>
-                            <p>8235 South Ave. Jamestown, NewYork Colorlib.Newyork@gmail.com</p>
-                            <span>(+12) 456 678 9100</span>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-sm-6">
-                        <div class="contact__address__item">
-                            <h4>Florida Showroom</h4>
-                            <p>497 Beaver Ridge St. Daytona Beach, Florida Colorlib.california@gmail.com</p>
-                            <span>(+12) 456 678 9100</span>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>

@@ -1,7 +1,6 @@
 @extends('template.temp')
 
-@section('title', 'Blog - GARASI62')
-
+@include('components.messages-widget')
 @section('content')
 @php
     use Illuminate\Support\Str;

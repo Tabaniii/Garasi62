@@ -1,6 +1,24 @@
 @extends('template.temp')
 
-<!-- @section('title', 'Home - GARASI62') Set the title for the page -->
+@section('meta')
+    <meta name="description" content="Garasi62 - Platform jual beli dan sewa mobil terpercaya. Temukan mobil impian Anda di sini.">
+    <meta name="keywords" content="Jual Mobil, Beli Mobil, Sewa Mobil, Garasi62, Mobil Bekas">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Garasi62 - Temukan Mobil Impianmu Disini">
+    <meta property="og:description" content="Garasi62 - Platform jual beli dan sewa mobil terpercaya. Temukan mobil impian Anda di sini.">
+    <meta property="og:image" content="{{ asset('garasi62/img/hero-bg.jpg') }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="GARASI62">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Garasi62 - Temukan Mobil Impianmu Disini">
+    <meta name="twitter:description" content="Garasi62 - Platform jual beli dan sewa mobil terpercaya.">
+    <meta name="twitter:image" content="{{ asset('garasi62/img/hero-bg.jpg') }}">
+@endsection
+
 
 @section('content')
 @include('components.messages-widget')
@@ -8,7 +26,7 @@
 <section class="hero spad set-bg" data-setbg="img/hero-bg.jpg">
     <div class="container">
         <div class="row">
-            <div class="col-lg-7">
+            <div class="col-lg-7 d-none d-md-block">
                 <div class="hero__text">
                     <div class="hero__text__title">
                         <span>TEMUKAN MOBIL IMPIANMU DISINI</span>
@@ -20,6 +38,14 @@
                     </div>
                     <a href="#" class="primary-btn"><img src="img/wheel.png" alt=""> Test Drive</a>
                     <a href="{{ route('about') }}" class="primary-btn more-btn">Learn More</a>
+                </div>
+            </div>
+            <div class="col-12 d-block d-md-none">
+                <div class="hero__text">
+                    <div class="hero__text__title">
+                        <h1 style="color: #fff; font-weight: 800;">Garasi62</h1>
+                        <span>TEMUKAN MOBIL IMPIANMU DISINI</span>
+                    </div>
                 </div>
             </div>
             <div class="col-lg-5">
@@ -229,7 +255,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 offset-lg-4">
+            <div class="col-lg-4 offset-lg-4 d-none d-md-block">
                 <div class="row">
                     <div class="col-lg-6 col-md-4 col-6">
                         <div class="feature__item">
@@ -302,7 +328,7 @@
 
         <!-- Car Grid -->
         <div class="row car-filter">
-            @forelse($cars as $car)
+            @forelse($cars->take(4) as $car)
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4 mix{{ $car->tipe == 'buy' ? ' sale' : '' }}" style="transition: opacity 0.3s ease, transform 0.3s ease, display 0.3s ease;">
                 <div class="car-card-modern" style="background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); transition: all 0.3s; height: 100%; display: flex; flex-direction: column;">
                     <!-- Car Image -->

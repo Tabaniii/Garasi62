@@ -10,12 +10,14 @@ class Message extends Model
         'chat_id',
         'sender_id',
         'message',
+        'is_deleted',
         'is_read',
         'reply_to_message_id',
     ];
 
     protected $casts = [
         'is_read' => 'boolean',
+        'is_deleted' => 'boolean',
     ];
 
     /**

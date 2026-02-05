@@ -98,6 +98,7 @@
                             
                             // Get last message safely
                             $lastMessage = null;
+                            $lastMessageTime = null;
                             if (isset($chat->last_message)) {
                                 if (is_object($chat->last_message)) {
                                     $lastMessage = $chat->last_message;
@@ -109,6 +110,15 @@
                                     ];
                                 }
                             }
+                            if ($lastMessage && isset($lastMessage->created_at)) {
+                                try {
+                                    $lastMessageTime = is_object($lastMessage->created_at)
+                                        ? $lastMessage->created_at
+                                        : \Carbon\Carbon::parse($lastMessage->created_at);
+                                } catch (\Exception $e) {
+                                    $lastMessageTime = null;
+                                }
+                            }
                             
                             // Get unread count safely
                             $unreadCount = 0;
@@ -116,28 +126,17 @@
                                 $unreadCount = (int)$chat->unread_count;
                             }
                         @endphp
-                        <div class="chat-item-wrapper">
+                        <div class="chat-item-wrapper" data-chat-id="{{ $chat->id }}" data-last-at="{{ $lastMessageTime ? $lastMessageTime->toIso8601String() : '' }}">
                             <input type="checkbox" class="chat-checkbox" value="{{ $chat->id }}" onchange="updateDeleteButton()">
-                            <a href="{{ route('chat.show', $chat->id) }}" class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}" onclick="return !event.ctrlKey && !event.metaKey;">
+                            <a href="{{ route('chat.show', $chat->id) }}" class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}" onclick="markChatAsRead('{{ $chat->id }}', this); return !event.ctrlKey && !event.metaKey;">
                                 <div class="chat-item-avatar">
                                     <i class="fas fa-user"></i>
                                 </div>
                                 <div class="chat-item-content">
                                     <div class="chat-item-header">
                                         <span class="chat-item-name">{{ $otherUser->name }}</span>
-                                        @if($lastMessage && isset($lastMessage->created_at))
-                                            @php
-                                                try {
-                                                    $lastMessageTime = is_object($lastMessage->created_at) 
-                                                        ? $lastMessage->created_at 
-                                                        : \Carbon\Carbon::parse($lastMessage->created_at);
-                                                } catch (\Exception $e) {
-                                                    $lastMessageTime = null;
-                                                }
-                                            @endphp
-                                            @if($lastMessageTime)
-                                                <span class="chat-item-time">{{ $lastMessageTime->diffForHumans() }}</span>
-                                            @endif
+                                        @if($lastMessageTime)
+                                            <span class="chat-item-time">{{ $lastMessageTime->diffForHumans() }}</span>
                                         @endif
                                     </div>
                                     <div class="chat-item-preview">
@@ -429,6 +428,86 @@
 </style>
 
 <script>
+function markChatAsRead(chatId, el) {
+    const item = el?.closest('.chat-item');
+    if (item) {
+        item.classList.remove('chat-item-unread');
+        const badge = item.querySelector('.chat-item-badge');
+        if (badge) badge.remove();
+    }
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    if (!chatId || !csrfToken) return;
+    fetch(`/chat/${encodeURIComponent(chatId)}/mark-read`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        keepalive: true
+    }).catch(() => {});
+}
+
+function refreshChatList() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+    fetch('/chat/unread-count', {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(res => res.ok ? res.json() : Promise.reject())
+    .then(data => {
+        const perChat = data.per_chat || {};
+        const listContainer = document.querySelector('.chat-list-container');
+        const wrappers = Array.from(document.querySelectorAll('.chat-item-wrapper'));
+        wrappers.forEach(wrapper => {
+            const chatId = wrapper.getAttribute('data-chat-id');
+            const meta = chatId && perChat[chatId] ? perChat[chatId] : null;
+            if (!meta) return;
+            const item = wrapper.querySelector('.chat-item');
+            const preview = wrapper.querySelector('.chat-item-message');
+            const timeEl = wrapper.querySelector('.chat-item-time');
+            const badge = wrapper.querySelector('.chat-item-badge');
+            const unread = parseInt(meta.unread_count || 0);
+            if (preview && meta.last_message) {
+                preview.textContent = meta.last_message;
+            }
+            if (timeEl && meta.last_message_time) {
+                timeEl.textContent = meta.last_message_time;
+            }
+            if (meta.last_message_at) {
+                wrapper.dataset.lastAt = meta.last_message_at;
+            }
+            if (unread > 0) {
+                item?.classList.add('chat-item-unread');
+                if (!badge) {
+                    const newBadge = document.createElement('span');
+                    newBadge.className = 'chat-item-badge';
+                    newBadge.textContent = unread;
+                    wrapper.querySelector('.chat-item-preview')?.appendChild(newBadge);
+                } else {
+                    badge.textContent = unread;
+                }
+            } else {
+                item?.classList.remove('chat-item-unread');
+                if (badge) badge.remove();
+            }
+        });
+        if (listContainer) {
+            const sorted = wrappers.sort((a, b) => {
+                const aTime = new Date(a.dataset.lastAt || 0).getTime();
+                const bTime = new Date(b.dataset.lastAt || 0).getTime();
+                return bTime - aTime;
+            });
+            sorted.forEach(w => listContainer.appendChild(w));
+        }
+    })
+    .catch(() => {});
+}
+
 // Search functionality
 document.getElementById('chatSearch').addEventListener('input', function(e) {
     const searchTerm = e.target.value.toLowerCase();
@@ -516,75 +595,89 @@ function deleteSelectedChats() {
         return;
     }
     
-    if (!confirm(`Apakah Anda yakin ingin menghapus ${chatIds.length} obrolan?`)) {
-        return;
-    }
-    
-    // Show loading
-    const deleteBtn = document.getElementById('deleteSelectedBtn');
-    const originalHTML = deleteBtn.innerHTML;
-    deleteBtn.disabled = true;
-    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
-    
-    fetch('{{ route("chat.destroy") }}', {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                           document.querySelector('input[name="_token"]')?.value || '',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({ chat_ids: chatIds })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Remove deleted chats from UI
-            chatIds.forEach(chatId => {
-                const wrapper = document.querySelector(`.chat-checkbox[value="${chatId}"]`)?.closest('.chat-item-wrapper');
-                if (wrapper) {
-                    wrapper.style.transition = 'opacity 0.3s';
-                    wrapper.style.opacity = '0';
-                    setTimeout(() => wrapper.remove(), 300);
+    const execute = () => {
+        const deleteBtn = document.getElementById('deleteSelectedBtn');
+        const originalHTML = deleteBtn.innerHTML;
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+        
+        fetch('{{ route("chat.destroy") }}', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                               document.querySelector('input[name="_token"]')?.value || '',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ chat_ids: chatIds })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                chatIds.forEach(chatId => {
+                    const wrapper = document.querySelector(`.chat-checkbox[value="${chatId}"]`)?.closest('.chat-item-wrapper');
+                    if (wrapper) {
+                        wrapper.style.transition = 'opacity 0.3s';
+                        wrapper.style.opacity = '0';
+                        setTimeout(() => wrapper.remove(), 300);
+                    }
+                });
+                toggleSelectMode();
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: data.message || `Berhasil menghapus ${data.deleted_count} obrolan`,
+                        confirmButtonColor: '#df2d24',
+                        timer: 2000
+                    });
+                } else {
+                    alert(data.message || `Berhasil menghapus ${data.deleted_count} obrolan`);
                 }
-            });
-            
-            // Reset selection mode
-            toggleSelectMode();
-            
-            // Show success message
+            } else {
+                throw new Error(data.error || 'Gagal menghapus obrolan');
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting chats:', error);
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: data.message || `Berhasil menghapus ${data.deleted_count} obrolan`,
-                    confirmButtonColor: '#df2d24',
-                    timer: 2000
+                    icon: 'error',
+                    title: 'Error!',
+                    text: error.message || 'Gagal menghapus obrolan',
+                    confirmButtonColor: '#df2d24'
                 });
             } else {
-                alert(data.message || `Berhasil menghapus ${data.deleted_count} obrolan`);
+                alert('Gagal menghapus obrolan: ' + error.message);
             }
-        } else {
-            throw new Error(data.error || 'Gagal menghapus obrolan');
+        })
+        .finally(() => {
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = originalHTML;
+        });
+    };
+    
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Hapus obrolan?',
+            text: `Anda akan menghapus ${chatIds.length} obrolan. Tindakan ini tidak bisa dibatalkan.`,
+            showCancelButton: true,
+            confirmButtonText: 'Hapus',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#df2d24',
+            cancelButtonColor: '#6b7280'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                execute();
+            }
+        });
+    } else {
+        if (!confirm(`Apakah Anda yakin ingin menghapus ${chatIds.length} obrolan?`)) {
+            return;
         }
-    })
-    .catch(error => {
-        console.error('Error deleting chats:', error);
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: error.message || 'Gagal menghapus obrolan',
-                confirmButtonColor: '#df2d24'
-            });
-        } else {
-            alert('Gagal menghapus obrolan: ' + error.message);
-        }
-    })
-    .finally(() => {
-        deleteBtn.disabled = false;
-        deleteBtn.innerHTML = originalHTML;
-    });
+        execute();
+    }
 }
 
 // Enable selection mode with Ctrl/Cmd + Click or long press
@@ -635,6 +728,7 @@ document.addEventListener('click', function(e) {
         }
     }
 });
+document.addEventListener('DOMContentLoaded', refreshChatList);
+setInterval(refreshChatList, 8000);
 </script>
 @endsection
-

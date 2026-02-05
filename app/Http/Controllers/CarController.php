@@ -129,6 +129,10 @@ class CarController extends Controller
                 $q->where('status', 'resolved')
                   ->whereNotNull('admin_notes')
                   ->latest();
+            },
+            // Eager load rejection approvals to show reason and date
+            'approvals' => function($q) {
+                $q->where('action', 'rejected')->latest();
             }]);
         } else {
             // Buyer cannot access this page
@@ -204,7 +208,7 @@ class CarController extends Controller
                 'kilometer' => 'required|string|max:6',
                 'transmisi' => 'required|string|max:10',
                 'harga' => 'required|string|max:10',
-                'metode' => 'required|string|max:5',
+                'metode' => 'required|string|max:10',
                 'kapasitasmesin' => 'required|string|max:50',
                 'stock' => 'nullable|string|max:50',
                 'vin' => 'nullable|string|max:50',
@@ -333,7 +337,7 @@ class CarController extends Controller
             'kilometer' => 'required|string|max:6',
             'transmisi' => 'required|string|max:10',
             'harga' => 'required|string|max:10',
-            'metode' => 'required|string|max:5',
+            'metode' => 'required|string|max:10',
             'kapasitasmesin' => 'required|string|max:50',
             'stock' => 'nullable|string|max:50',
             'vin' => 'nullable|string|max:50',
@@ -471,6 +475,11 @@ class CarController extends Controller
             $data['extra_features'] = array_filter($request->input('extra_features', []));
         }
 
+        // Jika mobil sebelumnya ditolak, ubah status menjadi pending (ajukan ulang otomatis)
+        if ($car->status === 'rejected') {
+            $data['status'] = 'pending';
+        }
+
         $car->update($data);
 
         return redirect()->route('cars.index')->with('success', 'Mobil berhasil diperbarui!');
@@ -502,8 +511,23 @@ class CarController extends Controller
             }
             
             // Hapus gambar dari storage
-            if ($car->image && is_array($car->image)) {
-                foreach ($car->image as $imagePath) {
+            if ($car->image) {
+                // Normalisasi ke array
+                $images = [];
+                if (is_array($car->image)) {
+                    $images = $car->image;
+                } elseif (is_string($car->image)) {
+                    try {
+                        $decoded = json_decode($car->image, true);
+                        if (is_array($decoded)) {
+                            $images = $decoded;
+                        }
+                    } catch (\Exception $e) {
+                        $images = [];
+                    }
+                }
+
+                foreach ($images as $imagePath) {
                     // Cek apakah gambar digunakan oleh mobil lain
                     $isUsedByOtherCar = car::where('id', '!=', $id)
                         ->whereNotNull('image')
@@ -511,6 +535,9 @@ class CarController extends Controller
                         ->filter(function($otherCar) use ($imagePath) {
                             if (is_array($otherCar->image)) {
                                 return in_array($imagePath, $otherCar->image);
+                            } elseif (is_string($otherCar->image)) {
+                                $otherImages = json_decode($otherCar->image, true);
+                                return is_array($otherImages) ? in_array($imagePath, $otherImages) : false;
                             }
                             return false;
                         })

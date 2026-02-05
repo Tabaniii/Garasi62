@@ -1,7 +1,39 @@
 @extends('template.temp')
 
-<!-- @section('title', 'Home - GARASI62') Set the title for the page -->
+@section('meta')
+    <meta name="description" content="Jual/Sewa Mobil {{ $car->brand }} {{ $car->nama }} Tahun {{ $car->tahun }} - {{ $car->tipe == 'rent' ? 'Sewa' : 'Jual' }} di Garasi62">
+    <meta name="keywords" content="{{ $car->brand }}, {{ $car->nama }}, Mobil Bekas, Sewa Mobil, Jual Mobil, {{ $car->tahun }}">
 
+    <!-- Open Graph -->
+    <meta property="og:title" content="{{ $car->brand }} {{ $car->nama }} {{ $car->tahun }} - Garasi62">
+    <meta property="og:description" content="Lihat detail mobil {{ $car->brand }} {{ $car->nama }} tahun {{ $car->tahun }}. Kondisi prima, harga bersaing. Tersedia untuk {{ $car->tipe == 'rent' ? 'disewa' : 'dibeli' }}.">
+    @if($car->image && is_array($car->image) && count($car->image) > 0)
+        <meta property="og:image" content="{{ asset('storage/' . $car->image[0]) }}">
+    @else
+        <meta property="og:image" content="{{ asset('garasi62/img/cars/details/cd-1.jpg') }}">
+    @endif
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="product">
+    <meta property="og:site_name" content="GARASI62">
+    
+    <!-- Product Specific OG -->
+    <meta property="product:brand" content="{{ $car->brand }}">
+    <meta property="product:condition" content="used">
+    <meta property="product:price:amount" content="{{ $car->harga }}">
+    <meta property="product:price:currency" content="IDR">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $car->brand }} {{ $car->nama }} {{ $car->tahun }} - Garasi62">
+    <meta name="twitter:description" content="Lihat detail mobil {{ $car->brand }} {{ $car->nama }} tahun {{ $car->tahun }}.">
+    @if($car->image && is_array($car->image) && count($car->image) > 0)
+        <meta name="twitter:image" content="{{ asset('storage/' . $car->image[0]) }}">
+    @else
+        <meta name="twitter:image" content="{{ asset('garasi62/img/cars/details/cd-1.jpg') }}">
+    @endif
+@endsection
+
+@include('components.messages-widget')
 @section('content')
     <!-- Breadcrumb Begin -->
     <div class="breadcrumb-option set-bg" data-setbg="{{ asset('garasi62/img/breadcrumb-bg.jpg') }}">

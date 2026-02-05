@@ -64,6 +64,7 @@ class MessageSent implements ShouldBroadcastNow
                 'sender_id' => $this->message->sender_id,
                 'sender_name' => $senderName,
                 'message' => $this->message->message,
+                'is_deleted' => $this->message->is_deleted ?? false,
                 'is_read' => $this->message->is_read ?? false,
                 'reply_to_message_id' => $this->message->reply_to_message_id ?? null,
                 'reply_to_message' => $this->message->reply_to_message ?? null,

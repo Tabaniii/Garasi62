@@ -9,6 +9,7 @@ use App\Models\FundRequest;
 use App\Models\Testimonial;
 use App\Models\CarApproval;
 use App\Models\Wishlist;
+use App\Models\Report;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -104,6 +105,13 @@ class DashboardController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // Get recent reports by this buyer
+        $myReports = Report::with(['car'])
+            ->where('reporter_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
         $stats = [
             'available_cars' => car::where('status', 'approved')->count(),
             'cars_for_sale' => car::where('tipe', 'buy')->where('status', 'approved')->count(),
@@ -111,9 +119,9 @@ class DashboardController extends Controller
             'recent_cars' => car::where('status', 'approved')->orderBy('created_at', 'desc')->limit(5)->get(),
             'wishlist_count' => $wishlistCarIds->count(),
             'wishlist_cars' => $wishlistCars,
+            'my_reports' => $myReports,
         ];
 
         return view('dashboard.buyer', compact('stats'));
     }
 }
-

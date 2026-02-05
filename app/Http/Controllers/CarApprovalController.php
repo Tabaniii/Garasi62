@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\car;
 use App\Models\CarApproval;
+use App\Models\NotificationLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -104,13 +105,18 @@ class CarApprovalController extends Controller
             ]);
 
             // Create notification message for seller
-            $notificationMessage = "Mobil {$car->brand} {$car->nama} yang Anda posting telah diproses.";
+            $notificationMessage = "Mobil {$car->brand} {$car->nama} yang Anda posting telah disetujui.";
             if ($request->notes) {
                 $notificationMessage .= " Catatan: " . $request->notes;
             }
 
-            // Here you can add more advanced notification logic
-            // For example: send email to seller, create notification record in database, push notification, etc.
+            // Create notification record in database
+            NotificationLog::create([
+                'user_id' => $car->seller_id,
+                'title' => 'Mobil Disetujui',
+                'message' => $notificationMessage,
+                'is_read' => false,
+            ]);
         });
 
         return redirect()->route('admin.car-approvals.index')

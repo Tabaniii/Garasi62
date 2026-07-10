@@ -10,35 +10,27 @@ return new class extends Migration {
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
-        if (!Schema::hasColumn('car', 'uuid')) {
-            Schema::table('car', function (Blueprint $table) {
-                $table->uuid('uuid')->nullable()->after('id');
-            });
-        }
+        // 1. Siapkan kanvas awal
+        Schema::table('car', function (Blueprint $table) {
+            $table->uuid('uuid')->nullable();
+        });
 
-        try {
-            Schema::table('car', function (Blueprint $table) {
-                $table->unique('uuid');
-            });
-        } catch (\Exception $e) {
-        }
-
-        $cars = DB::table('car')->whereNull('uuid')->orWhere('uuid', '')->get();
+        // 2. Cari data yang murni null saja (TANPA string kosong)
+        $cars = DB::table('car')->whereNull('uuid')->get();
         foreach ($cars as $car) {
             DB::table('car')->where('id', $car->id)->update([
                 'uuid' => (string) Str::uuid(),
             ]);
         }
 
-        try {
-            Schema::table('car', function (Blueprint $table) {
-                $table->uuid('uuid')->nullable(false)->change();
-            });
-        } catch (\Exception $e) {
-        }
-    }
+        // 3. Kunci layernya agar tidak boleh kosong (unique)
+        Schema::table('car', function (Blueprint $table) {
+            $table->uuid('uuid')->nullable(false)->change();
+            $table->unique('uuid');
+        });
+    }   
 
     /**
      * Reverse the migrations.

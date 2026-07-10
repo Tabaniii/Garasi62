@@ -21,8 +21,8 @@ class IndexController extends Controller
         $kapasitasmesinList = car::where('status', 'approved')->distinct()->whereNotNull('kapasitasmesin')->pluck('kapasitasmesin')->sort()->values();
         
         // Get min and max price from database (only approved cars)
-        $minPrice = car::where('status', 'approved')->whereNotNull('harga')->min(DB::raw('CAST(harga AS UNSIGNED)')) ?? 0;
-        $maxPrice = car::where('status', 'approved')->whereNotNull('harga')->max(DB::raw('CAST(harga AS UNSIGNED)')) ?? 1000000000;
+        $minPrice = car::where('status', 'approved')->whereNotNull('harga')->min(DB::raw('CAST(harga AS BIGINT)'));
+        $maxPrice = car::where('status', 'approved')->whereNotNull('harga')->max(DB::raw('CAST(harga AS BIGINT)')); 
 
         // Get latest published blogs (limit 3)
         $blogs = Blog::published()->orderBy('published_at', 'desc')->limit(3)->get();

@@ -68,10 +68,10 @@ class CarController extends Controller
 
         // Filter by price range
         if ($request->filled('min_price')) {
-            $query->whereRaw('CAST(harga AS UNSIGNED) >= ?', [$request->min_price]);
+            $query->whereRaw('CAST(harga AS BIGINT) >= ?', [$request->min_price]);
         }
         if ($request->filled('max_price')) {
-            $query->whereRaw('CAST(harga AS UNSIGNED) <= ?', [$request->max_price]);
+            $query->whereRaw('CAST(harga AS BIGINT) <= ?', [$request->max_price]);
         }
 
         // Sort
@@ -79,7 +79,7 @@ class CarController extends Controller
         $sortOrder = $request->get('sort_order', 'desc');
 
         if ($sortBy == 'harga') {
-            $query->orderByRaw('CAST(harga AS UNSIGNED) ' . $sortOrder);
+            $query->orderByRaw('CAST(harga AS BIGINT) ' . $sortOrder);
         } elseif ($sortBy == 'tahun') {
             $query->orderBy('tahun', $sortOrder);
         } else {
@@ -100,8 +100,8 @@ class CarController extends Controller
         $kapasitasmesinList = car::distinct()->whereNotNull('kapasitasmesin')->pluck('kapasitasmesin')->sort()->values();
 
         // Get min and max price from database
-        $minPrice = car::whereNotNull('harga')->min(DB::raw('CAST(harga AS UNSIGNED)'));
-        $maxPrice = car::whereNotNull('harga')->max(DB::raw('CAST(harga AS UNSIGNED)'));
+        $minPrice = car::whereNotNull('harga')->min(DB::raw('CAST(harga AS BIGINT)'));
+        $maxPrice = car::whereNotNull('harga')->max(DB::raw('CAST(harga AS BIGINT)'));
 
         return view('car', compact('cars', 'brands', 'transmisiList', 'bahanBakarList', 'locationList', 'tahunList', 'metodeList', 'kapasitasmesinList', 'minPrice', 'maxPrice'));
     }

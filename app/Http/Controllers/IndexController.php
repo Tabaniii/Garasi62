@@ -14,15 +14,23 @@ class IndexController extends Controller
         // Get cars data for display (latest approved cars, limit to 12 for homepage)
         $cars = car::where('status', 'approved')->orderBy('created_at', 'desc')->limit(12)->get();
         
-        // Get unique values for filters from database (only approved cars)
-        $brands = car::where('status', 'approved')->distinct()->whereNotNull('brand')->pluck('brand')->sort()->values();
-        $tahunList = car::where('status', 'approved')->distinct()->whereNotNull('tahun')->pluck('tahun')->sort()->values();
-        $transmisiList = car::where('status', 'approved')->distinct()->whereNotNull('transmisi')->pluck('transmisi')->sort()->values();
-        $kapasitasmesinList = car::where('status', 'approved')->distinct()->whereNotNull('kapasitasmesin')->pluck('kapasitasmesin')->sort()->values();
+        // Optimize: Fetch filter fields in one query to prevent multiple high-latency network round-trips to the remote database
+        $filterData = car::where('status', 'approved')
+            ->select('brand', 'tahun', 'transmisi', 'kapasitasmesin', 'harga')
+            ->get();
+            
+        $brands = $filterData->pluck('brand')->filter()->unique()->sort()->values();
+        $tahunList = $filterData->pluck('tahun')->filter()->unique()->sort()->values();
+        $transmisiList = $filterData->pluck('transmisi')->filter()->unique()->sort()->values();
+        $kapasitasmesinList = $filterData->pluck('kapasitasmesin')->filter()->unique()->sort()->values();
         
-        // Get min and max price from database (only approved cars)
-        $minPrice = car::where('status', 'approved')->whereNotNull('harga')->min(DB::raw('CAST(harga AS BIGINT)'));
-        $maxPrice = car::where('status', 'approved')->whereNotNull('harga')->max(DB::raw('CAST(harga AS BIGINT)')); 
+        // Parse prices to get min and max
+        $prices = $filterData->pluck('harga')->filter()->map(function ($h) {
+            return (int) $h;
+        });
+        
+        $minPrice = $prices->min() ?? 0;
+        $maxPrice = $prices->max() ?? 1000000000; 
 
         // Get latest published blogs (limit 3)
         $blogs = Blog::published()->orderBy('published_at', 'desc')->limit(3)->get();

@@ -31,6 +31,12 @@
         }
     });
 
+    // Safety fallback: force hide preloader after 1.5s if it hasn't loaded yet
+    setTimeout(function () {
+        $(".loader").fadeOut();
+        $("#preloder").fadeOut("slow");
+    }, 1500);
+
     /*------------------
         Background Set
     --------------------*/

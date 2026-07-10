@@ -79,7 +79,7 @@
                                             }
                                         }
                                     @endphp
-                                    <div class="message-item {{ ($message->sender_id ?? 0) === Auth::id() ? 'message-sent' : 'message-received' }} {{ $isDeleted ? 'message-deleted' : '' }}">
+                                    <div class="message-item {{ (int)($message->sender_id ?? 0) === (int)Auth::id() ? 'message-sent' : 'message-received' }} {{ $isDeleted ? 'message-deleted' : '' }}">
                                     <div class="message-content">
                                         @if(!$isDeleted)
                                             <div class="message-actions">
@@ -91,13 +91,13 @@
                                                         <i class="fa fa-reply"></i>
                                                         <span>Balas</span>
                                                     </button>
-                                                    @if(($message->sender_id ?? 0) === Auth::id() && !($message->is_read ?? false))
+                                                    @if((int)($message->sender_id ?? 0) === (int)Auth::id() && !($message->is_read ?? false))
                                                         <button class="message-action-item edit-btn" onclick="openEditModal('{{ $message->id }}', '{{ str_replace(array("\r", "\n"), array('\r', '\n'), addslashes($message->message)) }}')">
                                                             <i class="fa fa-pencil"></i>
                                                             <span>Edit</span>
                                                         </button>
                                                     @endif
-                                                    @if(($message->sender_id ?? 0) === Auth::id())
+                                                    @if((int)($message->sender_id ?? 0) === (int)Auth::id())
                                                         <button class="message-action-item delete-btn" onclick="deleteMessage('{{ $message->id }}')">
                                                             <i class="fa fa-trash"></i>
                                                             <span>Hapus</span>
@@ -456,14 +456,17 @@
             display: flex;
             margin-bottom: 12px;
             animation: fadeIn 0.3s ease-out;
+            width: 100%;
         }
 
         .message-sent {
             justify-content: flex-end;
+            margin-left: auto;
         }
 
         .message-received {
             justify-content: flex-start;
+            margin-right: auto;
         }
 
         .message-content {
@@ -754,7 +757,7 @@
     
     <script>
         const chatId = '{{ $chat->id }}';
-        const currentUserId = {{ Auth::id() }};
+        const currentUserId = Number({{ Auth::id() }});
         const otherUserId = {{ isset($otherUser) ? (int)$otherUser->id : (isset($seller) ? (int)$seller->id : 0) }};
         let lastMessageId = 0;
         const initialMessageIds = @json($messages->map(function($msg) { 
@@ -786,10 +789,11 @@
             const timeText = new Date(created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
             const isDeleted = !!is_deleted || !message;
-            messageDiv.className = `message-item ${sender_id === currentUserId ? 'message-sent' : 'message-received'}${isDeleted ? ' message-deleted' : ''}`;
+            const isOwn = Number(sender_id) === Number(currentUserId);
+            messageDiv.className = `message-item ${isOwn ? 'message-sent' : 'message-received'}${isDeleted ? ' message-deleted' : ''}`;
             messageDiv.dataset.id = id;
             
-            const isOwnMessage = sender_id === currentUserId;
+            const isOwnMessage = Number(sender_id) === Number(currentUserId);
             const showEdit = isOwnMessage && !is_read && !isDeleted;
             const showDelete = isOwnMessage && !isDeleted;
             
@@ -1073,9 +1077,14 @@
                 }
             })
             .finally(() => {
-                sendBtn.disabled = false;
-                sendBtn.innerHTML = originalHTML;
-                messageInput.focus();
+                // Restore tombol yang saat ini di DOM (bisa beda node jika form sempat di-clone)
+                const btn = document.getElementById('sendMessageBtn') || document.querySelector('.chat-send-btn');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa fa-paper-plane"></i>';
+                }
+                const input = document.getElementById('messageInput');
+                if (input) input.focus();
             });
             
             return false;

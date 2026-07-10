@@ -1,720 +1,765 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="page-title mb-0">Obrolan</h1>
-                <div class="d-flex gap-2">
-                    <button id="selectModeBtn" class="btn btn-sm btn-outline-primary" onclick="toggleSelectMode()">
-                        <i class="fas fa-check-square"></i> Pilih
-                    </button>
-                    <button id="selectAllBtn" class="btn btn-sm btn-outline-primary" onclick="toggleSelectAll()" style="display: none;">
-                        <i class="fas fa-check-square"></i> Pilih Semua
-                    </button>
-                    <button id="deleteSelectedBtn" class="btn btn-sm btn-danger" onclick="deleteSelectedChats()" style="display: none;">
-                        <i class="fas fa-trash"></i> Hapus Terpilih
-                    </button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="window.location.reload()">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h1 class="page-title mb-0">Obrolan</h1>
+                    <div class="d-flex gap-2">
+                        <button id="selectModeBtn" class="btn btn-sm btn-outline-primary" onclick="toggleSelectMode()">
+                            <i class="fas fa-check-square"></i> Pilih
+                        </button>
+                        <button id="selectAllBtn" class="btn btn-sm btn-outline-primary" onclick="toggleSelectAll()"
+                            style="display: none;">
+                            <i class="fas fa-check-square"></i> Pilih Semua
+                        </button>
+                        <button id="deleteSelectedBtn" class="btn btn-sm btn-danger" onclick="deleteSelectedChats()"
+                            style="display: none;">
+                            <i class="fas fa-trash"></i> Hapus Terpilih
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="window.location.reload()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Search Bar -->
-            <div class="chat-search-container mb-3">
-                <div class="chat-search-wrapper">
-                    <i class="fas fa-search chat-search-icon"></i>
-                    <input type="text" id="chatSearch" class="chat-search-input" placeholder="Cari obrolan...">
+                <!-- Search Bar -->
+                <div class="chat-search-container mb-3">
+                    <div class="chat-search-wrapper">
+                        <i class="fas fa-search chat-search-icon"></i>
+                        <input type="text" id="chatSearch" class="chat-search-input" placeholder="Cari obrolan...">
+                    </div>
                 </div>
-            </div>
 
-            @php
-                // Group chats by buyer_id safely
-                $shortcuts = collect([]);
-                if ($chats && $chats->count() > 0) {
-                    $shortcuts = $chats->groupBy(function($chat) {
-                        return $chat->buyer_id ?? null;
-                    })->filter(function($group, $key) {
-                        return $key !== null;
-                    });
-                }
-            @endphp
+                @php
+                    // Group chats by buyer_id safely
+                    $shortcuts = collect([]);
+                    if ($chats && $chats->count() > 0) {
+                        $shortcuts = $chats->groupBy(function ($chat) {
+                            return $chat->buyer_id ?? null;
+                        })->filter(function ($group, $key) {
+                            return $key !== null;
+                        });
+                    }
+                @endphp
 
-            @if($shortcuts->count() > 0)
-            <div class="chat-shortcut-container mb-3">
-                @foreach($shortcuts as $buyerId => $buyerChats)
-                    @php
-                        $firstChat = $buyerChats->first();
-                        if (!$firstChat) continue;
-                        
-                        // Use other_user if available, otherwise fallback to buyer
-                        $buyer = $firstChat->other_user ?? $firstChat->buyer ?? null;
-                        
-                        // Double check: make sure we're not showing seller's own name
-                        if ($buyer && $buyer->id == Auth::id()) {
-                            $buyer = $firstChat->buyer ?? null;
-                        }
-                        
-                        if (!$buyer) continue;
-                        
-                        // Calculate unread count safely
-                        $unread = 0;
-                        foreach ($buyerChats as $chat) {
-                            if (isset($chat->unread_count)) {
-                                $unread += (int)$chat->unread_count;
-                            }
-                        }
-                    @endphp
-                    <a href="{{ route('chat.show', $firstChat->id) }}" class="chat-shortcut-item" title="Chat dengan {{ $buyer->name }}">
-                        <div class="shortcut-avatar">
-                            <span>{{ strtoupper(substr($buyer->name,0,1)) }}</span>
-                        </div>
-                        <div class="shortcut-name">{{ Str::limit($buyer->name, 10) }}</div>
-                        @if($unread > 0)
-                            <span class="shortcut-badge">{{ $unread }}</span>
-                        @endif
-                    </a>
-                @endforeach
-            </div>
-            @endif
+                @if($shortcuts->count() > 0)
+                    <div class="chat-shortcut-container mb-3">
+                        @foreach($shortcuts as $buyerId => $buyerChats)
+                            @php
+                                $firstChat = $buyerChats->first();
+                                if (!$firstChat)
+                                    continue;
 
-            <!-- Chat List -->
-            <div class="chat-list-container">
-                @if($chats && $chats->count() > 0)
-                    @foreach($chats as $chat)
-                        @php
-                            // Use other_user if available (set in ChatController), otherwise fallback to buyer
-                            $otherUser = $chat->other_user ?? $chat->buyer ?? null;
-                            
-                            // Double check: make sure we're not showing seller's own name
-                            if ($otherUser && $otherUser->id == Auth::id()) {
-                                // Wrong user, try buyer
-                                $otherUser = $chat->buyer ?? null;
-                            }
-                            
-                            if (!$otherUser) continue;
-                            
-                            // Get last message safely
-                            $lastMessage = null;
-                            $lastMessageTime = null;
-                            if (isset($chat->last_message)) {
-                                if (is_object($chat->last_message)) {
-                                    $lastMessage = $chat->last_message;
-                                } elseif (is_string($chat->last_message)) {
-                                    // If last_message is just a string, create object
-                                    $lastMessage = (object)[
-                                        'message' => $chat->last_message,
-                                        'created_at' => $chat->last_message->created_at ?? now()
-                                    ];
+                                // Use other_user if available, otherwise fallback to buyer
+                                $buyer = $firstChat->other_user ?? $firstChat->buyer ?? null;
+
+                                // Double check: make sure we're not showing seller's own name
+                                if ($buyer && $buyer->id == Auth::id()) {
+                                    $buyer = $firstChat->buyer ?? null;
                                 }
-                            }
-                            if ($lastMessage && isset($lastMessage->created_at)) {
-                                try {
-                                    $lastMessageTime = is_object($lastMessage->created_at)
-                                        ? $lastMessage->created_at
-                                        : \Carbon\Carbon::parse($lastMessage->created_at);
-                                } catch (\Exception $e) {
-                                    $lastMessageTime = null;
+
+                                if (!$buyer)
+                                    continue;
+
+                                // Calculate unread count safely
+                                $unread = 0;
+                                foreach ($buyerChats as $chat) {
+                                    if (isset($chat->unread_count)) {
+                                        $unread += (int) $chat->unread_count;
+                                    }
                                 }
-                            }
-                            
-                            // Get unread count safely
-                            $unreadCount = 0;
-                            if (isset($chat->unread_count)) {
-                                $unreadCount = (int)$chat->unread_count;
-                            }
-                        @endphp
-                        <div class="chat-item-wrapper" data-chat-id="{{ $chat->id }}" data-last-at="{{ $lastMessageTime ? $lastMessageTime->toIso8601String() : '' }}">
-                            <input type="checkbox" class="chat-checkbox" value="{{ $chat->id }}" onchange="updateDeleteButton()">
-                            <a href="{{ route('chat.show', $chat->id) }}" class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}" onclick="markChatAsRead('{{ $chat->id }}', this); return !event.ctrlKey && !event.metaKey;">
-                                <div class="chat-item-avatar">
-                                    <i class="fas fa-user"></i>
+                            @endphp
+                            <a href="{{ route('chat.show', $firstChat->id) }}" class="chat-shortcut-item"
+                                title="Chat dengan {{ $buyer->name }}">
+                                <div class="shortcut-avatar">
+                                    <span>{{ strtoupper(substr($buyer->name, 0, 1)) }}</span>
                                 </div>
-                                <div class="chat-item-content">
-                                    <div class="chat-item-header">
-                                        <span class="chat-item-name">{{ $otherUser->name }}</span>
-                                        @if($lastMessageTime)
-                                            <span class="chat-item-time">{{ $lastMessageTime->diffForHumans() }}</span>
-                                        @endif
-                                    </div>
-                                    <div class="chat-item-preview">
-                                        @if($lastMessage && isset($lastMessage->message) && $lastMessage->message)
-                                            <span class="chat-item-message">
-                                                {{ Str::limit($lastMessage->message, 50) }}
-                                            </span>
-                                        @else
-                                            <span class="chat-item-message text-muted">Belum ada pesan</span>
-                                        @endif
-                                        @if($unreadCount > 0)
-                                            <span class="chat-item-badge">{{ $unreadCount }}</span>
-                                        @endif
-                                    </div>
-                                    @if(isset($chat->car) && $chat->car)
-                                    <div class="chat-item-car">
-                                        <i class="fas fa-car"></i> {{ $chat->car->brand ?? '' }} {{ $chat->car->nama ?? '' }}
-                                    </div>
-                                    @endif
-                                </div>
+                                <div class="shortcut-name">{{ Str::limit($buyer->name, 10) }}</div>
+                                @if($unread > 0)
+                                    <span class="shortcut-badge">{{ $unread }}</span>
+                                @endif
                             </a>
-                        </div>
-                    @endforeach
-                @else
-                    <div class="chat-empty-state">
-                        <i class="fas fa-comments fa-3x mb-3 text-muted"></i>
-                        <p class="text-muted">Belum ada obrolan</p>
-                        <small class="text-muted">Obrolan akan muncul ketika buyer menghubungi Anda</small>
+                        @endforeach
                     </div>
                 @endif
+
+                <!-- Chat List -->
+                <div class="chat-list-container">
+                    @if($chats && $chats->count() > 0)
+                        @foreach($chats as $chat)
+                            @php
+                                // Use other_user if available (set in ChatController), otherwise fallback to buyer
+                                $otherUser = $chat->other_user ?? $chat->buyer ?? null;
+
+                                // Double check: make sure we're not showing seller's own name
+                                if ($otherUser && $otherUser->id == Auth::id()) {
+                                    // Wrong user, try buyer
+                                    $otherUser = $chat->buyer ?? null;
+                                }
+
+                                if (!$otherUser)
+                                    continue;
+
+                                // Get last message safely
+                                $lastMessage = null;
+                                $lastMessageTime = null;
+                                if (isset($chat->last_message)) {
+                                    if (is_object($chat->last_message)) {
+                                        $lastMessage = $chat->last_message;
+                                    } elseif (is_string($chat->last_message)) {
+                                        // If last_message is just a string, create object
+                                        $lastMessage = (object) [
+                                            'message' => $chat->last_message,
+                                            'created_at' => $chat->last_message->created_at ?? now()
+                                        ];
+                                    }
+                                }
+                                if ($lastMessage && isset($lastMessage->created_at)) {
+                                    try {
+                                        $lastMessageTime = is_object($lastMessage->created_at)
+                                            ? $lastMessage->created_at
+                                            : \Carbon\Carbon::parse($lastMessage->created_at);
+                                    } catch (\Exception $e) {
+                                        $lastMessageTime = null;
+                                    }
+                                }
+
+                                // Get unread count safely
+                                $unreadCount = 0;
+                                if (isset($chat->unread_count)) {
+                                    $unreadCount = (int) $chat->unread_count;
+                                }
+                            @endphp
+                            <div class="chat-item-wrapper" data-chat-id="{{ $chat->id }}"
+                                data-last-at="{{ $lastMessageTime ? $lastMessageTime->toIso8601String() : '' }}">
+                                <input type="checkbox" class="chat-checkbox" value="{{ $chat->id }}"
+                                    onchange="updateDeleteButton()">
+                                <a href="{{ route('chat.show', $chat->id) }}"
+                                    class="chat-item {{ $unreadCount > 0 ? 'chat-item-unread' : '' }}"
+                                    onclick="markChatAsRead('{{ $chat->id }}', this); return !event.ctrlKey && !event.metaKey;">
+                                    <div class="chat-item-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="chat-item-content">
+                                        <div class="chat-item-header">
+                                            <span class="chat-item-name">{{ $otherUser->name }}</span>
+                                            @if($lastMessageTime)
+                                                <span class="chat-item-time">{{ $lastMessageTime->diffForHumans() }}</span>
+                                            @endif
+                                        </div>
+                                        <div class="chat-item-preview">
+                                            @if($lastMessage && isset($lastMessage->message) && $lastMessage->message)
+                                                <span class="chat-item-message">
+                                                    {{ Str::limit($lastMessage->message, 50) }}
+                                                </span>
+                                            @else
+                                                <span class="chat-item-message text-muted">Belum ada pesan</span>
+                                            @endif
+                                            @if($unreadCount > 0)
+                                                <span class="chat-item-badge">{{ $unreadCount }}</span>
+                                            @endif
+                                        </div>
+                                        @if(isset($chat->car) && $chat->car)
+                                            <div class="chat-item-car">
+                                                <i class="fas fa-car"></i> {{ $chat->car->brand ?? '' }} {{ $chat->car->nama ?? '' }}
+                                            </div>
+                                        @endif
+                                    </div>
+                                </a>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="chat-empty-state">
+                            <i class="fas fa-comments fa-3x mb-3 text-muted"></i>
+                            <p class="text-muted">Belum ada obrolan</p>
+                            <small class="text-muted">Obrolan akan muncul ketika buyer menghubungi Anda</small>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<style>
-.chat-search-container {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: #fff;
-    padding: 12px 0;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.chat-search-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.chat-search-icon {
-    position: absolute;
-    left: 16px;
-    color: #6c757d;
-    font-size: 14px;
-}
-
-.chat-search-input {
-    width: 100%;
-    padding: 10px 16px 10px 40px;
-    border: 1px solid #e9ecef;
-    border-radius: 5px;
-    font-size: 14px;
-    outline: none;
-    transition: all 0.3s;
-}
-
-.chat-search-input:focus {
-    border-color: #df2d24;
-    box-shadow: 0 0 0 3px rgba(223, 45, 36, 0.1);
-}
-
-.chat-list-container {
-    background: #fff;
-    border-radius: 5px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.chat-item-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.chat-checkbox {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 10;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    display: none;
-    margin: 0;
-    accent-color: #df2d24;
-    -webkit-appearance: checkbox;
-    -moz-appearance: checkbox;
-    appearance: checkbox;
-}
-
-.chat-item-wrapper.select-mode .chat-checkbox {
-    display: block !important;
-    opacity: 1;
-    visibility: visible;
-}
-
-.chat-item-wrapper.select-mode .chat-item {
-    padding-left: 45px;
-}
-
-.chat-item {
-    display: flex;
-    align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid #f0f0f0;
-    text-decoration: none;
-    color: inherit;
-    transition: all 0.2s;
-    position: relative;
-    width: 100%;
-}
-
-.chat-item:hover {
-    background: #f8f9fa;
-    text-decoration: none;
-    color: inherit;
-}
-
-.chat-item-unread {
-    background: #f0f7ff;
-    font-weight: 600;
-}
-
-.chat-item-unread:hover {
-    background: #e6f2ff;
-}
-
-.chat-item-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #df2d24, #b91c1c);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    margin-right: 12px;
-    flex-shrink: 0;
-}
-
-.chat-item-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.chat-item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 4px;
-}
-
-.chat-item-name {
-    font-size: 15px;
-    font-weight: 600;
-    color: #1a1a1a;
-}
-
-.chat-item-time {
-    font-size: 12px;
-    color: #6c757d;
-    white-space: nowrap;
-    margin-left: 8px;
-}
-
-.chat-item-preview {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-}
-
-.chat-item-message {
-    font-size: 13px;
-    color: #6c757d;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex: 1;
-}
-
-.chat-item-unread .chat-item-message {
-    color: #1a1a1a;
-    font-weight: 600;
-}
-
-.chat-item-badge {
-    background: #df2d24;
-    color: #fff;
-    border-radius: 5px;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 700;
-    min-width: 20px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.chat-item-car {
-    font-size: 11px;
-    color: #6c757d;
-    margin-top: 4px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.chat-empty-state {
-    text-align: center;
-    padding: 60px 20px;
-}
-
-@media (max-width: 768px) {
-    .chat-item {
-        padding: 10px 12px;
-    }
-
-    .chat-item-avatar {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-    }
-
-    .chat-item-name {
-        font-size: 14px;
-    }
-
-    .chat-item-message {
-        font-size: 12px;
-    }
-}
-
-.chat-shortcut-container{
-    display:flex;
-    gap:12px;
-    overflow-x:auto;
-    padding:8px 4px 12px;
-}
-.chat-shortcut-item{
-    position:relative;
-    text-align:center;
-    min-width:72px;
-    text-decoration:none;
-    color:#1a1a1a;
-}
-.shortcut-avatar{
-    width:52px;
-    height:52px;
-    border-radius:50%;
-    background:linear-gradient(135deg,#df2d24,#b91c1c);
-    color:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:700;
-    margin:0 auto 6px;
-    box-shadow:0 4px 12px rgba(223,45,36,0.25);
-}
-.shortcut-name{
-    font-size:12px;
-    white-space:nowrap;
-}
-.shortcut-badge{
-    position:absolute;
-    top:-4px;
-    right:12px;
-    background:#df2d24;
-    color:#fff;
-    border-radius:10px;
-    padding:2px 6px;
-    font-size:10px;
-    font-weight:700;
-}
-</style>
-</style>
-
-<script>
-function markChatAsRead(chatId, el) {
-    const item = el?.closest('.chat-item');
-    if (item) {
-        item.classList.remove('chat-item-unread');
-        const badge = item.querySelector('.chat-item-badge');
-        if (badge) badge.remove();
-    }
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-    if (!chatId || !csrfToken) return;
-    fetch(`/chat/${encodeURIComponent(chatId)}/mark-read`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': csrfToken,
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        keepalive: true
-    }).catch(() => {});
-}
-
-function refreshChatList() {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-    fetch('/chat/unread-count', {
-        method: 'GET',
-        headers: {
-            'X-CSRF-TOKEN': csrfToken,
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
+    <style>
+        .chat-search-container {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: #fff;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
         }
-    })
-    .then(res => res.ok ? res.json() : Promise.reject())
-    .then(data => {
-        const perChat = data.per_chat || {};
-        const listContainer = document.querySelector('.chat-list-container');
-        const wrappers = Array.from(document.querySelectorAll('.chat-item-wrapper'));
-        wrappers.forEach(wrapper => {
-            const chatId = wrapper.getAttribute('data-chat-id');
-            const meta = chatId && perChat[chatId] ? perChat[chatId] : null;
-            if (!meta) return;
-            const item = wrapper.querySelector('.chat-item');
-            const preview = wrapper.querySelector('.chat-item-message');
-            const timeEl = wrapper.querySelector('.chat-item-time');
-            const badge = wrapper.querySelector('.chat-item-badge');
-            const unread = parseInt(meta.unread_count || 0);
-            if (preview && meta.last_message) {
-                preview.textContent = meta.last_message;
+
+        .chat-search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-search-icon {
+            position: absolute;
+            left: 16px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .chat-search-input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .chat-search-input:focus {
+            border-color: #df2d24;
+            box-shadow: 0 0 0 3px rgba(223, 45, 36, 0.1);
+        }
+
+        .chat-list-container {
+            background: #fff;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            /* Prevent layout shift */
+        }
+
+        .chat-item-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .chat-checkbox {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: none;
+            margin: 0;
+            accent-color: #df2d24;
+            -webkit-appearance: checkbox;
+            -moz-appearance: checkbox;
+            appearance: checkbox;
+        }
+
+        .chat-item-wrapper.select-mode .chat-checkbox {
+            display: block !important;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .chat-item-wrapper.select-mode .chat-item {
+            padding-left: 45px;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+            position: relative;
+            width: 100%;
+        }
+
+        .chat-item:hover {
+            background: #f8f9fa;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .chat-item-unread {
+            background: #f0f7ff;
+            font-weight: 600;
+        }
+
+        .chat-item-unread:hover {
+            background: #e6f2ff;
+        }
+
+        .chat-item-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #df2d24, #b91c1c);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .chat-item-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .chat-item-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .chat-item-time {
+            font-size: 12px;
+            color: #6c757d;
+            white-space: nowrap;
+            margin-left: 8px;
+        }
+
+        .chat-item-preview {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .chat-item-message {
+            font-size: 13px;
+            color: #6c757d;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+        }
+
+        .chat-item-unread .chat-item-message {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .chat-item-badge {
+            background: #df2d24;
+            color: #fff;
+            border-radius: 5px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .chat-item-car {
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chat-empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        @media (max-width: 768px) {
+            .chat-item {
+                padding: 10px 12px;
             }
-            if (timeEl && meta.last_message_time) {
-                timeEl.textContent = meta.last_message_time;
+
+            .chat-item-avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
             }
-            if (meta.last_message_at) {
-                wrapper.dataset.lastAt = meta.last_message_at;
+
+            .chat-item-name {
+                font-size: 14px;
             }
-            if (unread > 0) {
-                item?.classList.add('chat-item-unread');
-                if (!badge) {
-                    const newBadge = document.createElement('span');
-                    newBadge.className = 'chat-item-badge';
-                    newBadge.textContent = unread;
-                    wrapper.querySelector('.chat-item-preview')?.appendChild(newBadge);
-                } else {
-                    badge.textContent = unread;
-                }
-            } else {
-                item?.classList.remove('chat-item-unread');
+
+            .chat-item-message {
+                font-size: 12px;
+            }
+        }
+
+        .chat-shortcut-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 8px 4px 12px;
+        }
+
+        .chat-shortcut-item {
+            position: relative;
+            text-align: center;
+            min-width: 72px;
+            text-decoration: none;
+            color: #1a1a1a;
+        }
+
+        .shortcut-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #df2d24, #b91c1c);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin: 0 auto 6px;
+            box-shadow: 0 4px 12px rgba(223, 45, 36, 0.25);
+        }
+
+        .shortcut-name {
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .shortcut-badge {
+            position: absolute;
+            top: -4px;
+            right: 12px;
+            background: #df2d24;
+            color: #fff;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+    </style>
+    </style>
+
+    <script>
+        function markChatAsRead(chatId, el) {
+            const item = el?.closest('.chat-item');
+            if (item) {
+                item.classList.remove('chat-item-unread');
+                const badge = item.querySelector('.chat-item-badge');
                 if (badge) badge.remove();
             }
-        });
-        if (listContainer) {
-            const sorted = wrappers.sort((a, b) => {
-                const aTime = new Date(a.dataset.lastAt || 0).getTime();
-                const bTime = new Date(b.dataset.lastAt || 0).getTime();
-                return bTime - aTime;
-            });
-            sorted.forEach(w => listContainer.appendChild(w));
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            if (!chatId || !csrfToken) return;
+            fetch(`/chat/${encodeURIComponent(chatId)}/mark-read`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                keepalive: true
+            }).catch(() => { });
         }
-    })
-    .catch(() => {});
-}
 
-// Search functionality
-document.getElementById('chatSearch').addEventListener('input', function(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const chatItems = document.querySelectorAll('.chat-item');
-    
-    chatItems.forEach(item => {
-        const name = item.querySelector('.chat-item-name').textContent.toLowerCase();
-        const message = item.querySelector('.chat-item-message').textContent.toLowerCase();
-        const car = item.querySelector('.chat-item-car')?.textContent.toLowerCase() || '';
-        
-        if (name.includes(searchTerm) || message.includes(searchTerm) || car.includes(searchTerm)) {
-            item.closest('.chat-item-wrapper').style.display = 'flex';
-        } else {
-            item.closest('.chat-item-wrapper').style.display = 'none';
+        function refreshChatList() {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+            fetch('/chat/unread-count', {
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(res => res.ok ? res.json() : Promise.reject())
+                .then(data => {
+                    const perChat = data.per_chat || {};
+                    const listContainer = document.querySelector('.chat-list-container');
+                    const wrappers = Array.from(document.querySelectorAll('.chat-item-wrapper'));
+                    wrappers.forEach(wrapper => {
+                        const chatId = wrapper.getAttribute('data-chat-id');
+                        const meta = chatId && perChat[chatId] ? perChat[chatId] : null;
+                        if (!meta) return;
+                        const item = wrapper.querySelector('.chat-item');
+                        const preview = wrapper.querySelector('.chat-item-message');
+                        const timeEl = wrapper.querySelector('.chat-item-time');
+                        const badge = wrapper.querySelector('.chat-item-badge');
+                        const unread = parseInt(meta.unread_count || 0);
+                        if (preview && meta.last_message) {
+                            preview.textContent = meta.last_message;
+                        }
+                        if (timeEl && meta.last_message_time) {
+                            timeEl.textContent = meta.last_message_time;
+                        }
+                        if (meta.last_message_at) {
+                            wrapper.dataset.lastAt = meta.last_message_at;
+                        }
+                        if (unread > 0) {
+                            item?.classList.add('chat-item-unread');
+                            if (!badge) {
+                                const newBadge = document.createElement('span');
+                                newBadge.className = 'chat-item-badge';
+                                newBadge.textContent = unread;
+                                wrapper.querySelector('.chat-item-preview')?.appendChild(newBadge);
+                            } else {
+                                badge.textContent = unread;
+                            }
+                        } else {
+                            item?.classList.remove('chat-item-unread');
+                            if (badge) badge.remove();
+                        }
+                    });
+                    if (listContainer) {
+                        const sorted = wrappers.sort((a, b) => {
+                            const aTime = new Date(a.dataset.lastAt || 0).getTime();
+                            const bTime = new Date(b.dataset.lastAt || 0).getTime();
+                            return bTime - aTime;
+                        });
+                        sorted.forEach(w => listContainer.appendChild(w));
+                    }
+                })
+                .catch(() => { });
         }
-    });
-});
 
-// Selection mode
-let isSelectMode = false;
+        // Search functionality
+        document.getElementById('chatSearch').addEventListener('input', function (e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const chatItems = document.querySelectorAll('.chat-item');
 
-function toggleSelectMode() {
-    isSelectMode = !isSelectMode;
-    const wrappers = document.querySelectorAll('.chat-item-wrapper');
-    const selectModeBtn = document.getElementById('selectModeBtn');
-    const selectAllBtn = document.getElementById('selectAllBtn');
-    const deleteBtn = document.getElementById('deleteSelectedBtn');
-    
-    if (isSelectMode) {
-        wrappers.forEach(wrapper => {
-            wrapper.classList.add('select-mode');
-        });
-        if (selectAllBtn) selectAllBtn.style.display = 'inline-block';
-        if (selectModeBtn) {
-            selectModeBtn.innerHTML = '<i class="fas fa-times"></i> Batal';
-            selectModeBtn.classList.remove('btn-outline-primary');
-            selectModeBtn.classList.add('btn-outline-secondary');
-        }
-        updateDeleteButton();
-    } else {
-        wrappers.forEach(wrapper => {
-            wrapper.classList.remove('select-mode');
-            const checkbox = wrapper.querySelector('.chat-checkbox');
-            if (checkbox) checkbox.checked = false;
-        });
-        if (selectAllBtn) selectAllBtn.style.display = 'none';
-        if (deleteBtn) deleteBtn.style.display = 'none';
-        if (selectModeBtn) {
-            selectModeBtn.innerHTML = '<i class="fas fa-check-square"></i> Pilih';
-            selectModeBtn.classList.remove('btn-outline-secondary');
-            selectModeBtn.classList.add('btn-outline-primary');
-        }
-    }
-}
+            chatItems.forEach(item => {
+                const name = item.querySelector('.chat-item-name').textContent.toLowerCase();
+                const message = item.querySelector('.chat-item-message').textContent.toLowerCase();
+                const car = item.querySelector('.chat-item-car')?.textContent.toLowerCase() || '';
 
-function toggleSelectAll() {
-    const checkboxes = document.querySelectorAll('.chat-checkbox');
-    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-    
-    checkboxes.forEach(cb => {
-        cb.checked = !allChecked;
-    });
-    
-    updateDeleteButton();
-}
-
-function updateDeleteButton() {
-    const checkboxes = document.querySelectorAll('.chat-checkbox:checked');
-    const deleteBtn = document.getElementById('deleteSelectedBtn');
-    
-    if (checkboxes.length > 0) {
-        deleteBtn.style.display = 'inline-block';
-        deleteBtn.innerHTML = `<i class="fas fa-trash"></i> Hapus (${checkboxes.length})`;
-    } else {
-        deleteBtn.style.display = 'none';
-    }
-}
-
-function deleteSelectedChats() {
-    const checkboxes = document.querySelectorAll('.chat-checkbox:checked');
-    const chatIds = Array.from(checkboxes).map(cb => cb.value);
-    
-    if (chatIds.length === 0) {
-        alert('Pilih obrolan yang ingin dihapus');
-        return;
-    }
-    
-    if (!confirm(`Apakah Anda yakin ingin menghapus ${chatIds.length} obrolan?`)) {
-        return;
-    }
-    
-    // Show loading
-    const deleteBtn = document.getElementById('deleteSelectedBtn');
-    const originalHTML = deleteBtn.innerHTML;
-    deleteBtn.disabled = true;
-    deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
-    
-    fetch('{{ route("chat.destroy") }}', {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                           document.querySelector('input[name="_token"]')?.value || '',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({ chat_ids: chatIds })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Remove deleted chats from UI
-            chatIds.forEach(chatId => {
-                const wrapper = document.querySelector(`.chat-checkbox[value="${chatId}"]`)?.closest('.chat-item-wrapper');
-                if (wrapper) {
-                    wrapper.style.transition = 'opacity 0.3s';
-                    wrapper.style.opacity = '0';
-                    setTimeout(() => wrapper.remove(), 300);
+                if (name.includes(searchTerm) || message.includes(searchTerm) || car.includes(searchTerm)) {
+                    item.closest('.chat-item-wrapper').style.display = 'flex';
+                } else {
+                    item.closest('.chat-item-wrapper').style.display = 'none';
                 }
             });
-            
-            // Reset selection mode
-            toggleSelectMode();
-            
-            // Show success message
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil!',
-                    text: data.message || `Berhasil menghapus ${data.deleted_count} obrolan`,
-                    confirmButtonColor: '#df2d24',
-                    timer: 2000
+        });
+
+        // Selection mode
+        let isSelectMode = false;
+
+        function toggleSelectMode() {
+            isSelectMode = !isSelectMode;
+            const wrappers = document.querySelectorAll('.chat-item-wrapper');
+            const selectModeBtn = document.getElementById('selectModeBtn');
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const deleteBtn = document.getElementById('deleteSelectedBtn');
+
+            if (isSelectMode) {
+                wrappers.forEach(wrapper => {
+                    wrapper.classList.add('select-mode');
                 });
+                if (selectAllBtn) selectAllBtn.style.display = 'inline-block';
+                if (selectModeBtn) {
+                    selectModeBtn.innerHTML = '<i class="fas fa-times"></i> Batal';
+                    selectModeBtn.classList.remove('btn-outline-primary');
+                    selectModeBtn.classList.add('btn-outline-secondary');
+                }
+                updateDeleteButton();
             } else {
-                alert(data.message || `Berhasil menghapus ${data.deleted_count} obrolan`);
+                wrappers.forEach(wrapper => {
+                    wrapper.classList.remove('select-mode');
+                    const checkbox = wrapper.querySelector('.chat-checkbox');
+                    if (checkbox) checkbox.checked = false;
+                });
+                if (selectAllBtn) selectAllBtn.style.display = 'none';
+                if (deleteBtn) deleteBtn.style.display = 'none';
+                if (selectModeBtn) {
+                    selectModeBtn.innerHTML = '<i class="fas fa-check-square"></i> Pilih';
+                    selectModeBtn.classList.remove('btn-outline-secondary');
+                    selectModeBtn.classList.add('btn-outline-primary');
+                }
             }
-        } else {
-            throw new Error(data.error || 'Gagal menghapus obrolan');
         }
-    })
-    .catch(error => {
-        console.error('Error deleting chats:', error);
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: error.message || 'Gagal menghapus obrolan',
-                confirmButtonColor: '#df2d24'
+
+        function toggleSelectAll() {
+            const checkboxes = document.querySelectorAll('.chat-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
             });
-        } else {
-            alert('Gagal menghapus obrolan: ' + error.message);
-        }
-    })
-    .finally(() => {
-        deleteBtn.disabled = false;
-        deleteBtn.innerHTML = originalHTML;
-    });
-}
 
-// Enable selection mode with Ctrl/Cmd + Click or long press
-document.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
-        e.preventDefault();
-        if (!isSelectMode) {
-            toggleSelectMode();
-        }
-    }
-});
-
-// Right click to enable selection mode
-document.addEventListener('contextmenu', function(e) {
-    if (e.target.closest('.chat-item-wrapper')) {
-        e.preventDefault();
-        if (!isSelectMode) {
-            toggleSelectMode();
-        }
-    }
-});
-
-// Long press on mobile
-let longPressTimer;
-document.addEventListener('touchstart', function(e) {
-    if (e.target.closest('.chat-item-wrapper')) {
-        longPressTimer = setTimeout(() => {
-            if (!isSelectMode) {
-                toggleSelectMode();
-            }
-        }, 500);
-    }
-});
-
-document.addEventListener('touchend', function() {
-    clearTimeout(longPressTimer);
-});
-
-// Click on chat item to toggle selection in select mode
-document.addEventListener('click', function(e) {
-    if (isSelectMode && e.target.closest('.chat-item')) {
-        e.preventDefault();
-        const wrapper = e.target.closest('.chat-item-wrapper');
-        const checkbox = wrapper?.querySelector('.chat-checkbox');
-        if (checkbox) {
-            checkbox.checked = !checkbox.checked;
             updateDeleteButton();
         }
-    }
-});
-document.addEventListener('DOMContentLoaded', refreshChatList);
-setInterval(refreshChatList, 8000);
-</script>
+
+        function updateDeleteButton() {
+            const checkboxes = document.querySelectorAll('.chat-checkbox:checked');
+            const deleteBtn = document.getElementById('deleteSelectedBtn');
+
+            if (checkboxes.length > 0) {
+                deleteBtn.style.display = 'inline-block';
+                deleteBtn.innerHTML = `<i class="fas fa-trash"></i> Hapus (${checkboxes.length})`;
+            } else {
+                deleteBtn.style.display = 'none';
+            }
+        }
+
+        function deleteSelectedChats() {
+            const checkboxes = document.querySelectorAll('.chat-checkbox:checked');
+            const chatIds = Array.from(checkboxes).map(cb => cb.value);
+
+            if (chatIds.length === 0) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Belum ada obrolan dipilih',
+                        text: 'Pilih obrolan yang ingin dihapus terlebih dahulu.',
+                        confirmButtonColor: '#df2d24'
+                    });
+                } else {
+                    alert('Pilih obrolan yang ingin dihapus');
+                }
+                return;
+            }
+
+            const executeDelete = () => {
+                const deleteBtn = document.getElementById('deleteSelectedBtn');
+                const originalHTML = deleteBtn.innerHTML;
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+
+                fetch('{{ route("chat.destroy") }}', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                            document.querySelector('input[name="_token"]')?.value || '',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ chat_ids: chatIds })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            chatIds.forEach(chatId => {
+                                const wrapper = document.querySelector(`.chat-checkbox[value="${chatId}"]`)?.closest('.chat-item-wrapper');
+                                if (wrapper) {
+                                    wrapper.style.transition = 'opacity 0.3s';
+                                    wrapper.style.opacity = '0';
+                                    setTimeout(() => wrapper.remove(), 300);
+                                }
+                            });
+
+                            toggleSelectMode();
+
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Berhasil!',
+                                    text: data.message || `Berhasil menghapus ${data.deleted_count} obrolan`,
+                                    confirmButtonColor: '#df2d24',
+                                    timer: 2000
+                                });
+                            } else {
+                                alert(data.message || `Berhasil menghapus ${data.deleted_count} obrolan`);
+                            }
+                        } else {
+                            throw new Error(data.error || 'Gagal menghapus obrolan');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting chats:', error);
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error!',
+                                text: error.message || 'Gagal menghapus obrolan',
+                                confirmButtonColor: '#df2d24'
+                            });
+                        } else {
+                            alert('Gagal menghapus obrolan: ' + error.message);
+                        }
+                    })
+                    .finally(() => {
+                        deleteBtn.disabled = false;
+                        deleteBtn.innerHTML = originalHTML;
+                    });
+            };
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Hapus Obrolan?',
+                    text: `Anda akan menghapus ${chatIds.length} obrolan secara permanen.`,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-trash me-2"></i>Hapus',
+                    cancelButtonText: '<i class="fas fa-times me-2"></i>Batal',
+                    confirmButtonColor: '#df2d24',
+                    cancelButtonColor: '#6b7280',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        executeDelete();
+                    }
+                });
+            } else {
+                if (confirm(`Apakah Anda yakin ingin menghapus ${chatIds.length} obrolan?`)) {
+                    executeDelete();
+                }
+            }
+        }
+
+        // Enable selection mode with Ctrl/Cmd + Click or long press
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+                e.preventDefault();
+                if (!isSelectMode) {
+                    toggleSelectMode();
+                }
+            }
+        });
+
+        // Right click to enable selection mode
+        document.addEventListener('contextmenu', function (e) {
+            if (e.target.closest('.chat-item-wrapper')) {
+                e.preventDefault();
+                if (!isSelectMode) {
+                    toggleSelectMode();
+                }
+            }
+        });
+
+        // Long press on mobile
+        let longPressTimer;
+        document.addEventListener('touchstart', function (e) {
+            if (e.target.closest('.chat-item-wrapper')) {
+                longPressTimer = setTimeout(() => {
+                    if (!isSelectMode) {
+                        toggleSelectMode();
+                    }
+                }, 500);
+            }
+        });
+
+        document.addEventListener('touchend', function () {
+            clearTimeout(longPressTimer);
+        });
+
+        // Click on chat item to toggle selection in select mode
+        document.addEventListener('click', function (e) {
+            if (isSelectMode && e.target.closest('.chat-item')) {
+                e.preventDefault();
+                const wrapper = e.target.closest('.chat-item-wrapper');
+                const checkbox = wrapper?.querySelector('.chat-checkbox');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    updateDeleteButton();
+                }
+            }
+        });
+        document.addEventListener('DOMContentLoaded', refreshChatList);
+        setInterval(refreshChatList, 8000);
+    </script>
 @endsection

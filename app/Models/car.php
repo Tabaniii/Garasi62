@@ -4,12 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\CarApproval;
+use Illuminate\Support\Str;
 
 class car extends Model
 {
     protected $table = 'car';
 
     protected $fillable = [
+        'uuid',
         'image',
         'tipe',
         'tahun',
@@ -17,6 +19,7 @@ class car extends Model
         'nama',
         'kilometer',
         'transmisi',
+        'bahan_bakar',
         'harga',
         'metode',
         'kapasitasmesin',
@@ -34,6 +37,7 @@ class car extends Model
         'status',
         'resubmission_notes',
         'resubmitted_at',
+        'is_foto_duplikat',
     ];
 
     protected $casts = [
@@ -41,7 +45,22 @@ class car extends Model
         'interior_features' => 'array',
         'safety_features' => 'array',
         'extra_features' => 'array',
+        'is_foto_duplikat' => 'boolean',
     ];
+
+    /**
+     * Boot method - auto generate UUID saat membuat record baru
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = Str::uuid()->toString();
+            }
+        });
+    }
 
     /**
      * Accessor untuk image - normalisasi path separator
@@ -52,18 +71,18 @@ class car extends Model
         if (empty($value)) {
             return null;
         }
-        
+
         // Jika masih string (belum di-cast), decode dulu
         if (is_string($value)) {
             $value = json_decode($value, true);
         }
-        
+
         if (!is_array($value)) {
             return null;
         }
-        
+
         // Normalisasi path separator (backslash ke forward slash untuk URL web)
-        return array_map(function($path) {
+        return array_map(function ($path) {
             if (is_string($path)) {
                 return str_replace('\\', '/', $path);
             }

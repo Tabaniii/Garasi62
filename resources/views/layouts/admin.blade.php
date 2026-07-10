@@ -1,19 +1,28 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Dashboard - Garasi62</title>
-    
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Favicon -->
+    @php
+        $siteFavicon = \App\Models\SiteSetting::get('site_favicon', 'favicon.ico');
+    @endphp
+    <link rel="shortcut icon" href="{{ asset($siteFavicon) }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset($siteFavicon) }}" type="image/x-icon">
+
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <style>
         * {
             margin: 0;
@@ -38,7 +47,7 @@
             color: #fff;
             padding: 0;
             z-index: 1000;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
             overflow-y: auto;
         }
 
@@ -81,7 +90,7 @@
 
         .sidebar-user {
             padding: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             gap: 12px;
@@ -166,7 +175,7 @@
             justify-content: space-between;
             padding: 0 30px;
             z-index: 999;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
         .header-left {
@@ -329,10 +338,10 @@
             background: #fff;
             border-radius: 5px;
             padding: 28px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             height: 100%;
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             position: relative;
             overflow: hidden;
         }
@@ -355,7 +364,7 @@
 
         .stat-card:hover {
             transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
             border-color: rgba(220, 38, 38, 0.2);
         }
 
@@ -369,13 +378,13 @@
             font-size: 28px;
             color: #fff;
             margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             transition: all 0.3s;
         }
 
         .stat-card:hover .stat-card-icon {
             transform: scale(1.1) rotate(5deg);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
 
         .stat-card-icon.red {
@@ -424,14 +433,14 @@
             background: #fff;
             border-radius: 5px;
             padding: 28px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06);
             height: 100%;
-            border: 1px solid rgba(0,0,0,0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             transition: all 0.3s;
         }
 
         .info-card:hover {
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
             transform: translateY(-2px);
         }
 
@@ -468,13 +477,13 @@
             background: #fff;
             border-radius: 5px;
             padding: 28px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06);
-            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.05);
             transition: all 0.3s;
         }
 
         .chart-card:hover {
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
         }
 
         .chart-card-title {
@@ -517,6 +526,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -528,6 +538,7 @@
                 opacity: 0;
                 transform: translateX(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -539,6 +550,7 @@
                 opacity: 0;
                 transform: translateX(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -550,6 +562,7 @@
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -561,22 +574,28 @@
                 opacity: 0;
                 transform: scale(0.3);
             }
+
             50% {
                 opacity: 1;
                 transform: scale(1.05);
             }
+
             70% {
                 transform: scale(0.9);
             }
+
             100% {
                 transform: scale(1);
             }
         }
 
         @keyframes pulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: scale(1);
             }
+
             50% {
                 transform: scale(1.05);
             }
@@ -587,6 +606,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -598,6 +618,7 @@
                 opacity: 0;
                 transform: translateX(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -706,7 +727,7 @@
 
         .stat-card:hover {
             transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
 
         .stat-card:hover .stat-card-icon {
@@ -735,7 +756,7 @@
         }
 
         .chart-card:hover {
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
         }
 
         /* Info Card Animation */
@@ -744,57 +765,48 @@
         }
 
         .info-card:hover {
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
             transform: translateY(-3px);
         }
-        @media (max-width: 360px) {
-        
-        }
-        
-        @media (min-width: 361px) and (max-width: 480px) {
-        
-        }
-        
+
+        @media (max-width: 360px) {}
+
+        @media (min-width: 361px) and (max-width: 480px) {}
+
         /* Extra small devices (portrait phones, <576px) */
         @media (min-width: 481px) and (max-width: 575.98px) {
-          /* CSS khusus HP kecil */
-        
+            /* CSS khusus HP kecil */
+
         }
-        
+
         /* Small devices (landscape phones, ≥576px and <768px) */
-        @media (min-width: 576px) and (max-width: 767.98px) {
-        
-        }
-        
+        @media (min-width: 576px) and (max-width: 767.98px) {}
+
         /* Medium devices (tablets, ≥768px and <992px) */
-        @media (min-width: 768px) and (max-width: 991.98px) {
-        
-        }
-        
+        @media (min-width: 768px) and (max-width: 991.98px) {}
+
         /* Large devices (desktops, ≥992px and <1200px) */
-        @media (min-width: 992px) and (max-width: 1199.98px) {
-          
-        }
-        
+        @media (min-width: 992px) and (max-width: 1199.98px) {}
+
         /* Extra large devices (large desktops, ≥1200px and <1400px) */
-        @media (min-width: 1200px) and (max-width: 1399.98px) {
-         
-        }
-        
+        @media (min-width: 1200px) and (max-width: 1399.98px) {}
+
         /* Extra extra large devices (ultra wide, ≥1400px) */
-        @media (min-width: 1400px) {
-         
-        }
+        @media (min-width: 1400px) {}
     </style>
 </head>
+
 <body>
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <a href="{{ route('dashboard') }}" class="sidebar-logo">
                 <div class="sidebar-logo-icon">
-                    <img src="{{ asset('img/logo.svg') }}" alt="Garasi62" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div style="display:none; width: 100%; height: 100%; background: linear-gradient(135deg, #dc2626, #991b1b); border-radius: 5px; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 20px;">G</div>
+                    <img src="{{ asset('img/logo.svg') }}" alt="Garasi62"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div
+                        style="display:none; width: 100%; height: 100%; background: linear-gradient(135deg, #dc2626, #991b1b); border-radius: 5px; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 20px;">
+                        G</div>
                 </div>
                 <span>Garasi62</span>
             </a>
@@ -812,117 +824,140 @@
 
         <div class="sidebar-menu">
             <div class="sidebar-menu-title">Menu Utama</div>
-            <a href="{{ route('dashboard') }}" class="sidebar-menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}"
+                class="sidebar-menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
             </a>
-            
+
             @if(Auth::user()->role === 'admin')
                 {{-- Admin Menu --}}
-                <a href="{{ route('cars.index') }}" class="sidebar-menu-item {{ request()->routeIs('cars.*') ? 'active' : '' }}">
+                <a href="{{ route('cars.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('cars.*') ? 'active' : '' }}">
                     <i class="fas fa-car"></i>
                     <span>List Mobil</span>
                 </a>
-                <a href="{{ route('users.sellers') }}" class="sidebar-menu-item {{ request()->routeIs('users.sellers') ? 'active' : '' }}">
+                <a href="{{ route('users.sellers') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('users.sellers') ? 'active' : '' }}">
                     <i class="fas fa-user-tie"></i>
                     <span>List Seller</span>
                 </a>
-                <a href="{{ route('admin.car-approvals.index') }}" class="sidebar-menu-item {{ request()->routeIs('admin.car-approvals.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.car-approvals.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('admin.car-approvals.*') ? 'active' : '' }}">
                     <i class="fas fa-check-circle"></i>
                     <span>Persetujuan Mobil</span>
                     @php
-                        $pendingCars = \App\Models\car::where('status', 'pending')->count();
+                        $pendingCars = \App\Models\car::where('status', 'pending')
+                            ->whereNull('resubmitted_at')
+                            ->whereDoesntHave('approvals', function ($q) {
+                                $q->where('action', 'rejected');
+                            })
+                            ->count();
                     @endphp
                     @if($pendingCars > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $pendingCars }}</span>
+                        <span
+                            style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $pendingCars }}</span>
                     @endif
                 </a>
-                <a href="{{ route('admin.car-approvals.resubmissions.index') }}" class="sidebar-menu-item {{ request()->routeIs('admin.car-approvals.resubmissions.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.car-approvals.resubmissions.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('admin.car-approvals.resubmissions.*') ? 'active' : '' }}">
                     <i class="fas fa-undo"></i>
                     <span>Pengajuan Ulang</span>
                     @php
                         $resubCount = \App\Models\car::where('status', 'pending')
-                            ->whereHas('approvals', function($q){ $q->where('action', 'rejected'); })
+                            ->where(function ($q) {
+                                $q->whereNotNull('resubmitted_at')
+                                    ->orWhereHas('approvals', function ($q) {
+                                        $q->where('action', 'rejected');
+                                    });
+                            })
                             ->count();
                     @endphp
                     @if($resubCount > 0)
-                    <span style="background: #f59e0b; color: #1a1a1a; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $resubCount }}</span>
+                        <span
+                            style="background: #f59e0b; color: #1a1a1a; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $resubCount }}</span>
                     @endif
                 </a>
-                <a href="{{ route('admin.duplicate-cars.index') }}" class="sidebar-menu-item {{ request()->routeIs('admin.duplicate-cars.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.duplicate-cars.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('admin.duplicate-cars.*') ? 'active' : '' }}">
                     <i class="fas fa-exclamation-triangle"></i>
                     <span>Deteksi Duplikat</span>
                 </a>
-                <a href="{{ route('blogs.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('blogs.admin.*') ? 'active' : '' }}">
+                <a href="{{ route('blogs.admin.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('blogs.admin.*') ? 'active' : '' }}">
                     <i class="fas fa-blog"></i>
                     <span>Blog</span>
                 </a>
-                <a href="{{ route('testimonials.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('testimonials.admin.*') ? 'active' : '' }}">
+                <a href="{{ route('testimonials.admin.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('testimonials.admin.*') ? 'active' : '' }}">
                     <i class="fas fa-quote-right"></i>
                     <span>Testimoni</span>
                 </a>
-                <a href="{{ route('comments.admin.index') }}" class="sidebar-menu-item {{ request()->routeIs('comments.admin.*') ? 'active' : '' }}">
+                <a href="{{ route('comments.admin.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('comments.admin.*') ? 'active' : '' }}">
                     <i class="fas fa-comments"></i>
                     <span>Komentar</span>
                     @php
                         $pendingComments = \App\Models\Comment::where('status', 'pending')->count();
                     @endphp
                     @if($pendingComments > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $pendingComments }}</span>
+                        <span
+                            style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $pendingComments }}</span>
                     @endif
                 </a>
-                <a href="{{ route('users.index') }}" class="sidebar-menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                <a href="{{ route('users.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
                     <i class="fas fa-users"></i>
                     <span>Pengguna</span>
                 </a>
-                <a href="{{ route('admin.reports.index') }}" class="sidebar-menu-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.reports.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
                     <i class="fas fa-flag"></i>
                     <span>Laporan Mobil</span>
                     @php
                         $pendingReports = \App\Models\Report::where('status', 'pending')->count();
                     @endphp
                     @if($pendingReports > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $pendingReports }}</span>
+                        <span
+                            style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $pendingReports }}</span>
                     @endif
                 </a>
-                <a href="{{ route('admin.footer.edit') }}" class="sidebar-menu-item {{ request()->routeIs('admin.footer.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.footer.edit') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('admin.footer.*') ? 'active' : '' }}">
                     <i class="fas fa-cog"></i>
                     <span>Site Setting</span>
                 </a>
-                <a href="{{ route('about') }}" class="sidebar-menu-item">
-                    <i class="fas fa-info-circle"></i>
-                    <span>Tentang</span>
-                </a>
-                <a href="{{ route('contact') }}" class="sidebar-menu-item">
-                    <i class="fas fa-envelope"></i>
-                    <span>Kontak</span>
-                </a>
             @elseif(Auth::user()->role === 'seller')
                 {{-- Seller Menu --}}
-                <a href="{{ route('cars.index') }}" class="sidebar-menu-item {{ request()->routeIs('cars.*') ? 'active' : '' }}">
+                <a href="{{ route('cars.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('cars.*') ? 'active' : '' }}">
                     <i class="fas fa-car"></i>
                     <span>Mobil Saya</span>
                 </a>
-                <a href="{{ route('cars.create') }}" class="sidebar-menu-item {{ request()->routeIs('cars.create') ? 'active' : '' }}">
+                <a href="{{ route('cars.create') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('cars.create') ? 'active' : '' }}">
                     <i class="fas fa-plus-circle"></i>
                     <span>Tambah Mobil</span>
                 </a>
-                <a href="{{ route('chat.seller.index') }}" class="sidebar-menu-item {{ request()->routeIs('chat.*') ? 'active' : '' }}">
+                <a href="{{ route('chat.seller.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('chat.*') ? 'active' : '' }}">
                     <i class="fas fa-comments"></i>
                     <span>Obrolan</span>
                     @php
                         $unreadChats = \App\Models\Chat::where('seller_id', Auth::id())
-                            ->whereHas('messages', function($query) {
+                            ->whereHas('messages', function ($query) {
                                 $query->where('sender_id', '!=', Auth::id())
-                                      ->where('is_read', false);
+                                    ->where('is_read', false);
                             })
                             ->count();
                     @endphp
                     @if($unreadChats > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $unreadChats }}</span>
+                        <span
+                            style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $unreadChats }}</span>
                     @endif
                 </a>
-                <a href="{{ route('seller.reports.index') }}" class="sidebar-menu-item {{ request()->routeIs('seller.reports.*') ? 'active' : '' }}">
+                <a href="{{ route('seller.reports.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('seller.reports.*') ? 'active' : '' }}">
                     <i class="fas fa-flag"></i>
                     <span>Laporan Mobil</span>
                     @php
@@ -930,16 +965,18 @@
                         $sellerUnpublishedReports = \App\Models\Report::where('seller_id', Auth::id())
                             ->where('status', 'resolved')
                             ->whereNotNull('admin_notes')
-                            ->whereHas('car', function($query) {
+                            ->whereHas('car', function ($query) {
                                 $query->where('status', 'rejected');
                             })
                             ->count();
                     @endphp
                     @if($sellerUnpublishedReports > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $sellerUnpublishedReports }}</span>
+                        <span
+                            style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $sellerUnpublishedReports }}</span>
                     @endif
                 </a>
-                <a href="{{ route('seller.resubmissions.index') }}" class="sidebar-menu-item {{ request()->routeIs('seller.resubmissions.*') ? 'active' : '' }}">
+                <a href="{{ route('seller.resubmissions.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('seller.resubmissions.*') ? 'active' : '' }}">
                     <i class="fas fa-undo"></i>
                     <span>Pengajuan Ulang</span>
                 </a>
@@ -949,29 +986,33 @@
                     <i class="fas fa-search"></i>
                     <span>Cari Mobil</span>
                 </a>
-                <a href="{{ route('chat.index') }}" class="sidebar-menu-item {{ request()->routeIs('chat.*') ? 'active' : '' }}">
+                <a href="{{ route('chat.index') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('chat.*') ? 'active' : '' }}">
                     <i class="fas fa-comments"></i>
                     <span>Obrolan</span>
                     @php
                         $unreadChats = \App\Models\Chat::where('buyer_id', Auth::id())
-                            ->whereHas('messages', function($query) {
+                            ->whereHas('messages', function ($query) {
                                 $query->where('sender_id', '!=', Auth::id())
-                                      ->where('is_read', false);
+                                    ->where('is_read', false);
                             })
                             ->count();
                     @endphp
                     @if($unreadChats > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $unreadChats }}</span>
+                        <span
+                            style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $unreadChats }}</span>
                     @endif
                 </a>
-                <a href="{{ route('reports.my-reports') }}" class="sidebar-menu-item {{ request()->routeIs('reports.my-reports') ? 'active' : '' }}">
+                <a href="{{ route('reports.my-reports') }}"
+                    class="sidebar-menu-item {{ request()->routeIs('reports.my-reports') ? 'active' : '' }}">
                     <i class="fas fa-flag"></i>
                     <span>Laporan Saya</span>
                     @php
                         $myPendingReports = \App\Models\Report::where('reporter_id', Auth::id())->where('status', 'pending')->count();
                     @endphp
                     @if($myPendingReports > 0)
-                    <span style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $myPendingReports }}</span>
+                        <span
+                            style="background: #dc2626; color: #fff; padding: 2px 8px; border-radius: 5px; font-size: 10px; margin-left: auto;">{{ $myPendingReports }}</span>
                     @endif
                 </a>
             @endif
@@ -979,13 +1020,10 @@
 
         <div class="sidebar-menu">
             <div class="sidebar-menu-title">Pengaturan</div>
-            <a href="#" class="sidebar-menu-item">
-                <i class="fas fa-cog"></i>
-                <span>Pengaturan</span>
-            </a>
             <form action="{{ route('logout') }}" method="POST" class="d-inline" id="logout-form">
                 @csrf
-                <button type="button" class="sidebar-menu-item w-100 text-start border-0 bg-transparent logout-btn" style="color: #ccc;">
+                <button type="button" class="sidebar-menu-item w-100 text-start border-0 bg-transparent logout-btn"
+                    style="color: #ccc;">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Keluar</span>
                 </button>
@@ -1016,22 +1054,22 @@
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <!-- Suppress autofill extension errors (bukan dari aplikasi) -->
     <script>
         // Suppress autofill extension errors - ini dari extension browser, bukan aplikasi
-        (function() {
+        (function () {
             // Suppress console.error untuk autofill
             const originalError = console.error;
             const originalWarn = console.warn;
-            
-            console.error = function(...args) {
+
+            console.error = function (...args) {
                 const message = args.join(' ').toLowerCase();
-                if (message.includes('[autofill]') || 
-                    message.includes('autofill.') || 
+                if (message.includes('[autofill]') ||
+                    message.includes('autofill.') ||
                     message.includes('missing typeid') ||
                     message.includes('missing itemid') ||
                     message.includes('typeid or itemid')) {
@@ -1039,11 +1077,11 @@
                 }
                 originalError.apply(console, args);
             };
-            
-            console.warn = function(...args) {
+
+            console.warn = function (...args) {
                 const message = args.join(' ').toLowerCase();
-                if (message.includes('[autofill]') || 
-                    message.includes('autofill.') || 
+                if (message.includes('[autofill]') ||
+                    message.includes('autofill.') ||
                     message.includes('missing typeid') ||
                     message.includes('missing itemid') ||
                     message.includes('typeid or itemid')) {
@@ -1051,9 +1089,9 @@
                 }
                 originalWarn.apply(console, args);
             };
-            
+
             // Juga catch unhandled errors dari autofill
-            window.addEventListener('error', function(e) {
+            window.addEventListener('error', function (e) {
                 if (e.message && (
                     e.message.toLowerCase().includes('[autofill]') ||
                     e.message.toLowerCase().includes('autofill.') ||
@@ -1067,46 +1105,46 @@
             }, true);
         })();
     </script>
-    
+
     <script>
         // Sidebar Toggle
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
+        document.getElementById('sidebarToggle').addEventListener('click', function () {
             document.getElementById('sidebar').classList.toggle('active');
         });
 
         // Logout confirmation with SweetAlert
-        (function() {
+        (function () {
             function initLogoutButton() {
                 // Check if SweetAlert is loaded
                 if (typeof Swal === 'undefined') {
                     setTimeout(initLogoutButton, 100);
                     return;
                 }
-                
+
                 const logoutBtn = document.querySelector('.logout-btn');
                 const logoutForm = document.getElementById('logout-form');
-                
+
                 if (!logoutBtn || !logoutForm) {
                     return;
                 }
-                
+
                 // Check if already has listener
                 if (logoutBtn.hasAttribute('data-listener-attached')) {
                     return;
                 }
-                
+
                 logoutBtn.setAttribute('data-listener-attached', 'true');
-                
-                logoutBtn.addEventListener('click', function(e) {
+
+                logoutBtn.addEventListener('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    
+
                     if (typeof Swal === 'undefined') {
                         console.error('SweetAlert not loaded');
                         logoutForm.submit();
                         return;
                     }
-                    
+
                     Swal.fire({
                         title: 'Apakah yakin ingin keluar?',
                         html: `<div style="text-align: center; padding: 10px 0;">
@@ -1131,17 +1169,17 @@
                                     Swal.showLoading();
                                 }
                             });
-                            
+
                             // Submit logout form
                             logoutForm.submit();
                         }
                     });
                 });
             }
-            
+
             // Initialize when DOM is ready
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', function() {
+                document.addEventListener('DOMContentLoaded', function () {
                     setTimeout(initLogoutButton, 200);
                 });
             } else {
@@ -1151,57 +1189,57 @@
 
         // SweetAlert untuk session messages
         @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: '{{ session('success') }}',
-            confirmButtonColor: '#dc2626',
-            timer: 3000,
-            timerProgressBar: true,
-            showConfirmButton: true
-        });
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session('success') }}',
+                confirmButtonColor: '#dc2626',
+                timer: 3000,
+                timerProgressBar: true,
+                showConfirmButton: true
+            });
         @endif
 
         @if(session('error'))
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal!',
-            text: '{{ session('error') }}',
-            confirmButtonColor: '#dc2626',
-            showConfirmButton: true
-        });
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: '{{ session('error') }}',
+                confirmButtonColor: '#dc2626',
+                showConfirmButton: true
+            });
         @endif
 
         @if(session('warning'))
-        Swal.fire({
-            icon: 'warning',
-            title: 'Peringatan!',
-            text: '{{ session('warning') }}',
-            confirmButtonColor: '#dc2626',
-            showConfirmButton: true
-        });
+            Swal.fire({
+                icon: 'warning',
+                title: 'Peringatan!',
+                text: '{{ session('warning') }}',
+                confirmButtonColor: '#dc2626',
+                showConfirmButton: true
+            });
         @endif
 
         @if(session('info'))
-        Swal.fire({
-            icon: 'info',
-            title: 'Informasi',
-            text: '{{ session('info') }}',
-            confirmButtonColor: '#dc2626',
-            showConfirmButton: true
-        });
+            Swal.fire({
+                icon: 'info',
+                title: 'Informasi',
+                text: '{{ session('info') }}',
+                confirmButtonColor: '#dc2626',
+                showConfirmButton: true
+            });
         @endif
     </script>
-    
+
     <script>
         // Suppress autofill extension errors (bukan dari aplikasi)
-        (function() {
+        (function () {
             const originalError = console.error;
-            console.error = function(...args) {
+            console.error = function (...args) {
                 // Filter out autofill extension errors
                 const message = args.join(' ');
-                if (message.includes('[AUTOFILL]') || 
-                    message.includes('autofill.') || 
+                if (message.includes('[AUTOFILL]') ||
+                    message.includes('autofill.') ||
                     message.includes('Missing typeId or itemId')) {
                     // Suppress these errors - mereka dari extension browser, bukan aplikasi
                     return;
@@ -1211,7 +1249,8 @@
             };
         })();
     </script>
-    
+
     @stack('scripts')
 </body>
+
 </html>

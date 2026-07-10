@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\CarApproval;
 use App\Models\NotificationLog;
+use Illuminate\Support\Facades\Log;
 
 class CarController extends Controller
 {
@@ -19,9 +20,9 @@ class CarController extends Controller
         // Search by nama or brand
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', '%' . $search . '%')
-                  ->orWhere('brand', 'like', '%' . $search . '%');
+                    ->orWhere('brand', 'like', '%' . $search . '%');
             });
         }
 
@@ -33,6 +34,16 @@ class CarController extends Controller
         // Filter by transmisi
         if ($request->filled('transmisi')) {
             $query->where('transmisi', $request->transmisi);
+        }
+
+        // Filter by bahan bakar
+        if ($request->filled('bahan_bakar')) {
+            $query->where('bahan_bakar', $request->bahan_bakar);
+        }
+
+        // Filter by location
+        if ($request->filled('location')) {
+            $query->where('location', $request->location);
         }
 
         // Filter by tipe (rent/buy)
@@ -66,9 +77,11 @@ class CarController extends Controller
         // Sort
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
-        
+
         if ($sortBy == 'harga') {
             $query->orderByRaw('CAST(harga AS UNSIGNED) ' . $sortOrder);
+        } elseif ($sortBy == 'tahun') {
+            $query->orderBy('tahun', $sortOrder);
         } else {
             $query->orderBy($sortBy, $sortOrder);
         }
@@ -80,15 +93,17 @@ class CarController extends Controller
         // Get unique values for filters from database
         $brands = car::distinct()->whereNotNull('brand')->pluck('brand')->sort()->values();
         $transmisiList = car::distinct()->whereNotNull('transmisi')->pluck('transmisi')->sort()->values();
+        $bahanBakarList = car::distinct()->whereNotNull('bahan_bakar')->pluck('bahan_bakar')->sort()->values();
+        $locationList = car::distinct()->whereNotNull('location')->pluck('location')->sort()->values();
         $tahunList = car::distinct()->whereNotNull('tahun')->pluck('tahun')->sort()->values();
         $metodeList = car::distinct()->whereNotNull('metode')->pluck('metode')->sort()->values();
         $kapasitasmesinList = car::distinct()->whereNotNull('kapasitasmesin')->pluck('kapasitasmesin')->sort()->values();
-        
+
         // Get min and max price from database
         $minPrice = car::whereNotNull('harga')->min(DB::raw('CAST(harga AS UNSIGNED)'));
         $maxPrice = car::whereNotNull('harga')->max(DB::raw('CAST(harga AS UNSIGNED)'));
 
-        return view('car', compact('cars', 'brands', 'transmisiList', 'tahunList', 'metodeList', 'kapasitasmesinList', 'minPrice', 'maxPrice'));
+        return view('car', compact('cars', 'brands', 'transmisiList', 'bahanBakarList', 'locationList', 'tahunList', 'metodeList', 'kapasitasmesinList', 'minPrice', 'maxPrice'));
     }
 
     // CRUD Methods untuk Dashboard
@@ -104,13 +119,16 @@ class CarController extends Controller
             'tahun',
             'kilometer',
             'transmisi',
+            'bahan_bakar',
             'kapasitasmesin',
             'harga',
             'metode',
             'tipe',
             'image',
+            'img_duplicate',
             'status',
             'seller_id',
+            'location',
             'created_at',
             'updated_at'
         ]);
@@ -121,27 +139,36 @@ class CarController extends Controller
             if ($request->has('seller_id') && $request->seller_id) {
                 $query->where('seller_id', $request->seller_id);
             }
+            // Filter by Area/Kota
+            if ($request->filled('location')) {
+                $query->where('location', $request->location);
+            }
             // Eager load seller for admin view
             $query->with('seller');
         } elseif ($user->role === 'seller') {
             // Seller can only see their own cars
             $query->where('seller_id', $user->id);
+            // Filter by Area/Kota
+            if ($request->filled('location')) {
+                $query->where('location', $request->location);
+            }
             // Eager load reports that caused unpublish (resolved with admin_notes)
-            $query->with(['reports' => function($q) {
-                $q->where('status', 'resolved')
-                  ->whereNotNull('admin_notes')
-                  ->latest();
-            },
-            // Eager load rejection approvals to show reason and date
-            'approvals' => function($q) {
-                $q->where('action', 'rejected')->latest();
-            }]);
+            $query->with([
+                'reports' => function ($q) {
+                    $q->where('status', 'resolved')
+                        ->whereNotNull('admin_notes')
+                        ->latest();
+                },
+                // Eager load rejection approvals to show reason and date
+                'approvals' => function ($q) {
+                    $q->where('action', 'rejected')->latest();
+                }
+            ]);
         } else {
             // Buyer cannot access this page
             return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
 
-        // Sorting
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
         $query->orderBy($sortBy, $sortOrder);
@@ -150,7 +177,12 @@ class CarController extends Controller
         $perPage = $request->get('per_page', 12);
         $cars = $query->paginate($perPage)->withQueryString();
 
-        return view('cars.index', compact('cars'));
+        // Daftar Area/Kota untuk filter (admin: semua, seller: mobil mereka saja)
+        $locationList = $user->role === 'admin'
+            ? car::distinct()->whereNotNull('location')->where('location', '!=', '')->pluck('location')->sort()->values()
+            : car::where('seller_id', $user->id)->distinct()->whereNotNull('location')->where('location', '!=', '')->pluck('location')->sort()->values();
+
+        return view('cars.index', compact('cars', 'locationList'));
     }
 
     public function create()
@@ -190,7 +222,7 @@ class CarController extends Controller
                 // Cek MIME type
                 $mimeType = $file->getMimeType();
                 $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
-                
+
                 if (!in_array($mimeType, $allowedMimes)) {
                     return back()->withErrors(['images.' . $index => 'Format file tidak didukung. Gunakan JPG, PNG, GIF, atau WEBP.'])->withInput();
                 }
@@ -209,6 +241,7 @@ class CarController extends Controller
                 'nama' => 'required|string|max:100',
                 'kilometer' => 'required|string|max:6',
                 'transmisi' => 'required|string|max:10',
+                'bahan_bakar' => 'nullable|string|max:50',
                 'harga' => 'required|string|max:10',
                 'metode' => 'required|string|max:10',
                 'kapasitasmesin' => 'required|string|max:50',
@@ -230,36 +263,37 @@ class CarController extends Controller
             }
 
             $imagePaths = [];
+            $adaDuplikat = false;
             foreach ($files as $file) {
                 // Generate hash dari file untuk cek duplikat
                 $fileHash = hash_file('md5', $file->getRealPath());
-                
+
                 // Cek apakah file dengan hash yang sama sudah ada
                 $existingCar = car::whereNotNull('image')
                     ->get()
-                    ->filter(function($car) use ($fileHash) {
-                        if (is_array($car->image)) {
-                            foreach ($car->image as $imagePath) {
-                                $fullPath = storage_path('app/public/' . $imagePath);
-                                if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
-                                    return true;
-                                }
+                    ->filter(function ($car) use ($fileHash) {
+                        $images = $car->image ?? [];
+                        foreach ($images as $imagePath) {
+                            $fullPath = Storage::disk('public')->path($imagePath);
+                            if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
+                                return true;
                             }
                         }
                         return false;
                     })
                     ->first();
-                
+
                 if ($existingCar) {
+                    // Tandai sebagai duplikat
+                    $adaDuplikat = true;
                     // Gunakan path yang sudah ada
                     $existingImagePath = null;
-                    if (is_array($existingCar->image)) {
-                        foreach ($existingCar->image as $imagePath) {
-                            $fullPath = storage_path('app/public/' . $imagePath);
-                            if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
-                                $existingImagePath = $imagePath;
-                                break;
-                            }
+                    $images = $existingCar->image ?? [];
+                    foreach ($images as $imagePath) {
+                        $fullPath = Storage::disk('public')->path($imagePath);
+                        if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
+                            $existingImagePath = $imagePath;
+                            break;
                         }
                     }
                     if ($existingImagePath) {
@@ -267,9 +301,14 @@ class CarController extends Controller
                         continue; // Skip upload, gunakan yang sudah ada
                     }
                 }
-                
+
                 // Upload file baru jika tidak ada duplikat
-                $path = $file->store('cars', 'public');
+                // Penamaan file: img_garasi62_[nama_file_asli].[ekstensi] (Sanitized)
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeName = \Illuminate\Support\Str::slug($originalName, '_');
+                $extension = $file->getClientOriginalExtension();
+                $newFileName = 'garasi62_' . $safeName . '_' . uniqid() . '.' . $extension;
+                $path = $file->storeAs('cars', $newFileName, 'public');
                 if (!$path) {
                     throw new \Exception('Gagal mengupload gambar. Pastikan folder storage dapat ditulis.');
                 }
@@ -278,6 +317,7 @@ class CarController extends Controller
 
             $data = $request->except(['images']);
             $data['image'] = $imagePaths;
+            $data['img_duplicate'] = $adaDuplikat;
 
             // Handle features arrays
             if ($request->has('interior_features')) {
@@ -294,13 +334,16 @@ class CarController extends Controller
             $data['seller_id'] = Auth::id();
             $data['status'] = 'pending';
 
+            // Pastikan bahan_bakar ikut tersimpan
+            $data['bahan_bakar'] = $request->input('bahan_bakar') ?: null;
+
             car::create($data);
 
             return redirect()->route('cars.index')->with('success', 'Mobil berhasil ditambahkan!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
-            \Log::error('Error storing car: ' . $e->getMessage());
+            Log::error('Error storing car: ' . $e->getMessage());
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()])->withInput();
         }
     }
@@ -315,7 +358,7 @@ class CarController extends Controller
             // Admin can edit all cars
         } elseif ($user->role === 'seller') {
             // Seller can only edit their own cars
-            if ($car->seller_id !== $user->id) {
+            if ((int) $car->seller_id !== (int) $user->id) {
                 return redirect()->route('cars.index')->with('error', 'Anda tidak memiliki akses untuk mengedit mobil ini.');
             }
         } else {
@@ -338,8 +381,10 @@ class CarController extends Controller
             'nama' => 'required|string|max:100',
             'kilometer' => 'required|string|max:6',
             'transmisi' => 'required|string|max:10',
+            'bahan_bakar' => 'nullable|string|max:50',
             'harga' => 'required|string|max:10',
-            'metode' => 'required|string|max:5',
+            // Izinkan nilai seperti "Cash" atau "Kredit" (<= 10 karakter)
+            'metode' => 'required|string|max:10',
             'kapasitasmesin' => 'required|string|max:50',
             'stock' => 'nullable|string|max:50',
             'vin' => 'nullable|string|max:50',
@@ -361,7 +406,7 @@ class CarController extends Controller
             // Admin can update all cars
         } elseif ($user->role === 'seller') {
             // Seller can only update their own cars
-            if ($car->seller_id !== $user->id) {
+            if ((int) $car->seller_id !== (int) $user->id) {
                 return redirect()->route('cars.index')->with('error', 'Anda tidak memiliki akses untuk mengupdate mobil ini.');
             }
         } else {
@@ -372,34 +417,33 @@ class CarController extends Controller
         // Handle existing images
         $existingImages = $request->input('existing_images', []);
         $removedImages = $request->input('removed_images', []);
-        
+
         // Get current images
-        $currentImages = is_array($car->image) ? $car->image : (is_string($car->image) ? json_decode($car->image, true) : []);
-        if (!is_array($currentImages)) $currentImages = [];
-        
+        $currentImages = $car->image ?? [];
+        if (!is_array($currentImages))
+            $currentImages = [];
+
         // Filter out removed images
-        $imagePaths = array_filter($currentImages, function($imagePath) use ($removedImages) {
+        $imagePaths = array_filter($currentImages, function ($imagePath) use ($removedImages) {
             return !in_array($imagePath, $removedImages);
         });
-        
+
         // Add back existing images that were kept
         $imagePaths = array_values($imagePaths);
-        
+
         // Delete removed image files from storage
         foreach ($removedImages as $removedImage) {
-            $fullPath = storage_path('app/public/' . $removedImage);
-            if (file_exists($fullPath)) {
+            if (Storage::disk('public')->exists($removedImage)) {
                 // Check if this image is used by other cars before deleting
                 $usedByOtherCars = car::where('id', '!=', $id)
                     ->whereNotNull('image')
                     ->get()
-                    ->filter(function($otherCar) use ($removedImage) {
-                        $otherImages = is_array($otherCar->image) ? $otherCar->image : (is_string($otherCar->image) ? json_decode($otherCar->image, true) : []);
-                        if (!is_array($otherImages)) $otherImages = [];
+                    ->filter(function ($otherCar) use ($removedImage) {
+                        $otherImages = $otherCar->image ?? [];
                         return in_array($removedImage, $otherImages);
                     })
                     ->count() > 0;
-                
+
                 if (!$usedByOtherCars) {
                     Storage::disk('public')->delete($removedImage);
                 }
@@ -407,19 +451,20 @@ class CarController extends Controller
         }
 
         // Handle new uploaded images
+        $adaDuplikat = false;
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
                 // Generate hash dari file untuk cek duplikat
                 $fileHash = hash_file('md5', $image->getRealPath());
-                
+
                 // Cek apakah file dengan hash yang sama sudah ada
                 $existingCar = car::where('id', '!=', $id)
                     ->whereNotNull('image')
                     ->get()
-                    ->filter(function($otherCar) use ($fileHash) {
+                    ->filter(function ($otherCar) use ($fileHash) {
                         if (is_array($otherCar->image)) {
                             foreach ($otherCar->image as $imagePath) {
-                                $fullPath = storage_path('app/public/' . $imagePath);
+                                $fullPath = Storage::disk('public')->path($imagePath);
                                 if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
                                     return true;
                                 }
@@ -428,13 +473,15 @@ class CarController extends Controller
                         return false;
                     })
                     ->first();
-                
+
                 if ($existingCar) {
+                    // Tandai sebagai duplikat
+                    $adaDuplikat = true;
                     // Gunakan path yang sudah ada
                     $existingImagePath = null;
                     if (is_array($existingCar->image)) {
                         foreach ($existingCar->image as $imagePath) {
-                            $fullPath = storage_path('app/public/' . $imagePath);
+                            $fullPath = Storage::disk('public')->path($imagePath);
                             if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
                                 $existingImagePath = $imagePath;
                                 break;
@@ -446,9 +493,14 @@ class CarController extends Controller
                         continue; // Skip upload, gunakan yang sudah ada
                     }
                 }
-                
+
                 // Upload file baru jika tidak ada duplikat
-                $path = $image->store('cars', 'public');
+                // Penamaan file: img_garasi62_[nama_file_asli].[ekstensi] (Sanitized)
+                $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeName = \Illuminate\Support\Str::slug($originalName, '_');
+                $extension = $image->getClientOriginalExtension();
+                $newFileName = 'garasi62_' . $safeName . '_' . uniqid() . '.' . $extension;
+                $path = $image->storeAs('cars', $newFileName, 'public');
                 $imagePaths[] = $path;
             }
         }
@@ -465,6 +517,7 @@ class CarController extends Controller
 
         $data = $request->except(['images', 'existing_images', 'removed_images']);
         $data['image'] = $imagePaths;
+        $data['img_duplicate'] = $adaDuplikat;
 
         // Handle features arrays
         if ($request->has('interior_features')) {
@@ -477,14 +530,17 @@ class CarController extends Controller
             $data['extra_features'] = array_filter($request->input('extra_features', []));
         }
 
+        // Pastikan bahan_bakar ikut tersimpan
+        $data['bahan_bakar'] = $request->input('bahan_bakar') ?: null;
+
         $car->update($data);
 
         return redirect()->route('cars.index')->with('success', 'Mobil berhasil diperbarui!');
     }
 
-    public function showDetail($id)
+    public function showDetail($uuid)
     {
-        $car = car::where('status', 'approved')->with('seller')->findOrFail($id);
+        $car = car::where('status', 'approved')->where('uuid', $uuid)->with('seller')->firstOrFail();
         return view('car-details', compact('car'));
     }
 
@@ -499,54 +555,36 @@ class CarController extends Controller
                 // Admin can delete all cars
             } elseif ($user->role === 'seller') {
                 // Seller can only delete their own cars
-                if ($car->seller_id !== $user->id) {
+                if ((int) $car->seller_id !== (int) $user->id) {
                     return redirect()->route('cars.index')->with('error', 'Anda tidak memiliki akses untuk menghapus mobil ini.');
                 }
             } else {
                 // Buyer cannot delete
                 return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
             }
-            
+
             // Hapus gambar dari storage
             if ($car->image) {
-                // Normalisasi ke array
-                $images = [];
-                if (is_array($car->image)) {
-                    $images = $car->image;
-                } elseif (is_string($car->image)) {
-                    try {
-                        $decoded = json_decode($car->image, true);
-                        if (is_array($decoded)) {
-                            $images = $decoded;
-                        }
-                    } catch (\Exception $e) {
-                        $images = [];
-                    }
-                }
+                $images = $car->image;
 
                 foreach ($images as $imagePath) {
                     // Cek apakah gambar digunakan oleh mobil lain
                     $isUsedByOtherCar = car::where('id', '!=', $id)
                         ->whereNotNull('image')
                         ->get()
-                        ->filter(function($otherCar) use ($imagePath) {
-                            if (is_array($otherCar->image)) {
-                                return in_array($imagePath, $otherCar->image);
-                            } elseif (is_string($otherCar->image)) {
-                                $otherImages = json_decode($otherCar->image, true);
-                                return is_array($otherImages) ? in_array($imagePath, $otherImages) : false;
-                            }
-                            return false;
+                        ->filter(function ($otherCar) use ($imagePath) {
+                            $otherImages = $otherCar->image ?? [];
+                            return in_array($imagePath, $otherImages);
                         })
                         ->isNotEmpty();
-                    
+
                     // Hapus file hanya jika tidak digunakan oleh mobil lain
                     if (!$isUsedByOtherCar && Storage::disk('public')->exists($imagePath)) {
                         Storage::disk('public')->delete($imagePath);
                     }
                 }
             }
-            
+
             $car->delete();
 
             if (request()->expectsJson() || request()->ajax()) {
@@ -558,19 +596,19 @@ class CarController extends Controller
 
             return redirect()->route('cars.index')->with('success', 'Mobil berhasil dihapus!');
         } catch (\Exception $e) {
-            \Log::error('Error deleting car: ' . $e->getMessage());
-            
+            Log::error('Error deleting car: ' . $e->getMessage());
+
             if (request()->expectsJson() || request()->ajax()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Terjadi kesalahan saat menghapus mobil.'
                 ], 500);
             }
-            
+
             return redirect()->route('cars.index')->with('error', 'Terjadi kesalahan saat menghapus mobil.');
         }
     }
-    
+
     /**
      * Seller: List rejected cars and allow resubmission
      */
@@ -580,45 +618,40 @@ class CarController extends Controller
         if ($user->role !== 'seller') {
             return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
         }
-        
-        $cars = car::with(['approvals' => function($q) {
+
+        $cars = car::with([
+            'approvals' => function ($q) {
                 $q->orderBy('approved_at', 'desc');
-            }])
+            }
+        ])
             ->where('seller_id', $user->id)
             ->where('status', 'rejected')
             ->orderBy('updated_at', 'desc')
             ->paginate(12);
-        
+
         return view('seller.resubmissions.index', compact('cars'));
     }
-    
+
     /**
      * Seller: Resubmit a rejected car for approval
+     * DINONAKTIFKAN - Pengajuan ulang tidak diizinkan
      */
     public function resubmit(Request $request, $id)
     {
-        $request->validate([
-            'notes' => 'nullable|string|max:1000',
-        ]);
-        
-        $user = Auth::user();
-        $car = car::findOrFail($id);
-        
-        // Only seller of the car can resubmit and only if currently rejected
-        if ($user->role !== 'seller' || $car->seller_id !== $user->id) {
-            return redirect()->route('seller.resubmissions.index')->with('error', 'Anda tidak memiliki akses untuk mengajukan ulang mobil ini.');
-        }
+        $car = car::where('seller_id', Auth::id())->findOrFail($id);
+
         if ($car->status !== 'rejected') {
-            return redirect()->route('seller.resubmissions.index')->with('error', 'Hanya mobil yang ditolak yang dapat diajukan ulang.');
+            return redirect()->route('seller.resubmissions.index')
+                ->with('error', 'Hanya mobil yang ditolak yang dapat diajukan ulang.');
         }
-        
-        // Set back to pending for admin review and store seller's notes
+
+        // Update status to pending for re-approval
         $car->update([
             'status' => 'pending',
-            'resubmission_notes' => $request->notes,
             'resubmitted_at' => now(),
         ]);
-        
-        return redirect()->route('seller.resubmissions.index')->with('success', 'Pengajuan ulang berhasil dikirim. Admin akan meninjau kembali mobil Anda.');
+
+        return redirect()->route('seller.resubmissions.index')
+            ->with('success', 'Mobil berhasil diajukan ulang untuk peninjauan.');
     }
 }

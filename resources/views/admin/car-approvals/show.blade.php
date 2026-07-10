@@ -67,9 +67,15 @@
                             <span>Transmisi: {{ $car->transmisi }}</span>
                         </div>
                         <div class="spec-item">
-                            <i class="fas fa-gas-pump"></i>
+                            <i class="fas fa-tachometer-alt"></i>
                             <span>Kapasitas Mesin: {{ $car->kapasitasmesin }} CC</span>
                         </div>
+                        @if($car->bahan_bakar)
+                        <div class="spec-item">
+                            <i class="fas fa-gas-pump"></i>
+                            <span>Bahan Bakar: {{ $car->bahan_bakar }}</span>
+                        </div>
+                        @endif
                         @if($car->location)
                         <div class="spec-item">
                             <i class="fas fa-map-marker-alt"></i>

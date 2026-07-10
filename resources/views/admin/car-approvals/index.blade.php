@@ -83,6 +83,9 @@
                                             <i class="fas fa-calendar-alt me-1"></i>{{ $car->tahun }}
                                             <i class="fas fa-tachometer-alt ms-2 me-1"></i>{{ number_format($car->kilometer, 0, ',', '.') }} km
                                             <i class="fas fa-cogs ms-2 me-1"></i>{{ $car->transmisi }}
+                                            @if($car->bahan_bakar)
+                                            <i class="fas fa-gas-pump ms-2 me-1"></i>{{ $car->bahan_bakar }}
+                                            @endif
                                         </small>
                                     </div>
                                 </td>

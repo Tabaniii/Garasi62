@@ -121,7 +121,7 @@
                                                     @endif
                                                     <div>
                                                         <strong style="color: #1a1a1a;">{{ strtoupper($report->car->brand) }} {{ $report->car->nama }}</strong><br>
-                                                    <a href="{{ route('car.details', $report->car->id) }}" target="_blank" style="color: #3b82f6; font-size: 12px;">
+                                                    <a href="{{ route('car.details', $report->car->uuid) }}" target="_blank" style="color: #3b82f6; font-size: 12px;">
                                                         <i class="fa fa-external-link"></i> Lihat Mobil
                                                     </a>
                                                     </div>

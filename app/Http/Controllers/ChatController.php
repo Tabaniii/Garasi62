@@ -927,7 +927,11 @@ class ChatController extends Controller
         $messages = Cache::get($cacheKey, []);
         
         return collect($messages)->map(function($msg) {
-            return (object)$msg;
+            $obj = (object)$msg;
+            if (isset($obj->sender_id)) {
+                $obj->sender_id = (int) $obj->sender_id;
+            }
+            return $obj;
         });
     }
 

@@ -7,6 +7,7 @@ use App\Mail\VerificationCodeMail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Carbon\Carbon;
@@ -29,7 +30,7 @@ class AuthController extends Controller
             'institution' => 'required',
             'role' => 'required|in:buyer,seller',
             'password' => 'required|confirmed|min:6',
-            'password_confirmation' => 'required' 
+            'password_confirmation' => 'required'
         ], [
             'role.required' => 'Pilih tipe akun (Buyer atau Seller).',
             'role.in' => 'Tipe akun harus Buyer atau Seller.',
@@ -37,7 +38,7 @@ class AuthController extends Controller
 
         // Generate kode verifikasi 6 digit
         $verificationCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-        
+
         // Simpan data user sementara di session (belum dibuat di database)
         Session::put('pending_user', [
             'name' => $request->name,
@@ -55,11 +56,18 @@ class AuthController extends Controller
         // Kirim email dengan kode verifikasi
         try {
             Mail::to($request->email)->send(new VerificationCodeMail($request->name, $verificationCode));
-            
+
             return redirect()->route('register.verify')->with('success', 'Kode verifikasi telah dikirim ke email Anda. Silakan cek inbox atau spam folder.');
         } catch (\Exception $e) {
-            Session::forget('pending_user');
-            return back()->withErrors(['email' => 'Gagal mengirim email. Pastikan email Anda valid.'])->withInput();
+            Log::error('Gagal mengirim email verifikasi: ' . $e->getMessage(), [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'mail_driver' => config('mail.default'),
+            ]);
+
+            // Jangan tampilkan OTP di halaman — hanya kirim lewat email (keamanan)
+            $warning = 'Email verifikasi tidak terkirim. Pastikan konfigurasi Gmail (MAIL_*) di .env benar dan gunakan App Password. Silakan coba daftar ulang atau klik Kirim Ulang Kode.';
+            return redirect()->route('register.verify')->with('warning', $warning);
         }
     }
 
@@ -127,7 +135,7 @@ class AuthController extends Controller
 
         // Generate kode baru
         $verificationCode = str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
-        
+
         // Update session dengan kode baru
         $pendingUser['verification_code'] = $verificationCode;
         $pendingUser['code_expires_at'] = Carbon::now()->addMinutes(10);
@@ -136,10 +144,16 @@ class AuthController extends Controller
         // Kirim email dengan kode baru
         try {
             Mail::to($pendingUser['email'])->send(new VerificationCodeMail($pendingUser['name'], $verificationCode));
-            
+
             return back()->with('success', 'Kode verifikasi baru telah dikirim ke email Anda.');
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Gagal mengirim email. Silakan coba lagi.']);
+            Log::error('Gagal mengirim ulang kode verifikasi: ' . $e->getMessage(), [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'mail_driver' => config('mail.default'),
+            ]);
+
+            return back()->withErrors(['error' => 'Email tidak terkirim. Periksa konfigurasi Gmail (MAIL_*) di .env dan gunakan App Password. Silakan coba lagi.']);
         }
     }
 
@@ -168,7 +182,7 @@ class AuthController extends Controller
 
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $request->session()->regenerate();
-            
+
             // Redirect ke halaman yang diminta sebelumnya atau dashboard
             $intended = $request->session()->pull('url.intended', route('dashboard'));
             return redirect($intended)->with('success', 'Login berhasil! Selamat datang kembali.');

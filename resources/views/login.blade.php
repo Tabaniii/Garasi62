@@ -20,7 +20,9 @@
             align-items:center;
             padding:20px;
             position:relative;
-            overflow:hidden
+            /* Izinkan scroll vertikal pada layar kecil/besar */
+            overflow-x:hidden;
+            overflow-y:auto;
         }
         body::before{
             content:'';

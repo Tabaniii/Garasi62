@@ -36,6 +36,11 @@ return [
     ],
 
     'recaptcha' => [
+        // Di Google reCAPTCHA Admin (https://www.google.com/recaptcha/admin) tambahkan SEMUA domain yang dipakai:
+        // - garage.rubicweb.com (tanpa www)
+        // - www.garage.rubicweb.com (jika user akses pakai www)
+        // - localhost (untuk development)
+        // Tanpa http/https. Tunggu 5–10 menit setelah mengubah domain.
         'site_key' => env('RECAPTCHA_SITE_KEY'),
         'secret_key' => env('RECAPTCHA_SECRET_KEY'),
     ],

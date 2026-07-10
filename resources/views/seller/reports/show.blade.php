@@ -157,6 +157,19 @@
                                     @endif
                                 </span>
                             </div>
+                            @if($report->car->status == 'rejected')
+                                <div style="margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <form action="{{ route('seller.resubmissions.resubmit', $report->car->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-paper-plane me-1"></i>Ajukan Ulang
+                                        </button>
+                                    </form>
+                                    <a href="{{ route('cars.edit', $report->car->id) }}" class="btn btn-sm btn-warning text-white">
+                                        <i class="fas fa-edit me-1"></i>Edit
+                                    </a>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -723,4 +736,3 @@
 }
 </style>
 @endsection
-

@@ -58,7 +58,10 @@ class DashboardController extends Controller
             'total_testimonials' => Testimonial::count(),
             'active_testimonials' => Testimonial::where('is_active', true)->count(),
             // Car approval stats
-            'pending_car_approvals' => car::where('status', 'pending')->count(),
+            'pending_car_approvals' => car::where('status', 'pending')
+                ->whereNull('resubmitted_at')
+                ->whereDoesntHave('approvals', function($q){ $q->where('action', 'rejected'); })
+                ->count(),
             'approved_cars' => car::where('status', 'approved')->count(),
             'rejected_cars' => car::where('status', 'rejected')->count(),
         ];

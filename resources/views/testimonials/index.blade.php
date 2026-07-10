@@ -131,7 +131,7 @@
                             <i class="fas fa-edit"></i>
                             <span>Edit</span>
                         </a>
-                        <form action="{{ route('testimonials.admin.destroy', $testimonial) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus testimoni ini?')">
+                        <form action="{{ route('testimonials.admin.destroy', $testimonial) }}" method="POST" class="d-inline js-testimonial-delete" data-testimonial-name="{{ $testimonial->name }}" data-testimonial-rating="{{ $testimonial->rating }}">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn-action btn-delete" title="Hapus">
@@ -526,6 +526,46 @@
     transition: width 0s, height 0s, opacity 0.3s;
 }
 
+.swal2-popup-testimonial-delete {
+    border-radius: 5px !important;
+    padding: 24px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid #e9ecef !important;
+    max-width: 520px !important;
+}
+
+.swal2-title-testimonial-delete {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+    margin-bottom: 10px !important;
+}
+
+.swal2-html-testimonial-delete {
+    font-size: 14px !important;
+    color: #4b5563 !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
+}
+
+.swal2-confirm-testimonial-delete {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 10px 18px !important;
+    border-radius: 5px !important;
+    font-weight: 700 !important;
+}
+
+.swal2-cancel-testimonial-delete {
+    background: #f3f4f6 !important;
+    color: #374151 !important;
+    border: none !important;
+    padding: 10px 18px !important;
+    border-radius: 5px !important;
+    font-weight: 700 !important;
+}
+
 @media (max-width: 768px) {
     .testimonials-grid-admin {
         grid-template-columns: 1fr;
@@ -558,3 +598,59 @@
 </style>
 @endsection
 
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.js-testimonial-delete').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = form.getAttribute('data-testimonial-name') || 'Testimoni';
+            const rating = form.getAttribute('data-testimonial-rating') || '';
+
+            if (typeof Swal === 'undefined') {
+                if (confirm('Apakah Anda yakin ingin menghapus testimoni ini?')) {
+                    form.submit();
+                }
+                return;
+            }
+
+            Swal.fire({
+                icon: 'warning',
+                title: '<strong>Hapus Testimoni?</strong>',
+                html: `<div style="text-align: left;">
+                    <div style="display: flex; gap: 12px; align-items: center; background: #f9fafb; border: 1px solid #f3f4f6; border-radius: 5px; padding: 12px; margin-bottom: 12px;">
+                        <div style="width: 44px; height: 44px; border-radius: 5px; background: linear-gradient(135deg, #ef4444, #dc2626); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px;">
+                            <i class="fas fa-quote-right"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; color: #111827; font-size: 14px;">${name}</div>
+                            <div style="color: #6b7280; font-size: 12px;">Rating ${rating}/5</div>
+                        </div>
+                    </div>
+                    <div style="background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; padding: 10px 12px; border-radius: 5px; font-size: 13px;">
+                        Testimoni ini akan dihapus permanen dan tidak dapat dikembalikan.
+                    </div>
+                </div>`,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-trash me-2"></i>Hapus',
+                cancelButtonText: '<i class="fas fa-times me-2"></i>Batal',
+                customClass: {
+                    popup: 'swal2-popup-testimonial-delete',
+                    confirmButton: 'swal2-confirm-testimonial-delete',
+                    cancelButton: 'swal2-cancel-testimonial-delete',
+                    title: 'swal2-title-testimonial-delete',
+                    htmlContainer: 'swal2-html-testimonial-delete'
+                },
+                buttonsStyling: false,
+                allowOutsideClick: false,
+                allowEscapeKey: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+});
+</script>
+@endpush

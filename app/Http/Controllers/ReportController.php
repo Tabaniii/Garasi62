@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Report;
 use App\Models\car;
 use App\Models\NotificationLog;
+use App\Models\CarApproval;
 use App\Mail\CarUnpublishedMail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -214,6 +215,14 @@ class ReportController extends Controller
             // Unpublish car (change status to rejected or unpublished)
             $car->update([
                 'status' => 'rejected',
+            ]);
+
+            CarApproval::create([
+                'car_id' => $car->id,
+                'admin_id' => Auth::id(),
+                'action' => 'rejected',
+                'notes' => $adminNotes,
+                'approved_at' => now(),
             ]);
 
             // Update report status

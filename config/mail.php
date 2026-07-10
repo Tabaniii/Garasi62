@@ -39,10 +39,11 @@ return [
 
         'smtp' => [
             'transport' => 'smtp',
-            'scheme' => env('MAIL_SCHEME'),
+            // Hanya 'smtp' atau 'smtps' (jangan smtp+tls — tidak didukung Symfony)
+            'scheme' => in_array(env('MAIL_SCHEME'), ['smtp', 'smtps'], true) ? env('MAIL_SCHEME') : null,
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
-            'port' => env('MAIL_PORT', 2525),
+            'port' => (int) env('MAIL_PORT', 2525),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
             'timeout' => null,
@@ -109,7 +110,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'tabaniakmal@gmail.com'),
+        'address' => env('MAIL_FROM_ADDRESS', 'mimin@rubicweb.co.id'),
         'name' => env('MAIL_FROM_NAME', 'Garasi62'),
     ],
 

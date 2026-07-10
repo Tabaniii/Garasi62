@@ -15,7 +15,7 @@ class FooterSettingController extends Controller
     public function fetchOgData(Request $request)
     {
         $url = $request->input('url');
-        
+
         if (!$url || !filter_var($url, FILTER_VALIDATE_URL)) {
             return response()->json(['success' => false, 'message' => 'Invalid URL']);
         }
@@ -23,21 +23,21 @@ class FooterSettingController extends Controller
         try {
             // Fetch URL content with a timeout
             $response = Http::timeout(5)->get($url);
-            
+
             if (!$response->successful()) {
                 return response()->json(['success' => false, 'message' => 'Failed to fetch URL']);
             }
 
             $html = $response->body();
-            
+
             // Extract OG Site Name or Title
             $siteName = null;
-            
+
             // Try og:site_name
             if (preg_match('/<meta[^>]*property=["\']og:site_name["\'][^>]*content=["\']([^"\']*)["\']/i', $html, $matches)) {
                 $siteName = $matches[1];
             }
-            
+
             // Try og:title if no site_name
             if (!$siteName && preg_match('/<meta[^>]*property=["\']og:title["\'][^>]*content=["\']([^"\']*)["\']/i', $html, $matches)) {
                 $siteName = $matches[1];
@@ -51,9 +51,9 @@ class FooterSettingController extends Controller
             // Map site name to FontAwesome icon
             $icon = 'link'; // Default
             $platform = $siteName ?? 'Unknown';
-            
+
             $siteNameLower = strtolower($siteName ?? $url);
-            
+
             $iconMap = [
                 'facebook' => 'facebook',
                 'twitter' => 'twitter',
@@ -109,6 +109,7 @@ class FooterSettingController extends Controller
             'site_email' => SiteSetting::get('site_email', SiteSetting::get('footer_email', 'Colorlib@gmail.com')),
             'site_operational_hours' => SiteSetting::get('site_operational_hours', 'Sales: 08:00 am to 18:00 pm'),
             'site_logo' => SiteSetting::get('site_logo', 'img/logo.svg'),
+            'site_favicon' => SiteSetting::get('site_favicon', 'favicon.ico'),
             'contact_hours_weekday' => SiteSetting::get('contact_hours_weekday', '08:00 am to 18:00 pm'),
             'contact_hours_saturday' => SiteSetting::get('contact_hours_saturday', '10:00 am to 16:00 pm'),
             'contact_hours_sunday' => SiteSetting::get('contact_hours_sunday', 'Closed'),
@@ -154,7 +155,7 @@ class FooterSettingController extends Controller
             'about_vision_text' => SiteSetting::get('about_vision_text', 'Where do you register your complaints? How can you protest in any form against companies whose advertising techniques you don’t agree with? You don’t. And on another point of difference between traditional products and their advertising and those of the internet nature, simply ignoring internet advertising is'),
         ];
 
-        return view('admin.footer.edit', compact('settings',  'brands', 'selectedBrands', 'operationalHours', 'showrooms', 'socialLinks'));
+        return view('admin.footer.edit', compact('settings', 'brands', 'selectedBrands', 'operationalHours', 'showrooms', 'socialLinks'));
     }
 
     public function update(Request $request)
@@ -168,7 +169,8 @@ class FooterSettingController extends Controller
             'site_email' => ['required', 'email', 'max:100'],
             'site_operational_hours' => ['required', 'string', 'max:120'],
             'site_logo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:5120'],
-            
+            'site_favicon' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg,ico', 'max:2048'],
+
             // Dynamic fields
             'operational_hours' => ['nullable', 'array'],
             'operational_hours.*.day' => ['required', 'string', 'max:50'],
@@ -214,14 +216,15 @@ class FooterSettingController extends Controller
 
         $payload = [];
         foreach ($data as $key => $value) {
-            if (is_array($value)) continue;
+            if (is_array($value))
+                continue;
             $payload[$key] = is_string($value) ? trim($value) : $value;
         }
 
         SiteSetting::set('site_name', $payload['site_name']);
         SiteSetting::set('site_email', $payload['site_email']);
         SiteSetting::set('site_operational_hours', $payload['site_operational_hours']);
-        
+
         // Save dynamic arrays
         $this->saveOperationalHours(array_values($request->input('operational_hours', [])));
         $this->saveShowrooms(array_values($request->input('showrooms', [])));
@@ -231,18 +234,18 @@ class FooterSettingController extends Controller
         SiteSetting::set('footer_phone', $payload['phone']);
         SiteSetting::set('footer_email', $payload['site_email']);
         SiteSetting::set('footer_about_text', $payload['about_text']);
-        
+
         // Legacy fields update for backward compatibility (optional, but good for safety)
         // We will just clear them or leave them as is since we use social_links now.
         // But to be safe, if we have social links that match legacy keys, we could update them.
         // For now, we will rely on getSocialLinks migration.
-        
+
         SiteSetting::set('footer_info1_title', $payload['info1_title']);
         SiteSetting::set('footer_info1_list', $payload['info1_list']);
         SiteSetting::set('footer_info2_title', $payload['info2_title']);
         SiteSetting::set('footer_info2_list', $payload['info2_list']);
         SiteSetting::set('footer_brands_title', $payload['brands_title']);
-        
+
         $brandList = $request->input('brands', []);
         $brandList = array_values(array_unique(array_filter($brandList)));
         SiteSetting::set('footer_brands_list', implode("\n", $brandList));
@@ -264,6 +267,10 @@ class FooterSettingController extends Controller
         if ($request->hasFile('site_logo')) {
             $logoPath = $request->file('site_logo')->store('site', 'public');
             SiteSetting::set('site_logo', 'storage/' . $logoPath);
+        }
+        if ($request->hasFile('site_favicon')) {
+            $faviconPath = $request->file('site_favicon')->store('site', 'public');
+            SiteSetting::set('site_favicon', 'storage/' . $faviconPath);
         }
         if ($request->hasFile('about_image')) {
             $imagePath = $request->file('about_image')->store('about', 'public');
@@ -360,16 +367,16 @@ class FooterSettingController extends Controller
                 ];
             }
         }
-        
+
         // If absolutely nothing exists, return empty array (or maybe some defaults if desired)
         if (empty($legacyLinks)) {
-             return [
+            return [
                 ['platform' => 'Facebook', 'icon' => 'facebook', 'url' => ''],
                 ['platform' => 'Instagram', 'icon' => 'instagram', 'url' => ''],
                 ['platform' => 'Twitter', 'icon' => 'twitter', 'url' => ''],
                 ['platform' => 'Google', 'icon' => 'google', 'url' => ''],
                 ['platform' => 'Skype', 'icon' => 'skype', 'url' => ''],
-             ];
+            ];
         }
 
         return $legacyLinks;

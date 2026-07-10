@@ -216,7 +216,7 @@
                                         value="{{ old('phone', $settings['phone']) }}" required placeholder="+62 812 3456 7890">
                                 </div>
                             </div>
-                            <div class="col-12">
+                            <div class="col-md-6">
                                 <label for="site_logo" class="form-label fw-bold small text-uppercase text-muted">Logo Website</label>
                                 <div class="p-4 border rounded bg-light">
                                     <div class="row align-items-center">
@@ -227,6 +227,22 @@
                                         <div class="col-md-4 mt-3 mt-md-0 text-center">
                                             <div class="p-3 bg-white border rounded shadow-sm d-inline-block">
                                                 <img src="{{ asset($settings['site_logo']) }}" alt="{{ $settings['site_name'] }}" class="img-fluid" style="max-height: 60px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="site_favicon" class="form-label fw-bold small text-uppercase text-muted">Favicon Website</label>
+                                <div class="p-4 border rounded bg-light">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <input type="file" class="form-control mb-2" id="site_favicon" name="site_favicon" accept="image/*">
+                                            <small class="text-muted d-block"><i class="fas fa-info-circle me-1"></i>Format: ICO, PNG, SVG. Maksimal 2MB</small>
+                                        </div>
+                                        <div class="col-md-4 mt-3 mt-md-0 text-center">
+                                            <div class="p-3 bg-white border rounded shadow-sm d-inline-block">
+                                                <img src="{{ asset($settings['site_favicon']) }}" alt="Favicon" class="img-fluid" style="max-height: 48px;">
                                             </div>
                                         </div>
                                     </div>

@@ -23,23 +23,23 @@
 @include('components.messages-widget')
 @section('content')
     @php
-        $aboutTitle = \App\Models\SiteSetting::get('about_title', 'Wellcome To HVAC Auto Online');
-        $aboutSubtitle = \App\Models\SiteSetting::get('about_subtitle', 'We Provide Everything You Need To A Car');
-        $aboutDescription = \App\Models\SiteSetting::get('about_description', 'First I will explain what contextual advertising is. Contextual advertising means the advertising of products on a website according to the content the page is displaying. For example if the content of a website was information on a Ford truck then the advertisements');
-        $aboutFeature1Title = \App\Models\SiteSetting::get('about_feature_1_title', 'Quality Assurance System');
-        $aboutFeature1Text = \App\Models\SiteSetting::get('about_feature_1_text', 'It seems though that some of the biggest problems with the internet advertising trends are the lack of');
+        $aboutTitle = \App\Models\SiteSetting::get('about_title', 'Selamat Datang di Garasi62');
+        $aboutSubtitle = \App\Models\SiteSetting::get('about_subtitle', 'Kami Menyediakan Segala yang Anda Butuhkan untuk Mobil');
+        $aboutDescription = \App\Models\SiteSetting::get('about_description', 'Garasi62 adalah platform terpercaya untuk jual beli dan sewa mobil. Kami berkomitmen memberikan layanan terbaik bagi pelanggan kami.');
+        $aboutFeature1Title = \App\Models\SiteSetting::get('about_feature_1_title', 'Sistem Jaminan Kualitas');
+        $aboutFeature1Text = \App\Models\SiteSetting::get('about_feature_1_text', 'Kami memastikan setiap kendaraan yang kami tawarkan telah melalui inspeksi ketat.');
         $aboutFeature1Icon = \App\Models\SiteSetting::get('about_feature_1_icon', 'img/about/af-1.png');
-        $aboutFeature2Title = \App\Models\SiteSetting::get('about_feature_2_title', 'Accurate Testing Processes');
-        $aboutFeature2Text = \App\Models\SiteSetting::get('about_feature_2_text', 'Where do you register your complaints? How can you protest in any form against companies whose');
+        $aboutFeature2Title = \App\Models\SiteSetting::get('about_feature_2_title', 'Proses Pengujian Akurat');
+        $aboutFeature2Text = \App\Models\SiteSetting::get('about_feature_2_text', 'Setiap detail kendaraan diperiksa untuk memastikan performa maksimal.');
         $aboutFeature2Icon = \App\Models\SiteSetting::get('about_feature_2_icon', 'img/about/af-2.png');
-        $aboutFeature3Title = \App\Models\SiteSetting::get('about_feature_3_title', 'Infrastructure Integration Technology');
-        $aboutFeature3Text = \App\Models\SiteSetting::get('about_feature_3_text', 'So in final analysis: it’s true, I hate peeping Toms, but if I had to choose, I’d take one any day over an');
+        $aboutFeature3Title = \App\Models\SiteSetting::get('about_feature_3_title', 'Teknologi Integrasi Infrastruktur');
+        $aboutFeature3Text = \App\Models\SiteSetting::get('about_feature_3_text', 'Kami menggunakan sistem modern untuk mengelola inventaris dan layanan kami.');
         $aboutFeature3Icon = \App\Models\SiteSetting::get('about_feature_3_icon', 'img/about/af-3.png');
         $aboutImage = \App\Models\SiteSetting::get('about_image', 'img/about/about-pic.jpg');
-        $aboutMissionTitle = \App\Models\SiteSetting::get('about_mission_title', 'Our Mission');
-        $aboutMissionText = \App\Models\SiteSetting::get('about_mission_text', 'Now, I’m not like Robin, that weirdo from my cultural anthropology class; I think that advertising is something that has its place in our society; which for better or worse is structured along a marketplace economy. But, simply because I feel advertising has a right to exist, doesn’t mean that I like or agree with it, in its');
-        $aboutVisionTitle = \App\Models\SiteSetting::get('about_vision_title', 'Our Vision');
-        $aboutVisionText = \App\Models\SiteSetting::get('about_vision_text', 'Where do you register your complaints? How can you protest in any form against companies whose advertising techniques you don’t agree with? You don’t. And on another point of difference between traditional products and their advertising and those of the internet nature, simply ignoring internet advertising is');
+        $aboutMissionTitle = \App\Models\SiteSetting::get('about_mission_title', 'Misi Kami');
+        $aboutMissionText = \App\Models\SiteSetting::get('about_mission_text', 'Memberikan pengalaman jual beli dan sewa mobil yang transparan, aman, dan mudah bagi seluruh lapisan masyarakat.');
+        $aboutVisionTitle = \App\Models\SiteSetting::get('about_vision_title', 'Visi Kami');
+        $aboutVisionText = \App\Models\SiteSetting::get('about_vision_text', 'Menjadi platform otomotif nomor satu di Indonesia yang dikenal karena kepercayaan dan kualitas layanannya.');
     @endphp
 
     <!-- Breadcrumb End -->
@@ -48,10 +48,10 @@
             <div class="row">
                 <div class="col-lg-12 text-center">
                     <div class="breadcrumb__text">
-                        <h2>About Us</h2>
+                        <h2>Tentang Kami</h2>
                         <div class="breadcrumb__links">
-                            <a href="./index.html"><i class="fa fa-home"></i> Home</a>
-                            <span>About Us</span>
+                            <a href="/"><i class="fa fa-home"></i> Beranda</a>
+                            <span>Tentang Kami</span>
                         </div>
                     </div>
                 </div>
@@ -126,35 +126,34 @@
                 <div class="col-lg-5 col-md-6">
                     <div class="call__text">
                         <div class="section-title">
-                            <h2>Request A Call Back</h2>
-                            <p>Posters had been a very beneficial marketing tool because it had paved to deliver an
-                                effective message that conveyed customer’s</p>
+                            <h2>Minta Panggilan Balik</h2>
+                            <p>Tinggalkan kontak Anda, tim kami akan segera menghubungi Anda untuk informasi lebih lanjut.</p>
                         </div>
-                        <a href="#">Contact Us</a>
+                        <a href="{{ route('contact') }}">Hubungi Kami</a>
                     </div>
                 </div>
                 <div class="col-lg-6 offset-lg-1 col-md-6">
                     <form action="#" class="call__form">
                         <div class="row">
                             <div class="col-lg-6">
-                                <input type="text" placeholder="Name">
+                                <input type="text" placeholder="Nama">
                             </div>
                             <div class="col-lg-6">
                                 <input type="text" placeholder="Email">
                             </div>
                             <div class="col-lg-6">
-                                <input type="text" placeholder="Phone">
+                                <input type="text" placeholder="Telepon">
                             </div>
                             <div class="col-lg-6">
                                 <select>
-                                    <option value="">Choose Our Services</option>
-                                    <option value="">Buy Cars</option>
-                                    <option value="">Sell Cars</option>
-                                    <option value="">Wash Cars</option>
+                                    <option value="">Pilih Layanan Kami</option>
+                                    <option value="">Beli Mobil</option>
+                                    <option value="">Jual Mobil</option>
+                                    <option value="">Cuci Mobil</option>
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="site-btn">Submit Now</button>
+                        <button type="submit" class="site-btn">Kirim Sekarang</button>
                     </form>
                 </div>
             </div>
@@ -168,8 +167,8 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section-title team-title">
-                        <span>Our Team</span>
-                        <h2>Meet Our Expert</h2>
+                        <span>Tim Kami</span>
+                        <h2>Temui Ahli Kami</h2>
                     </div>
                 </div>
             </div>
@@ -228,12 +227,12 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section-title testimonial-title" style="text-align: center; margin-bottom: 50px;">
-                        <span style="color: #dc2626; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; display: inline-block; margin-bottom: 10px;">Testimonials</span>
+                        <span style="color: #dc2626; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: 14px; display: inline-block; margin-bottom: 10px;">Testimoni</span>
                         <h2 style="font-size: 42px; font-weight: 800; margin: 15px 0 20px; color: #1a1a1a; position: relative; word-wrap: break-word; overflow-wrap: break-word;">
-                            What People Say About Us
+                            Apa Kata Mereka Tentang Kami
                             <span style="position: absolute; bottom: -10px; left: 50%; width: 80px; height: 4px; background: linear-gradient(90deg, #dc2626, #991b1b); border-radius: 5px;"></span>
                         </h2>
-                        <p style="font-size: 16px; color: #6b7280; max-width: 600px; margin: 0 auto; word-wrap: break-word; overflow-wrap: break-word;">Our customers are our biggest supporters. What do they think of us?</p>
+                        <p style="font-size: 16px; color: #6b7280; max-width: 600px; margin: 0 auto; word-wrap: break-word; overflow-wrap: break-word;">Pelanggan kami adalah pendukung terbesar kami. Apa pendapat mereka tentang kami?</p>
                     </div>
                 </div>
             </div>
@@ -503,26 +502,26 @@
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="counter__item">
                         <h2 class="counter-num">1922</h2>
-                        <p>Vehicles Stock</p>
+                        <p>Stok Kendaraan</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="counter__item">
                         <h2 class="counter-num">1500</h2>
                         <strong>+</strong>
-                        <p>Vehicles Sale</p>
+                        <p>Kendaraan Terjual</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="counter__item">
                         <h2 class="counter-num">1922</h2>
-                        <p>Dealer Reviews</p>
+                        <p>Ulasan Dealer</p>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="counter__item">
                         <h2 class="counter-num">5100</h2>
-                        <p>Happy Clients</p>
+                        <p>Pelanggan Puas</p>
                     </div>
                 </div>
             </div>
@@ -536,8 +535,8 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section-title client-title">
-                        <span>Partner</span>
-                        <h2>Our Clients</h2>
+                        <span>Mitra Kami</span>
+                        <h2>Klien Kami</h2>
                     </div>
                 </div>
             </div>

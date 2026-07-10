@@ -12,7 +12,8 @@
         $siteLogo = \App\Models\SiteSetting::get('site_logo', 'img/logo.svg');
         $siteEmail = \App\Models\SiteSetting::get('site_email', \App\Models\SiteSetting::get('footer_email', 'Colorlib@gmail.com'));
         $siteOperationalHours = \App\Models\SiteSetting::get('site_operational_hours', 'Sales: 08:00 am to 18:00 pm');
-        
+        $siteFavicon = \App\Models\SiteSetting::get('site_favicon', 'favicon.ico');
+
         // Dynamic Social Links Logic
         $socialLinksJson = \App\Models\SiteSetting::get('footer_social_links', '');
         $socialLinks = [];
@@ -27,11 +28,11 @@
                 'instagram' => 'site_instagram'
             ];
             $defaultUrls = [
-                 'facebook' => 'https://www.facebook.com/',
-                 'twitter' => 'https://twitter.com/',
-                 'google' => 'https://www.google.com/',
-                 'instagram' => 'https://www.instagram.com/'
-             ];
+                'facebook' => 'https://www.facebook.com/',
+                'twitter' => 'https://twitter.com/',
+                'google' => 'https://www.google.com/',
+                'instagram' => 'https://www.instagram.com/'
+            ];
             foreach ($legacyPlatforms as $icon => $key) {
                 $url = \App\Models\SiteSetting::get($key, $defaultUrls[$icon]);
                 if ($url) {
@@ -42,32 +43,38 @@
     @endphp
 
     @hasSection('meta')
-    @yield('meta')
+        @yield('meta')
     @else
-    <meta name="description" content="Garasi62 - Temukan Mobil Impianmu Disini">
-    <meta name="keywords" content="Garasi62, Jual Beli Mobil, Sewa Mobil, Mobil Bekas, Mobil Baru">
+        <meta name="description" content="Garasi62 - Temukan Mobil Impianmu Disini">
+        <meta name="keywords" content="Garasi62, Jual Beli Mobil, Sewa Mobil, Mobil Bekas, Mobil Baru">
 
-    <!-- Open Graph General -->
-    <meta property="og:title" content="{{ $siteName }} - Temukan Mobil Impianmu Disini">
-    <meta property="og:description" content="Garasi62 adalah platform terpercaya untuk jual beli dan sewa mobil. Temukan berbagai pilihan mobil berkualitas dengan harga terbaik.">
-    <meta property="og:image" content="{{ asset($siteLogo) }}">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:site_name" content="{{ $siteName }}">
-    <meta property="og:locale" content="id_ID">
-    <meta property="og:type" content="website">
+        <!-- Open Graph General -->
+        <meta property="og:title" content="{{ $siteName }} - Temukan Mobil Impianmu Disini">
+        <meta property="og:description"
+            content="Garasi62 adalah platform terpercaya untuk jual beli dan sewa mobil. Temukan berbagai pilihan mobil berkualitas dengan harga terbaik.">
+        <meta property="og:image" content="{{ asset($siteLogo) }}">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:site_name" content="{{ $siteName }}">
+        <meta property="og:locale" content="id_ID">
+        <meta property="og:type" content="website">
 
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $siteName }} - Temukan Mobil Impianmu Disini">
-    <meta name="twitter:description" content="Garasi62 adalah platform terpercaya untuk jual beli dan sewa mobil. Temukan berbagai pilihan mobil berkualitas dengan harga terbaik.">
-    <meta name="twitter:image" content="{{ asset($siteLogo) }}">
+        <!-- Twitter -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ $siteName }} - Temukan Mobil Impianmu Disini">
+        <meta name="twitter:description"
+            content="Garasi62 adalah platform terpercaya untuk jual beli dan sewa mobil. Temukan berbagai pilihan mobil berkualitas dengan harga terbaik.">
+        <meta name="twitter:image" content="{{ asset($siteLogo) }}">
     @endif
 
     @hasSection('title')
-    <title>@yield('title')</title>
+        <title>@yield('title')</title>
     @else
-    <title>{{ $title ?? $siteName }}</title>
+        <title>{{ $title ?? $siteName }}</title>
     @endif
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ asset($siteFavicon) }}" type="image/x-icon">
+    <link rel="icon" href="{{ asset($siteFavicon) }}" type="image/x-icon">
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
@@ -77,6 +84,8 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('garasi62/css/font-awesome.min.css')}}" type="text/css">
+    <!-- Font Awesome 6 (sama seperti seller) untuk ikon gas-pump / BBM -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('garasi62/css/elegant-icons.css')}}" type="text/css">
     <link rel="stylesheet" href="{{ asset('garasi62/css/nice-select.css')}}" type="text/css">
     <link rel="stylesheet" href="{{ asset('garasi62/css/magnific-popup.css')}}" type="text/css">
@@ -142,6 +151,7 @@
         .modal {
             z-index: 10001;
         }
+
         .modal-backdrop {
             z-index: 10000;
         }
@@ -161,23 +171,25 @@
     <div class="offcanvas-menu-wrapper">
         <nav class="offcanvas__nav">
             <ul>
-                <li><a href="/" class="{{ request()->routeIs('home') || request()->routeIs('index') ? 'active' : '' }}">Home</a></li>
-                <li><a href="/car" class="{{ request()->routeIs('cars') ? 'active' : '' }}">Cars</a></li>
+                <li><a href="/"
+                        class="{{ request()->routeIs('home') || request()->routeIs('index') ? 'active' : '' }}">Beranda</a>
+                </li>
+                <li><a href="/car" class="{{ request()->routeIs('cars') ? 'active' : '' }}">Mobil</a></li>
                 <li><a href="/blog" class="{{ request()->routeIs('blog') ? 'active' : '' }}">Blog</a></li>
-                <li><a href="/about" class="{{ request()->routeIs('about') ? 'active' : '' }}">About</a></li>
-                <li><a href="/contact" class="{{ request()->routeIs('contact') ? 'active' : '' }}">Contact</a></li>
+                <li><a href="/about" class="{{ request()->routeIs('about') ? 'active' : '' }}">Tentang</a></li>
+                <li><a href="/contact" class="{{ request()->routeIs('contact') ? 'active' : '' }}">Kontak</a></li>
             </ul>
         </nav>
         <div class="offcanvas__auth">
             @auth
-            <a href="{{ route('dashboard') }}" class="site-btn">Dashboard</a>
-            <form action="{{ route('logout') }}" method="POST" class="m-0">
-                @csrf
-                <button type="submit" class="site-btn">Keluar</button>
-            </form>
+                <a href="{{ route('dashboard') }}" class="site-btn">Dashboard</a>
+                <form action="{{ route('logout') }}" method="POST" class="m-0">
+                    @csrf
+                    <button type="submit" class="site-btn">Keluar</button>
+                </form>
             @else
-            <a href="{{ route('login') }}" class="site-btn">Masuk</a>
-            <a href="{{ route('register') }}" class="site-btn">Daftar</a>
+                <a href="{{ route('login') }}" class="site-btn">Masuk</a>
+                <a href="{{ route('register') }}" class="site-btn">Daftar</a>
             @endauth
         </div>
         <ul class="offcanvas__widget__add">
@@ -190,7 +202,8 @@
         </div>
         <div class="offcanvas__social">
             @foreach($socialLinks as $social)
-                <a href="{{ $social['url'] }}" target="_blank" title="{{ $social['platform'] ?? '' }}"><i class="fa fa-{{ $social['icon'] ?? 'link' }}"></i></a>
+                <a href="{{ $social['url'] }}" target="_blank" title="{{ $social['platform'] ?? '' }}"><i
+                        class="fab fa-{{ $social['icon'] ?? 'link' }}"></i></a>
             @endforeach
         </div>
     </div>
@@ -232,6 +245,67 @@
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Ensure footer background is set -->
+    <script>
+        $(document).ready(function () {
+            // Re-apply set-bg for footer in case it wasn't loaded initially
+            $('.footer.set-bg').each(function () {
+                var bg = $(this).data('setbg');
+                if (bg) {
+                    $(this).css('background-image', 'url(' + bg + ')');
+                }
+            });
+
+            // SweetAlert2 Flash Messages
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    background: '#1a1a1a',
+                    color: '#fff',
+                    iconColor: '#10b981'
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: "{{ session('error') }}",
+                    background: '#1a1a1a',
+                    color: '#fff',
+                    iconColor: '#ef4444'
+                });
+            @endif
+
+            @if(session('info'))
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Informasi',
+                    text: "{{ session('info') }}",
+                    background: '#1a1a1a',
+                    color: '#fff',
+                    iconColor: '#3b82f6'
+                });
+            @endif
+
+            @if(session('warning'))
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan',
+                    text: "{{ session('warning') }}",
+                    background: '#1a1a1a',
+                    color: '#fff',
+                    iconColor: '#f59e0b'
+                });
+            @endif
+        });
+    </script>
 
     @stack('scripts')
 </body>

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use App\Mail\ContactMail;
 use App\Models\Contact;
+use App\Rules\NoSpecialCharacters;
 
 class ContactController extends Controller
 {
@@ -38,15 +39,15 @@ class ContactController extends Controller
         $validator = Validator::make($sanitized, [
             'name' => 'required|string|max:255|min:2',
             'email' => 'required|email:rfc,dns|max:255',
-            'subject' => 'required|string|max:255|min:3',
-            'message' => 'required|string|min:10|max:5000',
+            'subject' => ['required', 'string', 'max:255', 'min:3', new NoSpecialCharacters],
+            'message' => ['required', 'string', 'min:10', 'max:5000', new NoSpecialCharacters],
             'g-recaptcha-response' => 'required',
         ], [
             'name.required' => 'Nama wajib diisi.',
             'name.min' => 'Nama minimal 2 karakter.',
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
-            'subject.required' => 'Subject wajib diisi.',
+            'subject.required' => 'Subject wajib diisi.',   
             'subject.min' => 'Subject minimal 3 karakter.',
             'message.required' => 'Pesan wajib diisi.',
             'message.min' => 'Pesan minimal 10 karakter.',
@@ -76,8 +77,7 @@ class ContactController extends Controller
         }
 
         try {
-            // Email selalu dikirim ke tabaniakmal@gmail.com
-            $adminEmail = 'tabaniakmal@gmail.com';
+            $adminEmail = 'taqyadriano@gmail.com';
 
             Mail::to($adminEmail)->send(new ContactMail(
                 $sanitized['name'],
@@ -115,7 +115,8 @@ class ContactController extends Controller
         }
     }
 
-    /**
+
+/**
      * Sanitasi input untuk mencegah XSS dan injection
      */
     private function sanitizeInput($input): string
@@ -141,7 +142,7 @@ class ContactController extends Controller
      */
     private function verifyRecaptcha(string $recaptchaResponse, string $ip): array
     {
-        $secretKey = config('services.recaptcha.secret_key');
+        $secretKey = recaptcha_secret_key();
         
         if (empty($secretKey)) {
             // Jika secret key tidak di-set, skip validasi (untuk development)

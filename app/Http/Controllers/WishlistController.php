@@ -39,7 +39,7 @@ class WishlistController extends Controller
             'car_id' => $carId,
         ]);
 
-        return back()->with('success', 'Mobil berhasil ditambahkan ke wishlist!');
+        return back()->with('success', 'Berhasil ditambahkan ke wishlist Anda!');
     }
 
     /**
@@ -55,6 +55,6 @@ class WishlistController extends Controller
 
         $wishlist->delete();
 
-        return back()->with('success', 'Mobil berhasil dihapus dari wishlist!');
+        return back()->with('success', 'Berhasil dihapus dari wishlist Anda!');
     }
 }

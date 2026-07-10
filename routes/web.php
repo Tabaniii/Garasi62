@@ -52,7 +52,7 @@ Route::get('/about', [AboutController::class, 'index'])->name('about');
 //car - Listing bisa dilihat semua, detail perlu login
 Route::get('/car', [CarController::class, 'show'])->name('cars');
 Route::middleware(['auth'])->group(function () {
-    Route::get('/car/{id}', [CarController::class, 'showDetail'])->name('car.details');
+    Route::get('/car/{uuid}', [CarController::class, 'showDetail'])->name('car.details');
 });
 
 // Contact Routes (Auth checked in controller)
@@ -200,7 +200,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [ReportController::class, 'sellerIndex'])->name('index');
         Route::get('/{report}', [ReportController::class, 'show'])->name('show');
     });
-    
+
     // Seller Resubmissions (Seller Only)
     Route::prefix('seller/resubmissions')->name('seller.resubmissions.')->middleware('role:seller')->group(function () {
         Route::get('/', [CarController::class, 'sellerResubmissions'])->name('index');

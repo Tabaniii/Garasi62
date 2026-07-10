@@ -308,6 +308,10 @@
             </div>
         </div>
         <div class="mini-chat-body" id="miniChatBody">
+            <div class="mini-chat-loading" id="miniChatLoading">
+                <div class="mini-chat-loading-spinner"></div>
+                <span>Memuat pesan...</span>
+            </div>
             <div class="mini-chat-messages" id="miniChatMessages">
                 <!-- Messages will be loaded here -->
             </div>
@@ -351,7 +355,8 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    z-index: 1000;
+    /* Pastikan selalu di atas header/navbar dan elemen lain */
+    z-index: 1000000;
 }
 
 .messages-btn {
@@ -415,7 +420,8 @@
     background: #1a1a1a;
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    z-index: 1001;
+    /* Di atas tombol Messages dan header */
+    z-index: 1000001;
     overflow: hidden;
     animation: slideUp 0.3s ease;
 }
@@ -652,11 +658,14 @@
     bottom: 80px;
     right: 20px;
     width: 350px;
-    height: 500px;
+    /* Responsif: tinggi menyesuaikan viewport dan tidak tertutup navbar */
+    max-height: calc(100vh - 120px);
+    height: auto;
     background: #1a1a1a;
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    z-index: 1002;
+    /* Paling atas di antara elemen biasa, header/nav, dan modal lain */
+    z-index: 1000002;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -738,6 +747,38 @@
     overflow-y: auto;
     padding: 16px;
     background: #1a1a1a;
+    position: relative;
+}
+
+.mini-chat-loading {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(31, 41, 55, 0.8), rgba(17, 24, 39, 0.9));
+    z-index: 2;
+}
+
+.mini-chat-loading span {
+    font-size: 12px;
+    color: #e5e7eb;
+}
+
+.mini-chat-loading-spinner {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid #4b5563;
+    border-top-color: #dc2626;
+    animation: miniChatSpin 0.8s linear infinite;
+}
+
+@keyframes miniChatSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
 }
 
 .mini-chat-messages {
@@ -787,6 +828,10 @@
     font-size: 10px;
     color: #666;
     padding: 0 4px;
+}
+
+.mini-chat-message-failed .mini-chat-message-time {
+    color: #ef4444;
 }
 
 .mini-chat-footer {
@@ -879,12 +924,14 @@
         width: calc(100% - 40px);
         right: 20px;
         left: 20px;
+        max-height: calc(100vh - 120px);
     }
     
     .mini-chat-widget {
         width: calc(100% - 40px);
         right: 20px;
         left: 20px;
+        max-height: calc(100vh - 120px);
     }
 }
 </style>
@@ -942,6 +989,16 @@ function openMiniChat(chatId, userName, otherUserId) {
         console.error('Could not update avatar:', { avatarEl, userName });
     }
     
+    // Tampilkan indikator loading & kosongkan pesan lama
+    const loadingEl = document.getElementById('miniChatLoading');
+    const messagesContainer = document.getElementById('miniChatMessages');
+    if (loadingEl) {
+        loadingEl.style.display = 'flex';
+    }
+    if (messagesContainer) {
+        messagesContainer.innerHTML = '';
+    }
+
     // Show mini chat
     const miniChatWidget = document.getElementById('miniChatWidget');
     if (miniChatWidget) {
@@ -968,7 +1025,7 @@ function openMiniChat(chatId, userName, otherUserId) {
         if (messagesInterval) {
             clearInterval(messagesInterval);
         }
-        messagesInterval = setInterval(loadMiniChatMessages, 3000);
+        messagesInterval = setInterval(function() { loadMiniChatMessages(false); }, 3000);
     }
     
     // Focus on input
@@ -1044,16 +1101,23 @@ function openFullscreenChat() {
     window.location.href = `/chat/${currentChatId}`;
 }
 
-function loadMiniChatMessages() {
+function loadMiniChatMessages(showLoadingOverlay) {
     if (!currentChatId) {
         console.warn('No chat ID available for loading messages');
         return;
+    }
+
+    const loadingEl = document.getElementById('miniChatLoading');
+    // Tampilkan overlay hanya saat load pertama (buka chat). Saat polling/refresh (false) jangan tampilkan.
+    if (loadingEl && showLoadingOverlay !== false) {
+        loadingEl.style.display = 'flex';
     }
     
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
     
     if (!csrfToken) {
         console.error('CSRF token not found');
+        if (loadingEl) loadingEl.style.display = 'none';
         return;
     }
     
@@ -1084,6 +1148,7 @@ function loadMiniChatMessages() {
         const messagesContainer = document.getElementById('miniChatMessages');
         if (!messagesContainer) {
             console.error('Messages container not found');
+            if (loadingEl) loadingEl.style.display = 'none';
             return;
         }
         
@@ -1147,9 +1212,14 @@ function loadMiniChatMessages() {
             emptyDiv.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Belum ada pesan</p>';
             messagesContainer.appendChild(emptyDiv);
         }
+
+        if (loadingEl) {
+            loadingEl.style.display = 'none';
+        }
     })
     .catch(error => {
         console.error('Error loading messages:', error);
+        if (loadingEl) loadingEl.style.display = 'none';
         const messagesContainer = document.getElementById('miniChatMessages');
         if (messagesContainer && messagesContainer.children.length === 0) {
             const errorDiv = document.createElement('div');
@@ -1348,7 +1418,6 @@ function refreshUnreadCounts() {
     .catch(() => {});
 }
 function sendMiniChatMessage(event) {
-    // Prevent default form submission
     if (event) {
         event.preventDefault();
         event.stopPropagation();
@@ -1360,40 +1429,49 @@ function sendMiniChatMessage(event) {
     }
     
     const input = document.getElementById('miniChatInput');
-    if (!input) {
-        console.error('Input element not found');
-        return false;
-    }
+    if (!input) return false;
     
     const message = input.value.trim();
-    
-    if (!message) {
-        return false;
-    }
-    
-    // Disable input while sending
-    input.disabled = true;
-    const form = document.getElementById('miniChatForm');
-    const sendBtn = form ? form.querySelector('.mini-chat-send-btn') : null;
-    if (sendBtn) {
-        sendBtn.disabled = true;
-        const originalHTML = sendBtn.innerHTML;
-        sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>';
-    }
+    if (!message) return false;
     
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
-    
     if (!csrfToken) {
-        console.error('CSRF token not found');
-        input.disabled = false;
-        if (sendBtn) sendBtn.disabled = false;
         alert('CSRF token tidak ditemukan. Silakan refresh halaman.');
         return false;
     }
     
-    // Encode chat ID properly
-    const encodedChatId = encodeURIComponent(currentChatId);
+    const messagesContainer = document.getElementById('miniChatMessages');
+    const tempId = 'opt-' + Date.now();
     
+    // Optimistic: tampilkan pesan langsung di UI
+    if (messagesContainer) {
+        const messageDiv = document.createElement('div');
+        messageDiv.id = tempId;
+        messageDiv.className = 'mini-chat-message sent';
+        messageDiv.dataset.optimistic = 'true';
+        
+        const bubble = document.createElement('div');
+        bubble.className = 'mini-chat-message-bubble';
+        bubble.textContent = message;
+        
+        const time = document.createElement('div');
+        time.className = 'mini-chat-message-time';
+        time.textContent = 'Mengirim...';
+        
+        messageDiv.appendChild(bubble);
+        messageDiv.appendChild(time);
+        messagesContainer.appendChild(messageDiv);
+        
+        const chatBody = document.getElementById('miniChatBody');
+        if (chatBody) {
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+    }
+    
+    input.value = '';
+    input.focus();
+    
+    const encodedChatId = encodeURIComponent(currentChatId);
     fetch(`/chat/${encodedChatId}/message`, {
         method: 'POST',
         headers: {
@@ -1404,11 +1482,11 @@ function sendMiniChatMessage(event) {
         },
         body: JSON.stringify({ message: message })
     })
-    .then(response => {
+    .then(function(response) {
         if (!response.ok) {
-            return response.text().then(text => {
+            return response.text().then(function(text) {
                 try {
-                    const json = JSON.parse(text);
+                    var json = JSON.parse(text);
                     throw new Error(json.error || 'Network response was not ok');
                 } catch (e) {
                     throw new Error(text || 'Network response was not ok');
@@ -1417,67 +1495,43 @@ function sendMiniChatMessage(event) {
         }
         return response.json();
     })
-    .then(data => {
-        if (data.success) {
-            input.value = '';
-            
-            // Add message immediately to UI for better UX
-            const messagesContainer = document.getElementById('miniChatMessages');
-            if (messagesContainer && data.message) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'mini-chat-message sent';
-                
-                const bubble = document.createElement('div');
-                bubble.className = 'mini-chat-message-bubble';
-                bubble.textContent = data.message.message || message;
-                
-                const time = document.createElement('div');
-                time.className = 'mini-chat-message-time';
-                try {
-                    const messageDate = new Date(data.message.created_at);
-                    time.textContent = messageDate.toLocaleTimeString('id-ID', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                    });
-                } catch (e) {
-                    time.textContent = 'Sekarang';
+    .then(function(data) {
+        var optEl = document.getElementById(tempId);
+        if (optEl) {
+            if (data.success && data.message) {
+                optEl.dataset.optimistic = 'false';
+                optEl.dataset.messageId = (data.message.id || '').toString();
+                var timeEl = optEl.querySelector('.mini-chat-message-time');
+                if (timeEl) {
+                    try {
+                        var messageDate = new Date(data.message.created_at);
+                        timeEl.textContent = messageDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    } catch (e) {
+                        timeEl.textContent = 'Sekarang';
+                    }
                 }
-                
-                messageDiv.appendChild(bubble);
-                messageDiv.appendChild(time);
-                messagesContainer.appendChild(messageDiv);
-                
-                // Scroll to bottom
-                const chatBody = document.getElementById('miniChatBody');
-                if (chatBody) {
-                    setTimeout(() => {
-                        chatBody.scrollTop = chatBody.scrollHeight;
-                    }, 100);
-                }
+            } else {
+                optEl.classList.add('mini-chat-message-failed');
+                var timeEl = optEl.querySelector('.mini-chat-message-time');
+                if (timeEl) timeEl.textContent = 'Gagal';
             }
-            
-            // Reload messages after a short delay to get updated data
-            setTimeout(loadMiniChatMessages, 1000);
-        } else {
-            console.error('Failed to send message:', data);
+        }
+        if (!data.success) {
             alert('Gagal mengirim pesan: ' + (data.error || 'Silakan coba lagi.'));
         }
     })
-    .catch(error => {
+    .catch(function(error) {
         console.error('Error sending message:', error);
-        alert('Terjadi kesalahan saat mengirim pesan: ' + error.message);
-    })
-    .finally(() => {
-        // Re-enable input
-        input.disabled = false;
-        if (sendBtn) {
-            sendBtn.disabled = false;
-            sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>';
+        var optEl = document.getElementById(tempId);
+        if (optEl) {
+            optEl.classList.add('mini-chat-message-failed');
+            var timeEl = optEl.querySelector('.mini-chat-message-time');
+            if (timeEl) timeEl.textContent = 'Gagal. Coba lagi.';
+        } else {
+            alert('Terjadi kesalahan: ' + error.message);
         }
-        input.focus();
     });
     
-    // Always return false to prevent form submission
     return false;
 }
 

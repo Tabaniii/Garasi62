@@ -43,8 +43,8 @@
                     <div class="breadcrumb__text">
                         <h2>{{ $car->brand }} {{ $car->tahun }}</h2>
                         <div class="breadcrumb__links">
-                            <a href="{{ route('home') }}"><i class="fa fa-home"></i> Home</a>
-                            <a href="{{ route('cars') }}">Car Listing</a>
+                            <a href="{{ route('home') }}"><i class="fa fa-home"></i> Beranda</a>
+                            <a href="{{ route('cars') }}">Daftar Mobil</a>
                             <span>{{ $car->brand }}</span>
                         </div>
                     </div>
@@ -68,7 +68,7 @@
                             @endif
                             <div class="image-overlay-badge">
                                 <span class="car-type-overlay {{ $car->tipe == 'buy' ? 'badge-sale-overlay' : 'badge-rent-overlay' }}">
-                                    {{ $car->tipe == 'rent' ? 'For Rent' : 'For Sale' }}
+                                    {{ $car->tipe == 'rent' ? 'Disewakan' : 'Dijual' }}
                                 </span>
                             </div>
                         </div>
@@ -99,22 +99,22 @@
                         <ul class="nav nav-tabs modern-tabs" role="tablist">
                             <li class="nav-item">
                                 <a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab">
-                                    <i class="fa fa-info-circle"></i> Overview
+                                    <i class="fa fa-info-circle"></i> Ringkasan
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#tabs-2" role="tab">
-                                    <i class="fa fa-cog"></i> Technical
+                                    <i class="fa fa-cog"></i> Teknis
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab">
-                                    <i class="fa fa-star"></i> Features
+                                    <i class="fa fa-star"></i> Fitur
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#tabs-4" role="tab">
-                                    <i class="fa fa-map-marker"></i> Location
+                                    <i class="fa fa-map-marker"></i> Lokasi
                                 </a>
                             </li>
                         </ul>
@@ -124,7 +124,7 @@
                                     <div class="row">
                                         <div class="col-lg-6 col-md-6">
                                             <div class="car__details__tab__info__item">
-                                                <h5>General Information</h5>
+                                                <h5>Informasi Umum</h5>
                                                 @if($car->description)
                                                     <div class="mb-3">
                                                         {!! nl2br(e($car->description)) !!}
@@ -136,6 +136,9 @@
                                                         <li><i class="fa fa-check"></i> Kilometer: <strong>{{ $car->kilometer }} km</strong></li>
                                                         <li><i class="fa fa-check"></i> Transmisi: <strong>{{ $car->transmisi }}</strong></li>
                                                         <li><i class="fa fa-check"></i> Kapasitas Mesin: <strong>{{ $car->kapasitasmesin }}</strong></li>
+                                                        @if($car->bahan_bakar)
+                                                        <li><i class="fa fa-check"></i> Bahan Bakar: <strong>{{ $car->bahan_bakar }}</strong></li>
+                                                        @endif
                                                     </ul>
                                                 @endif
                                             </div>
@@ -149,6 +152,9 @@
                                                     <li><i class="fa fa-check"></i> Kilometer: <strong>{{ $car->kilometer }} km</strong></li>
                                                     <li><i class="fa fa-check"></i> Transmisi: <strong>{{ $car->transmisi }}</strong></li>
                                                     <li><i class="fa fa-check"></i> Kapasitas Mesin: <strong>{{ $car->kapasitasmesin }}</strong></li>
+                                                    @if($car->bahan_bakar)
+                                                    <li><i class="fa fa-check"></i> Bahan Bakar: <strong>{{ $car->bahan_bakar }}</strong></li>
+                                                    @endif
                                                     @if($car->location)
                                                     <li><i class="fa fa-check"></i> Lokasi: <strong>{{ $car->location }}</strong></li>
                                                     @endif
@@ -162,7 +168,7 @@
                                         @if($car->interior_features && is_array($car->interior_features) && count($car->interior_features) > 0)
                                         <div class="col-lg-3 col-md-6 col-sm-6">
                                             <div class="car__details__tab__feature__item">
-                                                <h5>Interior Design</h5>
+                                                <h5>Desain Interior</h5>
                                                 <ul>
                                                     @foreach(array_filter($car->interior_features) as $feature)
                                                     <li><i class="fa fa-check-circle"></i> {{ $feature }}</li>
@@ -174,7 +180,7 @@
                                         @if($car->safety_features && is_array($car->safety_features) && count($car->safety_features) > 0)
                                         <div class="col-lg-3 col-md-6 col-sm-6">
                                             <div class="car__details__tab__feature__item">
-                                                <h5>Safety Design</h5>
+                                                <h5>Desain Keamanan</h5>
                                                 <ul>
                                                     @foreach(array_filter($car->safety_features) as $feature)
                                                     <li><i class="fa fa-check-circle"></i> {{ $feature }}</li>
@@ -186,7 +192,7 @@
                                         @if($car->extra_features && is_array($car->extra_features) && count($car->extra_features) > 0)
                                         <div class="col-lg-3 col-md-6 col-sm-6">
                                             <div class="car__details__tab__feature__item">
-                                                <h5>Extra Design</h5>
+                                                <h5>Desain Ekstra</h5>
                                                 <ul>
                                                     @foreach(array_filter($car->extra_features) as $feature)
                                                     <li><i class="fa fa-check-circle"></i> {{ $feature }}</li>
@@ -203,7 +209,7 @@
                                     <div class="row">
                                         <div class="col-lg-12">
                                             <div class="car__details__tab__info__item">
-                                                <h5>Technical Specifications</h5>
+                                                <h5>Spesifikasi Teknis</h5>
                                                 @if($car->technical_specs)
                                                     <div class="mb-3">
                                                         {!! nl2br(e($car->technical_specs)) !!}
@@ -215,6 +221,9 @@
                                                         <li><i class="fa fa-check"></i> Kilometer: <strong>{{ $car->kilometer }} km</strong></li>
                                                         <li><i class="fa fa-check"></i> Transmisi: <strong>{{ $car->transmisi }}</strong></li>
                                                         <li><i class="fa fa-check"></i> Kapasitas Mesin: <strong>{{ $car->kapasitasmesin }}</strong></li>
+                                                        @if($car->bahan_bakar)
+                                                        <li><i class="fa fa-check"></i> Bahan Bakar: <strong>{{ $car->bahan_bakar }}</strong></li>
+                                                        @endif
                                                     </ul>
                                                 @endif
                                             </div>
@@ -265,7 +274,7 @@
                                             (!$car->safety_features || count(array_filter($car->safety_features ?? [])) == 0) && 
                                             (!$car->extra_features || count(array_filter($car->extra_features ?? [])) == 0))
                                         <div class="col-lg-12">
-                                            <p class="text-muted">Belum ada features yang ditambahkan.</p>
+                                            <p class="text-muted">Belum ada fitur yang ditambahkan.</p>
                                         </div>
                                         @endif
                                     </div>
@@ -276,7 +285,7 @@
                                     <div class="row">
                                         <div class="col-lg-12">
                                             <div class="car__details__tab__info__item">
-                                                <h5>Vehicle Location</h5>
+                                                <h5>Lokasi Kendaraan</h5>
                                                 @if($car->location)
                                                     <p><i class="fa fa-map-marker"></i> <strong>{{ $car->location }}</strong></p>
                                                 @else
@@ -317,6 +326,12 @@
                                     <span class="info-label">Kilometer</span>
                                     <span class="info-value">{{ number_format($car->kilometer ?? 0, 0, ',', '.') }} km</span>
                                 </div>
+                                @if($car->bahan_bakar)
+                                <div class="info-item">
+                                    <span class="info-label"><i class="fa fa-gas-pump" style="margin-right: 6px; color: #df2d24;"></i>Bahan Bakar</span>
+                                    <span class="info-value">{{ $car->bahan_bakar }}</span>
+                                </div>
+                                @endif
                             </div>
                             <div class="wishlist-button-wrapper">
                             @auth
@@ -359,7 +374,7 @@
                                 @endif
                                 @if($car->dealer_discounts)
                                 <div class="price-item discount">
-                                    <span class="price-label">Discount</span>
+                                    <span class="price-label">Diskon</span>
                                     <span class="price-amount">- Rp {{ number_format($car->dealer_discounts, 0, ',', '.') }}</span>
                                 </div>
                                 @endif

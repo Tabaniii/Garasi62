@@ -211,7 +211,7 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.store');
 Route::get('/register/verify', [AuthController::class, 'showVerifyForm'])->name('register.verify');
-Route::post('/register/verify', [AuthController::class, 'verifyCode'])->name('register.verify');
+Route::post('/register/verify', [AuthController::class, 'verifyCode'])->name('register.verify.store');
 Route::post('/register/resend', [AuthController::class, 'resendCode'])->name('register.resend');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

@@ -487,5 +487,6 @@
             });
         @endif
     </script>
+    @include('components.demo-helper')
 </body>
 </html>

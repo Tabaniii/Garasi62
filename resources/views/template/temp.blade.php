@@ -308,6 +308,7 @@
     </script>
 
     @stack('scripts')
+    @include('components.demo-helper')
 </body>
 
 </html>

@@ -2,8 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Users;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,16 +12,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Call the AdminSeeder which seeds Admin, Seller, and Buyer roles
+        $this->call([
+            AdminSeeder::class,
+        ]);
 
-        // Check if test user already exists
-        if (!User::where('email', 'test@example.com')->exists()) {
-            User::create([
+        // Check if old test user already exists
+        if (!Users::where('email', 'test@example.com')->exists()) {
+            Users::create([
                 'name' => 'Test User',
                 'email' => 'test@example.com',
                 'phone' => '081234567890',
                 'gender' => 'Laki-laki',
                 'city' => 'Jakarta',
+                'institution' => 'Perorangan',
                 'role' => 'buyer',
                 'password' => bcrypt('password'),
             ]);

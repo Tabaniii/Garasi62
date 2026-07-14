@@ -802,7 +802,7 @@
         <div class="sidebar-header">
             <a href="{{ route('dashboard') }}" class="sidebar-logo">
                 <div class="sidebar-logo-icon">
-                    <img src="{{ asset('img/logo.svg') }}" alt="Garasi62"
+                    <img src="{{ asset('img/ride62-fix.svg') }}" alt="Garasi62"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div
                         style="display:none; width: 100%; height: 100%; background: linear-gradient(135deg, #dc2626, #991b1b); border-radius: 5px; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 20px;">

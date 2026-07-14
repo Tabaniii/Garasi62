@@ -8,7 +8,7 @@
     <meta property="og:title" content="{{ $blog->title }} - Garasi62">
     <meta property="og:description" content="{{ Str::limit(strip_tags($blog->content), 150) }}">
     <meta property="og:image"
-        content="{{ $blog->image ? asset('storage/' . $blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
+        content="{{ $blog->image ? media_url($blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="GARASI62">
@@ -30,7 +30,7 @@
     <meta name="twitter:title" content="{{ $blog->title }} - Garasi62">
     <meta name="twitter:description" content="{{ Str::limit(strip_tags($blog->content), 150) }}">
     <meta name="twitter:image"
-        content="{{ $blog->image ? asset('storage/' . $blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
+        content="{{ $blog->image ? media_url($blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
 @endsection
 
 @include('components.messages-widget')
@@ -38,7 +38,7 @@
 @section('content')
     <!-- Blog Details Hero Begin -->
     <section class="blog-details-hero spad set-bg"
-        data-setbg="{{ $blog->image ? asset('storage/' . $blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
+        data-setbg="{{ $blog->image ? media_url($blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
         <div class="container">
             <div class="row d-flex justify-content-center">
                 <div class="col-lg-10">
@@ -69,7 +69,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="blog__details__pic">
-                        <img src="{{ $blog->image ? asset('storage/' . $blog->image) : asset('img/blog/details/details-pic.jpg') }}"
+                        <img src="{{ $blog->image ? media_url($blog->image) : asset('img/blog/details/details-pic.jpg') }}"
                             alt="{{ $blog->title }}">
                     </div>
                 </div>
@@ -101,7 +101,7 @@
                                                 <div class="col-lg-6">
                                                     <a href="{{ route('blog.show', $related->slug) }}"
                                                         class="blog__details__btns__item set-bg"
-                                                        data-setbg="{{ $related->image ? asset('storage/' . $related->image) : asset('img/blog/blog-1.jpg') }}">
+                                                        data-setbg="{{ $related->image ? media_url($related->image) : asset('img/blog/blog-1.jpg') }}">
                                                         <h6>{{ $related->title }}</h6>
                                                         <ul>
                                                             <li>By {{ $related->author }}</li>

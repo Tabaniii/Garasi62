@@ -119,7 +119,7 @@
                             <div class="car-preview">
                                 <div class="car-image-wrapper">
                                     @if($report->car->image && is_array($report->car->image) && count($report->car->image) > 0)
-                                        <img src="{{ asset('storage/' . $report->car->image[0]) }}" alt="{{ $report->car->brand }}"
+                                        <img src="{{ media_url($report->car->image[0]) }}" alt="{{ $report->car->brand }}"
                                             class="car-image-modern">
                                     @else
                                         <div class="car-placeholder-modern">

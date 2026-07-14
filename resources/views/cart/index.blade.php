@@ -55,7 +55,7 @@
                                         <div class="col-md-3">
                                             @if($cart->car && $cart->car->image && is_array($cart->car->image) && count($cart->car->image) > 0)
                                                 <a href="{{ route('car.details', $cart->car->uuid) }}">
-                                                    <img src="{{ asset('storage/' . $cart->car->image[0]) }}"
+                                                    <img src="{{ media_url($cart->car->image[0]) }}"
                                                         alt="{{ $cart->car->brand }}"
                                                         style="width: 100%; height: 150px; object-fit: cover; border-radius: 5px;">
                                                 </a>

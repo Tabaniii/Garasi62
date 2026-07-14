@@ -98,7 +98,7 @@
                             <div class="recent-car-card">
                                 <div class="recent-car-image">
                                     @if($car->image && is_array($car->image) && count($car->image) > 0)
-                                        <img src="{{ asset('storage/' . $car->image[0]) }}" alt="{{ $car->brand }}">
+                                        <img src="{{ media_url($car->image[0]) }}" alt="{{ $car->brand }}">
                                     @else
                                         <div class="car-placeholder">
                                             <i class="fas fa-car"></i>
@@ -158,7 +158,7 @@
                                 <div class="testimonial-header">
                                     <div class="testimonial-avatar">
                                         @if($testimonial->image)
-                                            <img src="{{ asset('storage/' . $testimonial->image) }}" alt="{{ $testimonial->name }}">
+                                            <img src="{{ media_url($testimonial->image) }}" alt="{{ $testimonial->name }}">
                                         @else
                                             <div class="avatar-placeholder">
                                                 {{ strtoupper(mb_substr($testimonial->name, 0, 1)) }}

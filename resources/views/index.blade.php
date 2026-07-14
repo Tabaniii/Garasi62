@@ -362,7 +362,7 @@
                                         @foreach($car->image as $imagePath)
                                             <div
                                                 style="width: 100%; height: 220px; min-height: 220px; max-height: 220px; overflow: hidden;">
-                                                <img src="{{ asset('storage/' . $imagePath) }}"
+                                                <img src="{{ media_url($imagePath) }}"
                                                     alt="{{ $car->brand }} {{ $car->nama ?? '' }}"
                                                     style="width: 100%; height: 220px; min-height: 220px; max-height: 220px; object-fit: cover; display: block;">
                                             </div>
@@ -515,8 +515,8 @@
                     <div class="col-lg-4 col-md-6">
                         <div class="latest__blog__item">
                             <div class="latest__blog__item__pic set-bg" @if($blog->image)
-                                data-setbg="{{ asset('storage/' . $blog->image) }}"
-                            style="background-image: url('{{ asset('storage/' . $blog->image) }}');" @else
+                                data-setbg="{{ media_url($blog->image) }}"
+                            style="background-image: url('{{ media_url($blog->image) }}');" @else
                                     data-setbg="img/latest-blog/lb-1.jpg"
                                 style="background-image: url('{{ asset('img/latest-blog/lb-1.jpg') }}');" @endif>
                                 <ul>

@@ -108,7 +108,7 @@ class FooterSettingController extends Controller
             'site_name' => SiteSetting::get('site_name', 'GARASI62'),
             'site_email' => SiteSetting::get('site_email', SiteSetting::get('footer_email', 'Colorlib@gmail.com')),
             'site_operational_hours' => SiteSetting::get('site_operational_hours', 'Sales: 08:00 am to 18:00 pm'),
-            'site_logo' => SiteSetting::get('site_logo', 'img/logo.svg'),
+            'site_logo' => SiteSetting::get('site_logo', 'garasi62/img/ride62-fix.svg'),
             'site_favicon' => SiteSetting::get('site_favicon', 'favicon.ico'),
             'contact_hours_weekday' => SiteSetting::get('contact_hours_weekday', '08:00 am to 18:00 pm'),
             'contact_hours_saturday' => SiteSetting::get('contact_hours_saturday', '10:00 am to 16:00 pm'),
@@ -265,28 +265,22 @@ class FooterSettingController extends Controller
         SiteSetting::set('about_vision_text', $payload['about_vision_text']);
 
         if ($request->hasFile('site_logo')) {
-            $logoPath = $request->file('site_logo')->store('site', 'public');
-            SiteSetting::set('site_logo', 'storage/' . $logoPath);
+            SiteSetting::set('site_logo', media()->upload($request->file('site_logo'), 'site'));
         }
         if ($request->hasFile('site_favicon')) {
-            $faviconPath = $request->file('site_favicon')->store('site', 'public');
-            SiteSetting::set('site_favicon', 'storage/' . $faviconPath);
+            SiteSetting::set('site_favicon', media()->upload($request->file('site_favicon'), 'site'));
         }
         if ($request->hasFile('about_image')) {
-            $imagePath = $request->file('about_image')->store('about', 'public');
-            SiteSetting::set('about_image', 'storage/' . $imagePath);
+            SiteSetting::set('about_image', media()->upload($request->file('about_image'), 'about'));
         }
         if ($request->hasFile('about_feature_1_icon')) {
-            $iconPath = $request->file('about_feature_1_icon')->store('about', 'public');
-            SiteSetting::set('about_feature_1_icon', 'storage/' . $iconPath);
+            SiteSetting::set('about_feature_1_icon', media()->upload($request->file('about_feature_1_icon'), 'about'));
         }
         if ($request->hasFile('about_feature_2_icon')) {
-            $iconPath = $request->file('about_feature_2_icon')->store('about', 'public');
-            SiteSetting::set('about_feature_2_icon', 'storage/' . $iconPath);
+            SiteSetting::set('about_feature_2_icon', media()->upload($request->file('about_feature_2_icon'), 'about'));
         }
         if ($request->hasFile('about_feature_3_icon')) {
-            $iconPath = $request->file('about_feature_3_icon')->store('about', 'public');
-            SiteSetting::set('about_feature_3_icon', 'storage/' . $iconPath);
+            SiteSetting::set('about_feature_3_icon', media()->upload($request->file('about_feature_3_icon'), 'about'));
         }
 
         return redirect()->route('admin.footer.edit')->with('success', 'Site setting berhasil diperbarui.');

@@ -90,9 +90,9 @@
                                         <div class="image-item-modern existing-image-item" data-image-index="{{ $index }}">
                                             <input type="hidden" name="existing_images[]" value="{{ $imagePath }}">
                                             <div class="image-wrapper-modern existing-image"
-                                                data-src="{{ asset('storage/' . $imagePath) }}"
+                                                data-src="{{ media_url($imagePath) }}"
                                                 data-info="Gambar {{ $index + 1 }} (Existing)">
-                                                <img src="{{ asset('storage/' . $imagePath) }}" alt="Gambar {{ $index + 1 }}"
+                                                <img src="{{ media_url($imagePath) }}" alt="Gambar {{ $index + 1 }}"
                                                     class="image-preview-modern"
                                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\'%3E%3Crect fill=\'%23f3f4f6\' width=\'300\' height=\'200\'/%3E%3Ctext fill=\'%239ca3af\' font-family=\'sans-serif\' font-size=\'14\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\'%3EGambar tidak ditemukan%3C/text%3E%3C/svg%3E'">
                                                 <div class="image-label"

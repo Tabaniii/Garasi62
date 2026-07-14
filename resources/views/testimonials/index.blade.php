@@ -64,7 +64,7 @@
                     <div class="testimonial-card-header">
                         <div class="testimonial-avatar-section">
                             @if($testimonial->image)
-                                <img src="{{ asset('storage/' . $testimonial->image) }}" alt="{{ $testimonial->name }}" class="testimonial-avatar-img">
+                                <img src="{{ media_url($testimonial->image) }}" alt="{{ $testimonial->name }}" class="testimonial-avatar-img">
                             @else
                                 <div class="testimonial-avatar-placeholder">
                                     {{ strtoupper(mb_substr($testimonial->name, 0, 1)) }}

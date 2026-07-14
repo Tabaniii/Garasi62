@@ -3,8 +3,8 @@
         $siteName = \App\Models\SiteSetting::get('site_name', 'GARASI62');
         $siteEmail = \App\Models\SiteSetting::get('site_email', \App\Models\SiteSetting::get('footer_email', 'Colorlib@gmail.com'));
         $siteOperationalHours = \App\Models\SiteSetting::get('site_operational_hours', 'Sales: 08:00 am to 18:00 pm');
-        $siteLogo = \App\Models\SiteSetting::get('site_logo', 'img/logo.svg');
-        $logoFallback = asset('img/logo.svg');
+        $siteLogo = \App\Models\SiteSetting::get('site_logo', 'garasi62/img/ride62-fix.svg');
+        $logoFallback = asset('garasi62/img/ride62-fix.svg');
         $sitePhone = \App\Models\SiteSetting::get('footer_phone', '(+12) 345 678 910');
 
         // Dynamic Social Links Logic
@@ -64,7 +64,8 @@
         <div class="row align-items-center">
             <div class="col-lg-2">
                 <div class="header__logo">
-                    <a href="/"><img src="{{ asset($siteLogo) }}" alt="{{ $siteName }}"
+                    <a href="/"><img src="{{ media_url($siteLogo) }}" alt="{{ $siteName }}"
+                            style="max-height: 48px; width: auto; display: block;"
                             onerror="this.onerror=null; this.src='{{ $logoFallback }}';"></a>
                 </div>
             </div>

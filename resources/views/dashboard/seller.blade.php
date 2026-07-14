@@ -310,7 +310,7 @@
                             <div class="recent-car-card">
                                 <div class="recent-car-image">
                                     @if($car->image && is_array($car->image) && count($car->image) > 0)
-                                        <img src="{{ asset('storage/' . $car->image[0]) }}" alt="{{ $car->brand }}">
+                                        <img src="{{ media_url($car->image[0]) }}" alt="{{ $car->brand }}">
                                     @else
                                         <div class="car-placeholder">
                                             <i class="fas fa-car"></i>

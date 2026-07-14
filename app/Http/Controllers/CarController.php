@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\car;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use App\Models\CarApproval;
@@ -125,7 +124,7 @@ class CarController extends Controller
             'metode',
             'tipe',
             'image',
-            'img_duplicate',
+            'is_foto_duplikat',
             'status',
             'seller_id',
             'location',
@@ -257,67 +256,28 @@ class CarController extends Controller
                 'location' => 'nullable|string|max:255',
             ]);
 
-            // Ensure storage directory exists
-            if (!Storage::disk('public')->exists('cars')) {
-                Storage::disk('public')->makeDirectory('cars');
-            }
-
             $imagePaths = [];
             $adaDuplikat = false;
             foreach ($files as $file) {
-                // Generate hash dari file untuk cek duplikat
-                $fileHash = hash_file('md5', $file->getRealPath());
+                $fileHash = media()->hashUploadedFile($file);
+                $existingImagePath = media()->findExistingImageByHash($fileHash);
 
-                // Cek apakah file dengan hash yang sama sudah ada
-                $existingCar = car::whereNotNull('image')
-                    ->get()
-                    ->filter(function ($car) use ($fileHash) {
-                        $images = $car->image ?? [];
-                        foreach ($images as $imagePath) {
-                            $fullPath = Storage::disk('public')->path($imagePath);
-                            if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    })
-                    ->first();
-
-                if ($existingCar) {
-                    // Tandai sebagai duplikat
+                if ($existingImagePath) {
                     $adaDuplikat = true;
-                    // Gunakan path yang sudah ada
-                    $existingImagePath = null;
-                    $images = $existingCar->image ?? [];
-                    foreach ($images as $imagePath) {
-                        $fullPath = Storage::disk('public')->path($imagePath);
-                        if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
-                            $existingImagePath = $imagePath;
-                            break;
-                        }
-                    }
-                    if ($existingImagePath) {
-                        $imagePaths[] = $existingImagePath;
-                        continue; // Skip upload, gunakan yang sudah ada
-                    }
+                    $imagePaths[] = $existingImagePath;
+                    continue;
                 }
 
-                // Upload file baru jika tidak ada duplikat
-                // Penamaan file: img_garasi62_[nama_file_asli].[ekstensi] (Sanitized)
                 $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeName = \Illuminate\Support\Str::slug($originalName, '_');
                 $extension = $file->getClientOriginalExtension();
                 $newFileName = 'garasi62_' . $safeName . '_' . uniqid() . '.' . $extension;
-                $path = $file->storeAs('cars', $newFileName, 'public');
-                if (!$path) {
-                    throw new \Exception('Gagal mengupload gambar. Pastikan folder storage dapat ditulis.');
-                }
-                $imagePaths[] = $path;
+                $imagePaths[] = media()->uploadAs($file, 'cars', $newFileName);
             }
 
             $data = $request->except(['images']);
             $data['image'] = $imagePaths;
-            $data['img_duplicate'] = $adaDuplikat;
+            $data['is_foto_duplikat'] = $adaDuplikat;
 
             // Handle features arrays
             if ($request->has('interior_features')) {
@@ -433,20 +393,21 @@ class CarController extends Controller
 
         // Delete removed image files from storage
         foreach ($removedImages as $removedImage) {
-            if (Storage::disk('public')->exists($removedImage)) {
-                // Check if this image is used by other cars before deleting
-                $usedByOtherCars = car::where('id', '!=', $id)
-                    ->whereNotNull('image')
-                    ->get()
-                    ->filter(function ($otherCar) use ($removedImage) {
-                        $otherImages = $otherCar->image ?? [];
-                        return in_array($removedImage, $otherImages);
-                    })
-                    ->count() > 0;
+            if (!media()->exists($removedImage)) {
+                continue;
+            }
 
-                if (!$usedByOtherCars) {
-                    Storage::disk('public')->delete($removedImage);
-                }
+            $usedByOtherCars = car::where('id', '!=', $id)
+                ->whereNotNull('image')
+                ->get()
+                ->filter(function ($otherCar) use ($removedImage) {
+                    $otherImages = $otherCar->image ?? [];
+                    return in_array($removedImage, $otherImages);
+                })
+                ->count() > 0;
+
+            if (!$usedByOtherCars) {
+                media()->delete($removedImage);
             }
         }
 
@@ -454,54 +415,20 @@ class CarController extends Controller
         $adaDuplikat = false;
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                // Generate hash dari file untuk cek duplikat
-                $fileHash = hash_file('md5', $image->getRealPath());
+                $fileHash = media()->hashUploadedFile($image);
+                $existingImagePath = media()->findExistingImageByHash($fileHash, $id);
 
-                // Cek apakah file dengan hash yang sama sudah ada
-                $existingCar = car::where('id', '!=', $id)
-                    ->whereNotNull('image')
-                    ->get()
-                    ->filter(function ($otherCar) use ($fileHash) {
-                        if (is_array($otherCar->image)) {
-                            foreach ($otherCar->image as $imagePath) {
-                                $fullPath = Storage::disk('public')->path($imagePath);
-                                if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
-                                    return true;
-                                }
-                            }
-                        }
-                        return false;
-                    })
-                    ->first();
-
-                if ($existingCar) {
-                    // Tandai sebagai duplikat
+                if ($existingImagePath) {
                     $adaDuplikat = true;
-                    // Gunakan path yang sudah ada
-                    $existingImagePath = null;
-                    if (is_array($existingCar->image)) {
-                        foreach ($existingCar->image as $imagePath) {
-                            $fullPath = Storage::disk('public')->path($imagePath);
-                            if (file_exists($fullPath) && hash_file('md5', $fullPath) === $fileHash) {
-                                $existingImagePath = $imagePath;
-                                break;
-                            }
-                        }
-                    }
-                    if ($existingImagePath) {
-                        $imagePaths[] = $existingImagePath;
-                        continue; // Skip upload, gunakan yang sudah ada
-                    }
+                    $imagePaths[] = $existingImagePath;
+                    continue;
                 }
 
-                // Upload file baru jika tidak ada duplikat
-                // Penamaan file: img_garasi62_[nama_file_asli].[ekstensi] (Sanitized)
                 $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeName = \Illuminate\Support\Str::slug($originalName, '_');
                 $extension = $image->getClientOriginalExtension();
                 $newFileName = 'garasi62_' . $safeName . '_' . uniqid() . '.' . $extension;
-                $path = $image->storeAs('cars', $newFileName, 'public');
-                $imagePaths[] = $path;
+                $imagePaths[] = media()->uploadAs($image, 'cars', $newFileName);
             }
         }
 
@@ -517,7 +444,7 @@ class CarController extends Controller
 
         $data = $request->except(['images', 'existing_images', 'removed_images']);
         $data['image'] = $imagePaths;
-        $data['img_duplicate'] = $adaDuplikat;
+        $data['is_foto_duplikat'] = $adaDuplikat;
 
         // Handle features arrays
         if ($request->has('interior_features')) {
@@ -579,8 +506,8 @@ class CarController extends Controller
                         ->isNotEmpty();
 
                     // Hapus file hanya jika tidak digunakan oleh mobil lain
-                    if (!$isUsedByOtherCar && Storage::disk('public')->exists($imagePath)) {
-                        Storage::disk('public')->delete($imagePath);
+                    if (!$isUsedByOtherCar) {
+                        media()->delete($imagePath);
                     }
                 }
             }

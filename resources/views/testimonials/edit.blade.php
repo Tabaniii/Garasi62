@@ -156,7 +156,7 @@
                     <div id="imagePreview" class="image-preview-container mt-3">
                         @if($testimonial->image)
                             <div class="preview-image-wrapper">
-                                <img src="{{ asset('storage/' . $testimonial->image) }}" class="preview-image" alt="{{ $testimonial->name }}">
+                                <img src="{{ media_url($testimonial->image) }}" class="preview-image" alt="{{ $testimonial->name }}">
                                 <button type="button" class="preview-remove" onclick="removePreview()">
                                     <i class="fas fa-times"></i>
                                 </button>

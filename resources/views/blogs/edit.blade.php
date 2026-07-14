@@ -114,7 +114,7 @@
             @if($blog->image)
             <div class="mb-2">
                 <p class="mb-1"><strong>Gambar Saat Ini:</strong></p>
-                <img src="{{ asset('storage/' . $blog->image) }}" alt="Current Image" class="current-image">
+                <img src="{{ media_url($blog->image) }}" alt="Current Image" class="current-image">
             </div>
             @endif
             <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" accept="image/*" onchange="previewImage(this)">

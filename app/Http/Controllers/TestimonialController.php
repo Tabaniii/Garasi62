@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Testimonial;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class TestimonialController extends Controller
 {
@@ -43,11 +42,7 @@ class TestimonialController extends Controller
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('image')) {
-            if (!Storage::disk('public')->exists('testimonials')) {
-                Storage::disk('public')->makeDirectory('testimonials');
-            }
-
-            $data['image'] = $request->file('image')->store('testimonials', 'public');
+            $data['image'] = media()->upload($request->file('image'), 'testimonials');
         }
 
         Testimonial::create($data);
@@ -83,15 +78,11 @@ class TestimonialController extends Controller
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('image')) {
-            if ($testimonial->image && Storage::disk('public')->exists($testimonial->image)) {
-                Storage::disk('public')->delete($testimonial->image);
+            if ($testimonial->image) {
+                media()->delete($testimonial->image);
             }
 
-            if (!Storage::disk('public')->exists('testimonials')) {
-                Storage::disk('public')->makeDirectory('testimonials');
-            }
-
-            $data['image'] = $request->file('image')->store('testimonials', 'public');
+            $data['image'] = media()->upload($request->file('image'), 'testimonials');
         }
 
         $testimonial->update($data);
@@ -101,8 +92,8 @@ class TestimonialController extends Controller
 
     public function destroy(Testimonial $testimonial)
     {
-        if ($testimonial->image && Storage::disk('public')->exists($testimonial->image)) {
-            Storage::disk('public')->delete($testimonial->image);
+        if ($testimonial->image) {
+            media()->delete($testimonial->image);
         }
 
         $testimonial->delete();

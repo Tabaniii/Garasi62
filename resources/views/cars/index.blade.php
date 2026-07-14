@@ -932,7 +932,7 @@
                 <div class="car-card animate-fade-in" data-animation-delay="{{ $index * 0.1 }}">
                     <div class="car-card-image">
                         @if($car->image && is_array($car->image) && count($car->image) > 0)
-                            <img src="{{ asset('storage/' . $car->image[0]) }}" alt="{{ $car->brand }}" class="car-main-image"
+                            <img src="{{ media_url($car->image[0]) }}" alt="{{ $car->brand }}" class="car-main-image"
                                 loading="lazy" decoding="async"
                                 onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'200\'%3E%3Crect fill=\'%23f3f4f6\' width=\'300\' height=\'200\'/%3E%3Ctext fill=\'%239ca3af\' font-family=\'sans-serif\' font-size=\'14\' x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\'%3EGambar tidak tersedia%3C/text%3E%3C/svg%3E';">
                             <div class="car-image-count">
@@ -1088,7 +1088,7 @@
                             </a>
                             <button type="button" class="btn-action btn-delete-action w-100" data-car-id="{{ $car->id }}"
                                 data-car-name="{{ $car->nama }}" data-car-brand="{{ $car->brand }}"
-                                data-car-image="{{ ($car->image && is_array($car->image) && count($car->image) > 0) ? asset('storage/' . $car->image[0]) : '' }}"
+                                data-car-image="{{ ($car->image && is_array($car->image) && count($car->image) > 0) ? media_url($car->image[0]) : '' }}"
                                 onclick="confirmDeleteCar(this)">
                                 <i class="fas fa-trash"></i>
                                 <span>Hapus</span>

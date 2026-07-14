@@ -67,7 +67,7 @@
                             <tr>
                                 <td>
                                     @if($car->image && is_array($car->image) && count($car->image) > 0)
-                                        <img src="{{ asset('storage/' . $car->image[0]) }}"
+                                        <img src="{{ media_url($car->image[0]) }}"
                                              alt="{{ $car->brand }}"
                                              class="car-thumbnail">
                                     @else

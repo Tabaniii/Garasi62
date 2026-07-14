@@ -364,7 +364,7 @@
 <body>
     <div class="container">
         <div class="logo-container">
-            <img src="{{ asset('img/logo.svg') }}" alt="Garasi62 Logo" loading="eager">
+            <img src="{{ asset('img/ride62-fix.svg') }}" alt="Garasi62 Logo" loading="eager">
         </div>
         <a href="{{ url()->previous() == url()->current() ? route('home') : url()->previous() }}" class="back-link">
             <i class="fas fa-arrow-left"></i> Kembali

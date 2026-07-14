@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\car;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class DuplicateCarController extends Controller
 {
@@ -52,9 +51,8 @@ class DuplicateCarController extends Controller
                         'file_name' => $fileName,
                     ];
                 }
-                $fullPath = Storage::disk('public')->path($imagePath);
-                if (file_exists($fullPath)) {
-                    $hash = hash_file('md5', $fullPath);
+                $hash = media()->hash($imagePath);
+                if ($hash) {
                     if (!isset($imageHashMap[$hash])) {
                         $imageHashMap[$hash] = [];
                     }

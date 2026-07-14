@@ -37,7 +37,7 @@
                 <tr>
                     <td>
                         @if(is_array($car->image) && count($car->image) > 0)
-                            <img src="{{ asset('storage/' . $car->image[0]) }}" alt="{{ $car->brand }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+                            <img src="{{ media_url($car->image[0]) }}" alt="{{ $car->brand }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
                         @else
                             <div class="car-thumbnail-placeholder">
                                 <i class="fas fa-car"></i>

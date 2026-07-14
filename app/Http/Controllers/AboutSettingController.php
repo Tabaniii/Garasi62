@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class AboutSettingController extends Controller
 {
@@ -75,20 +74,16 @@ class AboutSettingController extends Controller
         SiteSetting::set('about_vision_text', $payload['vision_text']);
 
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('about', 'public');
-            SiteSetting::set('about_image', 'storage/' . $imagePath);
+            SiteSetting::set('about_image', media()->upload($request->file('image'), 'about'));
         }
         if ($request->hasFile('feature_1_icon')) {
-            $iconPath = $request->file('feature_1_icon')->store('about', 'public');
-            SiteSetting::set('about_feature_1_icon', 'storage/' . $iconPath);
+            SiteSetting::set('about_feature_1_icon', media()->upload($request->file('feature_1_icon'), 'about'));
         }
         if ($request->hasFile('feature_2_icon')) {
-            $iconPath = $request->file('feature_2_icon')->store('about', 'public');
-            SiteSetting::set('about_feature_2_icon', 'storage/' . $iconPath);
+            SiteSetting::set('about_feature_2_icon', media()->upload($request->file('feature_2_icon'), 'about'));
         }
         if ($request->hasFile('feature_3_icon')) {
-            $iconPath = $request->file('feature_3_icon')->store('about', 'public');
-            SiteSetting::set('about_feature_3_icon', 'storage/' . $iconPath);
+            SiteSetting::set('about_feature_3_icon', media()->upload($request->file('feature_3_icon'), 'about'));
         }
 
         return redirect()->route('admin.about.edit')->with('success', 'Konten About Us berhasil diperbarui.');

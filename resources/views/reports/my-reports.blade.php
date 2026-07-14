@@ -113,7 +113,7 @@
                                             @if($report->car)
                                                 <div style="display: flex; align-items: center; gap: 10px;">
                                                     @if(is_array($report->car->image ?? null) && count($report->car->image) > 0)
-                                                        <img src="{{ asset('storage/' . $report->car->image[0]) }}" alt="{{ $report->car->brand }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                        <img src="{{ media_url($report->car->image[0]) }}" alt="{{ $report->car->brand }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
                                                     @else
                                                         <div style="width: 40px; height: 40px; border-radius: 4px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #9ca3af;">
                                                             <i class="fa fa-car"></i>

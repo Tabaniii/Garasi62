@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Blog;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class BlogController extends Controller
@@ -138,16 +137,7 @@ class BlogController extends Controller
 
             // Handle image upload
             if ($request->hasFile('image')) {
-                // Ensure storage directory exists
-                if (!Storage::disk('public')->exists('blogs')) {
-                    Storage::disk('public')->makeDirectory('blogs');
-                }
-
-                $imagePath = $request->file('image')->store('blogs', 'public');
-                if (!$imagePath) {
-                    throw new \Exception('Gagal mengupload gambar. Pastikan folder storage dapat ditulis.');
-                }
-                $data['image'] = $imagePath;
+                $data['image'] = media()->upload($request->file('image'), 'blogs');
             }
 
             // Generate slug
@@ -205,11 +195,10 @@ class BlogController extends Controller
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            if ($blog->image && Storage::disk('public')->exists($blog->image)) {
-                Storage::disk('public')->delete($blog->image);
+            if ($blog->image) {
+                media()->delete($blog->image);
             }
-            $imagePath = $request->file('image')->store('blogs', 'public');
-            $data['image'] = $imagePath;
+            $data['image'] = media()->upload($request->file('image'), 'blogs');
         }
 
         // Update slug jika title berubah
@@ -240,8 +229,8 @@ class BlogController extends Controller
     public function destroy($id)
     {
         $blog = Blog::findOrFail($id);
-        if ($blog->image && Storage::disk('public')->exists($blog->image)) {
-            Storage::disk('public')->delete($blog->image);
+        if ($blog->image) {
+            media()->delete($blog->image);
         }
         $blog->delete();
 

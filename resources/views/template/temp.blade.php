@@ -9,7 +9,7 @@
 
     @php
         $siteName = \App\Models\SiteSetting::get('site_name', 'GARASI62');
-        $siteLogo = \App\Models\SiteSetting::get('site_logo', 'img/logo.svg');
+        $siteLogo = \App\Models\SiteSetting::get('site_logo', 'garasi62/img/ride62-fix.svg');
         $siteEmail = \App\Models\SiteSetting::get('site_email', \App\Models\SiteSetting::get('footer_email', 'Colorlib@gmail.com'));
         $siteOperationalHours = \App\Models\SiteSetting::get('site_operational_hours', 'Sales: 08:00 am to 18:00 pm');
         $siteFavicon = \App\Models\SiteSetting::get('site_favicon', 'favicon.ico');
@@ -52,7 +52,7 @@
         <meta property="og:title" content="{{ $siteName }} - Temukan Mobil Impianmu Disini">
         <meta property="og:description"
             content="Garasi62 adalah platform terpercaya untuk jual beli dan sewa mobil. Temukan berbagai pilihan mobil berkualitas dengan harga terbaik.">
-        <meta property="og:image" content="{{ asset($siteLogo) }}">
+        <meta property="og:image" content="{{ media_url($siteLogo) }}">
         <meta property="og:url" content="{{ url()->current() }}">
         <meta property="og:site_name" content="{{ $siteName }}">
         <meta property="og:locale" content="id_ID">
@@ -63,7 +63,7 @@
         <meta name="twitter:title" content="{{ $siteName }} - Temukan Mobil Impianmu Disini">
         <meta name="twitter:description"
             content="Garasi62 adalah platform terpercaya untuk jual beli dan sewa mobil. Temukan berbagai pilihan mobil berkualitas dengan harga terbaik.">
-        <meta name="twitter:image" content="{{ asset($siteLogo) }}">
+        <meta name="twitter:image" content="{{ media_url($siteLogo) }}">
     @endif
 
     @hasSection('title')
@@ -73,8 +73,8 @@
     @endif
 
     <!-- Favicon -->
-    <link rel="shortcut icon" href="{{ asset($siteFavicon) }}" type="image/x-icon">
-    <link rel="icon" href="{{ asset($siteFavicon) }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ media_url($siteFavicon) }}" type="image/x-icon">
+    <link rel="icon" href="{{ media_url($siteFavicon) }}" type="image/x-icon">
 
     <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">

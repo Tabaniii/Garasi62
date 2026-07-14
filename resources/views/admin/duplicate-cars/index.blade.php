@@ -283,7 +283,7 @@
                                                 <td>#{{ $car->id }}</td>
                                                 <td>
                                                     @if($car->image && is_array($car->image) && count($car->image) > 0)
-                                                        <img src="{{ asset('storage/' . $car->image[0]) }}" alt="Car" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                                        <img src="{{ media_url($car->image[0]) }}" alt="Car" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                                     @else
                                                         <div style="width: 60px; height: 40px; background: #eee; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999;">
                                                             <i class="fas fa-image"></i>
@@ -405,7 +405,7 @@
                         <div>
                             @foreach($group['entries'] as $entryIdx => $entry)
                                 <div class="foto-dup-item">
-                                    <img src="{{ asset('storage/' . $entry['image_path']) }}" alt="Foto Duplikat">
+                                    <img src="{{ media_url($entry['image_path']) }}" alt="Foto Duplikat">
                                     <div class="foto-dup-info">
                                         <div class="foto-dup-car-name">
                                             @if(($group['type'] ?? 'hash') === 'prefix')

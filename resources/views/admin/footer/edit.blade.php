@@ -226,7 +226,7 @@
                                         </div>
                                         <div class="col-md-4 mt-3 mt-md-0 text-center">
                                             <div class="p-3 bg-white border rounded shadow-sm d-inline-block">
-                                                <img src="{{ asset($settings['site_logo']) }}" alt="{{ $settings['site_name'] }}" class="img-fluid" style="max-height: 60px;">
+                                                <img src="{{ media_url($settings['site_logo']) }}" alt="{{ $settings['site_name'] }}" class="img-fluid" style="max-height: 60px;">
                                             </div>
                                         </div>
                                     </div>
@@ -242,7 +242,7 @@
                                         </div>
                                         <div class="col-md-4 mt-3 mt-md-0 text-center">
                                             <div class="p-3 bg-white border rounded shadow-sm d-inline-block">
-                                                <img src="{{ asset($settings['site_favicon']) }}" alt="Favicon" class="img-fluid" style="max-height: 48px;">
+                                                <img src="{{ media_url($settings['site_favicon']) }}" alt="Favicon" class="img-fluid" style="max-height: 48px;">
                                             </div>
                                         </div>
                                     </div>
@@ -471,7 +471,7 @@
                                         </div>
                                         <div class="col-md-4 mt-3 mt-md-0 text-center">
                                             <div class="p-2 bg-white border rounded shadow-sm d-inline-block">
-                                                <img src="{{ asset($settings['about_image']) }}" alt="About Image" class="img-fluid" style="max-height: 120px;">
+                                                <img src="{{ media_url($settings['about_image']) }}" alt="About Image" class="img-fluid" style="max-height: 120px;">
                                             </div>
                                         </div>
                                     </div>
@@ -544,7 +544,7 @@
                                                             <input type="file" class="form-control form-control-sm"
                                                                 name="about_feature_{{ $i }}_icon" accept="image/*">
                                                             <div class="bg-light p-1 rounded border">
-                                                                <img src="{{ asset($settings['about_feature_' . $i . '_icon']) }}"
+                                                                <img src="{{ media_url($settings['about_feature_' . $i . '_icon']) }}"
                                                                     alt="Icon" style="width: 30px; height: 30px; object-fit: contain;">
                                                             </div>
                                                         </div>

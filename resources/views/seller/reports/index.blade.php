@@ -74,7 +74,7 @@
                                                 <h6 class="mb-1">{{ strtoupper($car->brand) }} {{ $car->nama }}</h6>
                                                 <div class="d-flex align-items-center">
                                                     @if(isset($car->image[0]))
-                                                        <img src="{{ asset('storage/' . $car->image[0]) }}" alt="Car"
+                                                        <img src="{{ media_url($car->image[0]) }}" alt="Car"
                                                             style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin-right: 10px;">
                                                     @endif
                                                     <span class="badge bg-danger">Ditolak</span>

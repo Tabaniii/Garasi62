@@ -8,7 +8,7 @@
     <meta property="og:title" content="{{ $car->brand }} {{ $car->nama }} {{ $car->tahun }} - Garasi62">
     <meta property="og:description" content="Lihat detail mobil {{ $car->brand }} {{ $car->nama }} tahun {{ $car->tahun }}. Kondisi prima, harga bersaing. Tersedia untuk {{ $car->tipe == 'rent' ? 'disewa' : 'dibeli' }}.">
     @if($car->image && is_array($car->image) && count($car->image) > 0)
-        <meta property="og:image" content="{{ asset('storage/' . $car->image[0]) }}">
+        <meta property="og:image" content="{{ media_url($car->image[0]) }}">
     @else
         <meta property="og:image" content="{{ asset('garasi62/img/cars/details/cd-1.jpg') }}">
     @endif
@@ -27,7 +27,7 @@
     <meta name="twitter:title" content="{{ $car->brand }} {{ $car->nama }} {{ $car->tahun }} - Garasi62">
     <meta name="twitter:description" content="Lihat detail mobil {{ $car->brand }} {{ $car->nama }} tahun {{ $car->tahun }}.">
     @if($car->image && is_array($car->image) && count($car->image) > 0)
-        <meta name="twitter:image" content="{{ asset('storage/' . $car->image[0]) }}">
+        <meta name="twitter:image" content="{{ media_url($car->image[0]) }}">
     @else
         <meta name="twitter:image" content="{{ asset('garasi62/img/cars/details/cd-1.jpg') }}">
     @endif
@@ -62,7 +62,7 @@
                     <div class="car-details-gallery animate-fade-in">
                         <div class="car-main-image-wrapper">
                             @if($car->image && is_array($car->image) && count($car->image) > 0)
-                                <img class="car-big-img" src="{{ asset('storage/' . $car->image[0]) }}" alt="{{ $car->brand }}" id="mainCarImage">
+                                <img class="car-big-img" src="{{ media_url($car->image[0]) }}" alt="{{ $car->brand }}" id="mainCarImage">
                             @else
                                 <img class="car-big-img" src="{{ asset('garasi62/img/cars/details/cd-1.jpg') }}" alt="{{ $car->brand }}" id="mainCarImage">
                             @endif
@@ -80,8 +80,8 @@
                             <div class="car-thumbs-grid {{ $gridClass }}">
                                 @if($car->image && is_array($car->image) && count($car->image) > 0)
                                     @foreach($car->image as $index => $imagePath)
-                                        <div class="thumb-item {{ $index === 0 ? 'active' : '' }}" data-imgbigurl="{{ asset('storage/' . $imagePath) }}">
-                                            <img src="{{ asset('storage/' . $imagePath) }}" alt="Thumbnail {{ $index + 1 }}">
+                                        <div class="thumb-item {{ $index === 0 ? 'active' : '' }}" data-imgbigurl="{{ media_url($imagePath) }}">
+                                            <img src="{{ media_url($imagePath) }}" alt="Thumbnail {{ $index + 1 }}">
                                             <div class="thumb-overlay"></div>
                                         </div>
                                     @endforeach

@@ -67,7 +67,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="mt-3">
-                                <img src="{{ asset($settings['image']) }}" alt="About Image" style="max-width: 100%; border-radius: 5px;">
+                                <img src="{{ media_url($settings['image']) }}" alt="About Image" style="max-width: 100%; border-radius: 5px;">
                             </div>
                         </div>
                     </div>
@@ -139,7 +139,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="mt-2">
-                                <img src="{{ asset($settings['feature_1_icon']) }}" alt="Feature 1" style="max-width: 90px;">
+                                <img src="{{ media_url($settings['feature_1_icon']) }}" alt="Feature 1" style="max-width: 90px;">
                             </div>
                         </div>
                         <div class="mb-4">
@@ -157,7 +157,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="mt-2">
-                                <img src="{{ asset($settings['feature_2_icon']) }}" alt="Feature 2" style="max-width: 90px;">
+                                <img src="{{ media_url($settings['feature_2_icon']) }}" alt="Feature 2" style="max-width: 90px;">
                             </div>
                         </div>
                         <div class="mb-3">
@@ -175,7 +175,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div class="mt-2">
-                                <img src="{{ asset($settings['feature_3_icon']) }}" alt="Feature 3" style="max-width: 90px;">
+                                <img src="{{ media_url($settings['feature_3_icon']) }}" alt="Feature 3" style="max-width: 90px;">
                             </div>
                         </div>
                     </div>

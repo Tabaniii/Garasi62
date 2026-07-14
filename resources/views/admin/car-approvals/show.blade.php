@@ -19,15 +19,15 @@
                 <div class="car-images-section">
                     @if($car->image && is_array($car->image) && count($car->image) > 0)
                         <div class="main-image">
-                            <img src="{{ asset('storage/' . $car->image[0]) }}" alt="{{ $car->brand }}" id="mainImage">
+                            <img src="{{ media_url($car->image[0]) }}" alt="{{ $car->brand }}" id="mainImage">
                         </div>
                         @if(count($car->image) > 1)
                         <div class="thumbnail-images">
                             @foreach($car->image as $index => $image)
-                            <img src="{{ asset('storage/' . $image) }}"
+                            <img src="{{ media_url($image) }}"
                                  alt="Thumbnail {{ $index + 1 }}"
                                  class="thumbnail {{ $index === 0 ? 'active' : '' }}"
-                                 data-image="{{ asset('storage/' . $image) }}">
+                                 data-image="{{ media_url($image) }}">
                             @endforeach
                         </div>
                         @endif

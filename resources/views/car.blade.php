@@ -190,7 +190,7 @@
                                     <div class="car-card-image-wrapper">
                                         <div class="car-card-image-slider">
                                             @if($car->image && is_array($car->image) && count($car->image) > 0)
-                                                <img src="{{ asset('storage/' . $car->image[0]) }}"
+                                                <img src="{{ media_url($car->image[0]) }}"
                                                     alt="{{ $car->brand }} {{ $car->nama ?? '' }}" class="car-card-main-image">
                                                 @if(count($car->image) > 1)
                                                     <div class="image-count-badge">

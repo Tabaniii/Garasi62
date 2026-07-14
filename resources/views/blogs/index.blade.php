@@ -393,7 +393,7 @@
     <div class="blog-card animate-fade-in" style="animation-delay: {{ $index * 0.1 }}s;">
         <div class="blog-card-image">
             @if($blog->image)
-            <img src="{{ asset('storage/' . $blog->image) }}" alt="{{ $blog->title }}">
+            <img src="{{ media_url($blog->image) }}" alt="{{ $blog->title }}">
             @else
             <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9ca3af;">
                 <i class="fas fa-image" style="font-size: 48px;"></i>

@@ -63,7 +63,7 @@
                                 onclick="window.location.href='{{ $report->car ? route('car.details', $report->car->uuid) : '#' }}'">
                                 <div class="recent-car-image">
                                     @if($report->car && $report->car->image && is_array($report->car->image) && count($report->car->image) > 0)
-                                        <img src="{{ asset('storage/' . $report->car->image[0]) }}" alt="{{ $report->car->brand }}">
+                                        <img src="{{ media_url($report->car->image[0]) }}" alt="{{ $report->car->brand }}">
                                     @else
                                         <div class="car-placeholder">
                                             <i class="fas fa-flag"></i>
@@ -172,7 +172,7 @@
                             <div class="recent-car-card" onclick="window.location.href='{{ route('car.details', $car->uuid) }}'">
                                 <div class="recent-car-image">
                                     @if($car->image && is_array($car->image) && count($car->image) > 0)
-                                        <img src="{{ asset('storage/' . $car->image[0]) }}" alt="{{ $car->brand }}">
+                                        <img src="{{ media_url($car->image[0]) }}" alt="{{ $car->brand }}">
                                     @else
                                         <div class="car-placeholder">
                                             <i class="fas fa-car"></i>
@@ -240,7 +240,7 @@
                                 <div class="recent-car-image"
                                     onclick="window.location.href='{{ route('car.details', $car->uuid) }}'">
                                     @if($car->image && is_array($car->image) && count($car->image) > 0)
-                                        <img src="{{ asset('storage/' . $car->image[0]) }}" alt="{{ $car->brand }}">
+                                        <img src="{{ media_url($car->image[0]) }}" alt="{{ $car->brand }}">
                                     @else
                                         <div class="car-placeholder">
                                             <i class="fas fa-car"></i>

@@ -34,7 +34,7 @@
                         @foreach($blogs as $blog)
                         <div class="col-lg-6 col-md-6 col-sm-6">
                             <div class="blog__item">
-                                <div class="blog__item__pic set-bg" data-setbg="{{ $blog->image ? asset('storage/' . $blog->image) : asset('img/blog/blog-1.jpg') }}">
+                                <div class="blog__item__pic set-bg" data-setbg="{{ $blog->image ? media_url($blog->image) : asset('img/blog/blog-1.jpg') }}">
                                     <ul>
                                         <li>By {{ $blog->author }}</li>
                                         <li>{{ $blog->published_at ? $blog->published_at->format('M d, Y') : $blog->created_at->format('M d, Y') }}</li>

@@ -75,21 +75,21 @@
                 <div class="row">
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="about__feature__item">
-                            <img src="{{ asset($aboutFeature1Icon) }}" alt="">
+                            <img src="{{ media_url($aboutFeature1Icon) }}" alt="">
                             <h5>{{ $aboutFeature1Title }}</h5>
                             <p>{{ $aboutFeature1Text }}</p>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="about__feature__item">
-                            <img src="{{ asset($aboutFeature2Icon) }}" alt="">
+                            <img src="{{ media_url($aboutFeature2Icon) }}" alt="">
                             <h5>{{ $aboutFeature2Title }}</h5>
                             <p>{{ $aboutFeature2Text }}</p>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-6">
                         <div class="about__feature__item">
-                            <img src="{{ asset($aboutFeature3Icon) }}" alt="">
+                            <img src="{{ media_url($aboutFeature3Icon) }}" alt="">
                             <h5>{{ $aboutFeature3Title }}</h5>
                             <p>{{ $aboutFeature3Text }}</p>
                         </div>
@@ -99,7 +99,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="about__pic">
-                        <img src="{{ asset($aboutImage) }}" alt="">
+                        <img src="{{ media_url($aboutImage) }}" alt="">
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-6 col-sm-6">
@@ -250,7 +250,7 @@
                                     <div class="testimonial__item__author" style="display: flex; align-items: flex-start; margin-bottom: 25px; position: relative; z-index: 1; flex-shrink: 0;">
                                         <div class="testimonial__item__author__pic" style="margin-right: 20px; position: relative; flex-shrink: 0;">
                                             @if($testimonial->image)
-                                                <img src="{{ asset('storage/' . $testimonial->image) }}" alt="{{ $testimonial->name }}" style="width: 80px; height: 80px; border-radius: 5px; object-fit: cover; border: 4px solid #dc2626; display: block;">
+                                                <img src="{{ media_url($testimonial->image) }}" alt="{{ $testimonial->name }}" style="width: 80px; height: 80px; border-radius: 5px; object-fit: cover; border: 4px solid #dc2626; display: block;">
                                             @else
                                                 <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #dc2626, #991b1b); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 32px; color: #ffffff; border: 4px solid #ffffff; flex-shrink: 0; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);">
                                                     {{ strtoupper(mb_substr($testimonial->name, 0, 1)) }}

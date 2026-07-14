@@ -4,26 +4,34 @@ namespace App\Services;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use VercelBlobPhp\Client;
-use VercelBlobPhp\CommonCreateBlobOptions;
+use RuntimeException;
 
 class MediaStorage
 {
-    private ?Client $client = null;
+    private ?VercelBlobClient $blobClient = null;
+
+    public function driver(): string
+    {
+        $configured = config('media.disk', 'auto');
+
+        if ($configured === 'public') {
+            return 'public';
+        }
+
+        if ($configured === 'vercel-blob' || VercelBlobAuth::isVercelRuntime()) {
+            return 'vercel-blob';
+        }
+
+        if ($configured === 'auto' && $this->blob()->hasCredentials()) {
+            return 'vercel-blob';
+        }
+
+        return 'public';
+    }
 
     public function usesBlob(): bool
     {
-        $disk = config('media.disk', 'auto');
-
-        if ($disk === 'vercel-blob') {
-            return $this->token() !== '';
-        }
-
-        if ($disk === 'public') {
-            return false;
-        }
-
-        return $this->token() !== '';
+        return $this->driver() === 'vercel-blob';
     }
 
     public function upload(UploadedFile $file, string $directory): string
@@ -37,16 +45,16 @@ class MediaStorage
     {
         if ($this->usesBlob()) {
             $path = trim($directory, '/') . '/' . $filename;
-            $result = $this->client()->put(
+            $result = $this->blob()->put(
                 $path,
                 file_get_contents($file->getRealPath()),
-                new CommonCreateBlobOptions(
-                    contentType: $file->getMimeType() ?: 'application/octet-stream',
-                    addRandomSuffix: false,
-                )
+                [
+                    'contentType' => $file->getMimeType() ?: 'application/octet-stream',
+                    'access' => 'public',
+                ]
             );
 
-            return $result->url;
+            return $result['url'];
         }
 
         if (!Storage::disk('public')->exists($directory)) {
@@ -56,7 +64,7 @@ class MediaStorage
         $stored = $file->storeAs($directory, $filename, 'public');
 
         if (!$stored) {
-            throw new \RuntimeException('Gagal mengupload file ke storage lokal.');
+            throw new RuntimeException('Gagal mengupload file ke storage lokal.');
         }
 
         return $stored;
@@ -70,7 +78,7 @@ class MediaStorage
 
         if ($this->isRemoteUrl($pathOrUrl)) {
             try {
-                $this->client()->del([$pathOrUrl]);
+                $this->blob()->delete([$pathOrUrl]);
 
                 return true;
             } catch (\Throwable) {
@@ -93,7 +101,7 @@ class MediaStorage
 
         if ($this->isRemoteUrl($pathOrUrl)) {
             try {
-                $this->client()->head($pathOrUrl);
+                $this->blob()->head($pathOrUrl);
 
                 return true;
             } catch (\Throwable) {
@@ -179,17 +187,12 @@ class MediaStorage
         return str_starts_with($path, 'http://') || str_starts_with($path, 'https://');
     }
 
-    private function token(): string
+    private function blob(): VercelBlobClient
     {
-        return (string) (config('media.blob_token') ?: getenv('BLOB_READ_WRITE_TOKEN') ?: '');
-    }
-
-    private function client(): Client
-    {
-        if ($this->client === null) {
-            $this->client = new Client($this->token() ?: null);
+        if ($this->blobClient === null) {
+            $this->blobClient = app(VercelBlobClient::class);
         }
 
-        return $this->client;
+        return $this->blobClient;
     }
 }

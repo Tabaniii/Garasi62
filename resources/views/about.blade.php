@@ -23,6 +23,7 @@
 @include('components.messages-widget')
 @section('content')
     @php
+        $aboutImage = \App\Models\SiteSetting::get('about_image', 'img/about/about-pic.jpg');
         $aboutTitle = \App\Models\SiteSetting::get('about_title', 'Selamat Datang di Garasi62');
         $aboutSubtitle = \App\Models\SiteSetting::get('about_subtitle', 'Kami Menyediakan Segala yang Anda Butuhkan untuk Mobil');
         $aboutDescription = \App\Models\SiteSetting::get('about_description', 'Garasi62 adalah platform terpercaya untuk jual beli dan sewa mobil. Kami berkomitmen memberikan layanan terbaik bagi pelanggan kami.');

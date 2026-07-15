@@ -25,18 +25,18 @@
 @section('content')
     @include('components.messages-widget')
     <!-- Hero Section Begin -->
-    <section class="hero spad set-bg" data-setbg="img/hero-bg.jpg">
+    <section class="hero spad set-bg">
+        <!-- Video Background -->
+        <video autoplay muted loop playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;">
+            <source src="{{ asset('ride62/video/kompres_hero_video_fix.mp4') }}" type="video/mp4">
+        </video>
         <div class="container">
             <div class="row">
                 <div class="col-lg-7 d-none d-md-block">
                     <div class="hero__text">
                         <div class="hero__text__title">
                             <span>TEMUKAN MOBIL IMPIANMU DISINI</span>
-                            <h2>Porsche Cayenne S</h2>
-                        </div>
-                        <div class="hero__text__price">
-                            <div class="car-model">Model 2019</div>
-                            <h2>IDR 2.2M</h2>
+                            <h2>Ride62</h2>
                         </div>
                         <a href="{{ route('cars') }}" class="primary-btn"><img src="img/wheel.png" alt=""> Uji Coba</a>
                         <a href="{{ route('about') }}" class="primary-btn more-btn">Pelajari Lebih Lanjut</a>
@@ -570,6 +570,16 @@
     <!-- Cta End -->
 
     <style>
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .hero .container {
+            position: relative;
+            z-index: 1;
+        }
         .price-range-preview {
             margin-bottom: 15px;
             padding: 8px 0;

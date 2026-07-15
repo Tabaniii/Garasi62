@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App\Services\MediaStorage;
+use App\Services\VercelBlobAuth;
+use App\Services\VercelBlobClient;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 
@@ -13,6 +15,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton(VercelBlobAuth::class);
+        $this->app->singleton(VercelBlobClient::class);
         $this->app->singleton(MediaStorage::class);
      }
 

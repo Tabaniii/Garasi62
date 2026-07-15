@@ -12,17 +12,8 @@ class MediaStorage
 
     public function driver(): string
     {
-        $configured = config('media.disk', 'auto');
-
-        if ($configured === 'public') {
-            return 'public';
-        }
-
-        if ($configured === 'vercel-blob' || VercelBlobAuth::isVercelRuntime()) {
-            return 'vercel-blob';
-        }
-
-        if ($configured === 'auto' && $this->blob()->hasCredentials()) {
+        // Vercel production must never touch local disk
+        if (VercelBlobAuth::shouldForceBlob()) {
             return 'vercel-blob';
         }
 
@@ -45,14 +36,19 @@ class MediaStorage
     {
         if ($this->usesBlob()) {
             $path = trim($directory, '/') . '/' . $filename;
+
             $result = $this->blob()->put(
                 $path,
-                file_get_contents($file->getRealPath()),
+                (string) file_get_contents($file->getRealPath()),
                 [
                     'contentType' => $file->getMimeType() ?: 'application/octet-stream',
                     'access' => 'public',
                 ]
             );
+
+            if (empty($result['url'])) {
+                throw new RuntimeException('Upload ke Vercel Blob berhasil tanpa URL.');
+            }
 
             return $result['url'];
         }
@@ -109,6 +105,10 @@ class MediaStorage
             }
         }
 
+        if ($this->usesBlob()) {
+            return false;
+        }
+
         return Storage::disk('public')->exists($pathOrUrl);
     }
 
@@ -152,6 +152,10 @@ class MediaStorage
             } catch (\Throwable) {
                 return null;
             }
+        }
+
+        if ($this->usesBlob()) {
+            return null;
         }
 
         $fullPath = Storage::disk('public')->path($pathOrUrl);

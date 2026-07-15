@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use GuzzleHttp\Client as HttpClient;
-use GuzzleHttp\Exception\GuzzleException;
 use RuntimeException;
 
+/**
+ * Minimal Vercel Blob REST client with OIDC + store-id support.
+ * Compatible with Vercel's current Blob API (x-vercel-blob-store-id).
+ */
 class VercelBlobClient
 {
     private const API_URL = 'https://vercel.com/api/blob';
@@ -14,7 +17,7 @@ class VercelBlobClient
     private HttpClient $http;
 
     public function __construct(
-        private readonly VercelBlobAuth $authResolver = new VercelBlobAuth(),
+        private readonly VercelBlobAuth $auth = new VercelBlobAuth(),
     ) {
         $this->http = new HttpClient([
             'http_errors' => false,
@@ -27,10 +30,10 @@ class VercelBlobClient
      */
     public function put(string $pathname, string $content, array $options = []): array
     {
-        $auth = $this->requireAuth();
+        $credentials = $this->requireCredentials();
         $query = http_build_query(['pathname' => ltrim($pathname, '/')]);
 
-        $headers = array_merge($this->authHeaders($auth), [
+        $headers = array_merge($this->authHeaders($credentials), [
             'x-api-version' => self::API_VERSION,
             'x-vercel-blob-access' => $options['access'] ?? 'public',
             'x-content-type' => $options['contentType'] ?? 'application/octet-stream',
@@ -55,10 +58,10 @@ class VercelBlobClient
             return;
         }
 
-        $auth = $this->requireAuth();
+        $credentials = $this->requireCredentials();
 
         $response = $this->http->request('POST', self::API_URL . '/delete', [
-            'headers' => array_merge($this->authHeaders($auth), [
+            'headers' => array_merge($this->authHeaders($credentials), [
                 'x-api-version' => self::API_VERSION,
                 'Content-Type' => 'application/json',
             ]),
@@ -72,11 +75,11 @@ class VercelBlobClient
 
     public function head(string $url): array
     {
-        $auth = $this->requireAuth();
+        $credentials = $this->requireCredentials();
         $query = http_build_query(['url' => $url]);
 
         $response = $this->http->request('GET', self::API_URL . '/?' . $query, [
-            'headers' => array_merge($this->authHeaders($auth), [
+            'headers' => array_merge($this->authHeaders($credentials), [
                 'x-api-version' => self::API_VERSION,
             ]),
         ]);
@@ -86,31 +89,33 @@ class VercelBlobClient
 
     public function hasCredentials(): bool
     {
-        return $this->authResolver->resolve() !== null;
+        $credentials = $this->auth->resolve();
+
+        return $credentials !== null && $credentials->token !== '' && $credentials->storeId !== '';
     }
 
-    private function requireAuth(): VercelBlobAuth
+    private function requireCredentials(): VercelBlobCredentials
     {
-        $auth = $this->authResolver->resolve();
+        $credentials = $this->auth->resolve();
 
-        if ($auth === null) {
+        if ($credentials === null || $credentials->token === '' || $credentials->storeId === '') {
             throw new RuntimeException(
-                'Vercel Blob credentials tidak ditemukan. Pastikan Blob store sudah terhubung ke project Vercel '
-                . '(BLOB_STORE_ID + VERCEL_OIDC_TOKEN / x-vercel-oidc-token).'
+                'Vercel Blob credentials tidak lengkap. Pastikan Blob store terhubung ke project '
+                . '(BLOB_STORE_ID tersedia) dan OIDC aktif (header x-vercel-oidc-token / VERCEL_OIDC_TOKEN).'
             );
         }
 
-        return $auth;
+        return $credentials;
     }
 
     /**
      * @return array<string, string>
      */
-    private function authHeaders(VercelBlobAuth $auth): array
+    private function authHeaders(VercelBlobCredentials $credentials): array
     {
         return [
-            'Authorization' => 'Bearer ' . $auth->token,
-            'x-vercel-blob-store-id' => $auth->storeId,
+            'Authorization' => 'Bearer ' . $credentials->token,
+            'x-vercel-blob-store-id' => $credentials->storeId,
         ];
     }
 

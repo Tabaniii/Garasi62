@@ -35,7 +35,7 @@ class SanitizeProject extends Command
             $targets[] = $env2;
         }
 
-        $publicGarasi = $base . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'garasi62';
+        $publicGarasi = $base . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'ride62';
         if (File::isDirectory($publicGarasi)) {
             $htmls = glob($publicGarasi . DIRECTORY_SEPARATOR . '*.html') ?: [];
             foreach ($htmls as $f) {

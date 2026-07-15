@@ -2,23 +2,23 @@
 
 @section('meta')
     <meta name="description"
-        content="Hubungi Garasi62 - Kami siap membantu Anda. Silakan hubungi kami untuk informasi lebih lanjut.">
-    <meta name="keywords" content="Kontak Garasi62, Alamat Garasi62, Telepon Garasi62">
+        content="Hubungi Ride62 - Kami siap membantu Anda. Silakan hubungi kami untuk informasi lebih lanjut.">
+    <meta name="keywords" content="Kontak Ride62, Alamat Ride62, Telepon Ride62">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="Hubungi Kami - Garasi62">
+    <meta property="og:title" content="Hubungi Kami - Ride62">
     <meta property="og:description"
-        content="Hubungi Garasi62 - Kami siap membantu Anda. Silakan hubungi kami untuk informasi lebih lanjut.">
-    <meta property="og:image" content="{{ asset('garasi62/img/logo.png') }}">
+        content="Hubungi Ride62 - Kami siap membantu Anda. Silakan hubungi kami untuk informasi lebih lanjut.">
+    <meta property="og:image" content="{{ asset('ride62/img/logo.png') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="GARASI62">
+    <meta property="og:site_name" content="Ride62">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Hubungi Kami - Garasi62">
-    <meta name="twitter:description" content="Hubungi Garasi62 - Kami siap membantu Anda.">
-    <meta name="twitter:image" content="{{ asset('garasi62/img/logo.png') }}">
+    <meta name="twitter:title" content="Hubungi Kami - Ride62">
+    <meta name="twitter:description" content="Hubungi Ride62 - Kami siap membantu Anda.">
+    <meta name="twitter:image" content="{{ asset('ride62/img/logo.png') }}">
 @endsection
 
 @include('components.messages-widget')

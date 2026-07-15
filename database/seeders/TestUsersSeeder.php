@@ -15,10 +15,10 @@ class TestUsersSeeder extends Seeder
     public function run(): void
     {
         // Create Seller User (if not exists)
-        if (!User::where('email', 'seller@garasi62.com')->exists()) {
+        if (!User::where('email', 'seller@ride62.com')->exists()) {
             User::create([
                 'name' => 'John Seller',
-                'email' => 'seller@garasi62.com',
+                'email' => 'seller@ride62.com',
                 'phone' => '081234567891',
                 'gender' => 'Laki-laki',
                 'city' => 'Surabaya',
@@ -31,8 +31,8 @@ class TestUsersSeeder extends Seeder
         }
 
         $this->command->info('Test users setup completed!');
-        $this->command->info('Admin: admin@garasi62.com (existing)');
-        $this->command->info('Seller: seller@garasi62.com / seller123');
+        $this->command->info('Admin: admin@ride62.com (existing)');
+        $this->command->info('Seller: seller@ride62.com / seller123');
         $this->command->info('Buyer: user@gmail.com / (existing user)');
     }
 }

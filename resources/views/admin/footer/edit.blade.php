@@ -189,7 +189,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text bg-white"><i class="fas fa-signature text-muted"></i></span>
                                     <input type="text" class="form-control" id="site_name" name="site_name"
-                                        value="{{ old('site_name', $settings['site_name']) }}" required placeholder="Contoh: Garasi62">
+                                        value="{{ old('site_name', $settings['site_name']) }}" required placeholder="Contoh: Ride62">
                                 </div>
                             </div>
                             <div class="col-md-6">

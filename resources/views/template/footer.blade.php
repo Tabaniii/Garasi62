@@ -2,9 +2,9 @@
     $footerContactTitle = \App\Models\SiteSetting::get('footer_contact_title', 'Hubungi Kami Sekarang!');
     $footerPhone = \App\Models\SiteSetting::get('footer_phone', '(+12) 345 678 910');
     $siteEmail = \App\Models\SiteSetting::get('site_email', \App\Models\SiteSetting::get('footer_email', 'Colorlib@gmail.com'));
-    $siteName = \App\Models\SiteSetting::get('site_name', 'GARASI62');
-    $siteLogo = \App\Models\SiteSetting::get('site_logo', 'garasi62/img/ride62-fix.svg');
-    $logoFallback = asset('garasi62/img/ride62-fix.svg');
+    $siteName = \App\Models\SiteSetting::get('site_name', 'Ride62');
+    $siteLogo = \App\Models\SiteSetting::get('site_logo', 'ride62/img/ride62-fix.svg');
+    $logoFallback = asset('ride62/img/ride62-fix.svg');
     $footerAboutText = \App\Models\SiteSetting::get('footer_about_text', 'Any questions? Let us know in store at 625 Gloria Union, California, United Stated or call us on (+1) 96 123 8888');
     $socialLinksJson = \App\Models\SiteSetting::get('footer_social_links', '');
     $socialLinks = [];

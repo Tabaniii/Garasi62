@@ -11,8 +11,12 @@
       "dest": "/public/build/$1"
     },
     {
+      "src": "/ride62/(.*)",
+      "dest": "/public/ride62/$1"
+    },
+    {
       "src": "/garasi62/(.*)",
-      "dest": "/public/garasi62/$1"
+      "dest": "/public/ride62/$1"
     },
     {
       "src": "/(css|js|img|fonts)/(.*)",

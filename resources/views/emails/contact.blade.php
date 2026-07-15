@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Form - Garasi62</title>
+    <title>Contact Form - Ride62</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f4f4;">
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
@@ -14,7 +14,7 @@
                     <tr>
                         <td style="background-color: #dc3545; color: #ffffff; padding: 30px 20px; text-align: center;">
                             <h1 style="margin: 0; font-size: 24px; font-weight: bold;">Pesan Baru dari Contact Form</h1>
-                            <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;">Garasi62</p>
+                            <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;">Ride62</p>
                         </td>
                     </tr>
                     
@@ -59,7 +59,7 @@
                     <tr>
                         <td style="background-color: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0;">
                             <p style="margin: 0 0 10px 0; font-size: 12px; color: #666666;">
-                                Email ini dikirim dari contact form Garasi62
+                                Email ini dikirim dari contact form Ride62
                             </p>
                             <p style="margin: 0; font-size: 12px; color: #666666;">
                                 Anda bisa membalas email ini langsung ke: 

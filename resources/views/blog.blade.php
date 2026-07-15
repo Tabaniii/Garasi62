@@ -2,16 +2,16 @@
 
 @section('meta')
     <meta name="description" content="{{ Str::limit(strip_tags($blog->content), 150) }}">
-    <meta name="keywords" content="{{ $blog->category ?? 'Blog' }}, Garasi62, Berita Otomotif, {{ $blog->title }}">
+    <meta name="keywords" content="{{ $blog->category ?? 'Blog' }}, Ride62, Berita Otomotif, {{ $blog->title }}">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="{{ $blog->title }} - Garasi62">
+    <meta property="og:title" content="{{ $blog->title }} - Ride62">
     <meta property="og:description" content="{{ Str::limit(strip_tags($blog->content), 150) }}">
     <meta property="og:image"
         content="{{ $blog->image ? media_url($blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="article">
-    <meta property="og:site_name" content="GARASI62">
+    <meta property="og:site_name" content="Ride62">
 
     <meta property="article:published_time"
         content="{{ $blog->published_at ? $blog->published_at->toIso8601String() : $blog->created_at->toIso8601String() }}">
@@ -27,7 +27,7 @@
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $blog->title }} - Garasi62">
+    <meta name="twitter:title" content="{{ $blog->title }} - Ride62">
     <meta name="twitter:description" content="{{ Str::limit(strip_tags($blog->content), 150) }}">
     <meta name="twitter:image"
         content="{{ $blog->image ? media_url($blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
@@ -84,7 +84,7 @@
                     <div class="blog__details__author">
                         <div class="blog__details__author__text">
                             <h5>{{ $blog->author }}</h5>
-                            <p>Penulis artikel ini adalah bagian dari tim GARASI62 yang berdedikasi menyediakan konten
+                            <p>Penulis artikel ini adalah bagian dari tim Ride62 yang berdedikasi menyediakan konten
                                 berkualitas.</p>
                         </div>
                     </div>

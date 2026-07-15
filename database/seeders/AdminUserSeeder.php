@@ -15,10 +15,10 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         // Update atau create user admin
-        $adminUser = Users::firstOrNew(['email' => 'admin@garasi62.com']);
+        $adminUser = Users::firstOrNew(['email' => 'admin@ride62.com']);
         
         $adminUser->name = $adminUser->name ?? 'Administrator';
-        $adminUser->email = 'admin@garasi62.com';
+        $adminUser->email = 'admin@ride62.com';
         $adminUser->password = Hash::make('admin123');
         $adminUser->phone = $adminUser->phone ?? '081234567890';
         $adminUser->gender = $adminUser->gender ?? 'Laki-laki';
@@ -29,12 +29,12 @@ class AdminUserSeeder extends Seeder
         $adminUser->save();
 
         // Update semua user lain yang belum punya role menjadi buyer (default)
-        Users::where('email', '!=', 'admin@garasi62.com')
+        Users::where('email', '!=', 'admin@ride62.com')
             ->whereNull('role')
             ->orWhere('role', '')
             ->update(['role' => 'buyer']);
 
-        $this->command->info('Admin user berhasil dibuat/updated: admin@garasi62.com (password: admin123)');
+        $this->command->info('Admin user berhasil dibuat/updated: admin@ride62.com (password: admin123)');
         $this->command->info('Semua user tanpa role telah di-set menjadi buyer (default)');
     }
 }

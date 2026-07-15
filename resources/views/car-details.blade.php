@@ -1,20 +1,20 @@
 @extends('template.temp')
 
 @section('meta')
-    <meta name="description" content="Jual/Sewa Mobil {{ $car->brand }} {{ $car->nama }} Tahun {{ $car->tahun }} - {{ $car->tipe == 'rent' ? 'Sewa' : 'Jual' }} di Garasi62">
+    <meta name="description" content="Jual/Sewa Mobil {{ $car->brand }} {{ $car->nama }} Tahun {{ $car->tahun }} - {{ $car->tipe == 'rent' ? 'Sewa' : 'Jual' }} di Ride62">
     <meta name="keywords" content="{{ $car->brand }}, {{ $car->nama }}, Mobil Bekas, Sewa Mobil, Jual Mobil, {{ $car->tahun }}">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="{{ $car->brand }} {{ $car->nama }} {{ $car->tahun }} - Garasi62">
+    <meta property="og:title" content="{{ $car->brand }} {{ $car->nama }} {{ $car->tahun }} - Ride62">
     <meta property="og:description" content="Lihat detail mobil {{ $car->brand }} {{ $car->nama }} tahun {{ $car->tahun }}. Kondisi prima, harga bersaing. Tersedia untuk {{ $car->tipe == 'rent' ? 'disewa' : 'dibeli' }}.">
     @if($car->image && is_array($car->image) && count($car->image) > 0)
         <meta property="og:image" content="{{ media_url($car->image[0]) }}">
     @else
-        <meta property="og:image" content="{{ asset('garasi62/img/cars/details/cd-1.jpg') }}">
+        <meta property="og:image" content="{{ asset('ride62/img/cars/details/cd-1.jpg') }}">
     @endif
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="product">
-    <meta property="og:site_name" content="GARASI62">
+    <meta property="og:site_name" content="Ride62">
     
     <!-- Product Specific OG -->
     <meta property="product:brand" content="{{ $car->brand }}">
@@ -24,19 +24,19 @@
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $car->brand }} {{ $car->nama }} {{ $car->tahun }} - Garasi62">
+    <meta name="twitter:title" content="{{ $car->brand }} {{ $car->nama }} {{ $car->tahun }} - Ride62">
     <meta name="twitter:description" content="Lihat detail mobil {{ $car->brand }} {{ $car->nama }} tahun {{ $car->tahun }}.">
     @if($car->image && is_array($car->image) && count($car->image) > 0)
         <meta name="twitter:image" content="{{ media_url($car->image[0]) }}">
     @else
-        <meta name="twitter:image" content="{{ asset('garasi62/img/cars/details/cd-1.jpg') }}">
+        <meta name="twitter:image" content="{{ asset('ride62/img/cars/details/cd-1.jpg') }}">
     @endif
 @endsection
 
 @include('components.messages-widget')
 @section('content')
     <!-- Breadcrumb Begin -->
-    <div class="breadcrumb-option set-bg" data-setbg="{{ asset('garasi62/img/breadcrumb-bg.jpg') }}">
+    <div class="breadcrumb-option set-bg" data-setbg="{{ asset('ride62/img/breadcrumb-bg.jpg') }}">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
@@ -64,7 +64,7 @@
                             @if($car->image && is_array($car->image) && count($car->image) > 0)
                                 <img class="car-big-img" src="{{ media_url($car->image[0]) }}" alt="{{ $car->brand }}" id="mainCarImage">
                             @else
-                                <img class="car-big-img" src="{{ asset('garasi62/img/cars/details/cd-1.jpg') }}" alt="{{ $car->brand }}" id="mainCarImage">
+                                <img class="car-big-img" src="{{ asset('ride62/img/cars/details/cd-1.jpg') }}" alt="{{ $car->brand }}" id="mainCarImage">
                             @endif
                             <div class="image-overlay-badge">
                                 <span class="car-type-overlay {{ $car->tipe == 'buy' ? 'badge-sale-overlay' : 'badge-rent-overlay' }}">

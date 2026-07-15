@@ -1,22 +1,22 @@
 @extends('template.temp')
 
 @section('meta')
-    <meta name="description" content="Tentang Garasi62 - Kami menyediakan segala kebutuhan mobil Anda. Jual beli dan sewa mobil terpercaya.">
-    <meta name="keywords" content="Tentang Garasi62, Profil Garasi62, Dealer Mobil">
+    <meta name="description" content="Tentang Ride62 - Kami menyediakan segala kebutuhan mobil Anda. Jual beli dan sewa mobil terpercaya.">
+    <meta name="keywords" content="Tentang Ride62, Profil Ride62, Dealer Mobil">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="Tentang Kami - Garasi62">
-    <meta property="og:description" content="Tentang Garasi62 - Kami menyediakan segala kebutuhan mobil Anda. Jual beli dan sewa mobil terpercaya.">
-    <meta property="og:image" content="{{ asset('garasi62/img/about/about-pic.jpg') }}">
+    <meta property="og:title" content="Tentang Kami - Ride62">
+    <meta property="og:description" content="Tentang Ride62 - Kami menyediakan segala kebutuhan mobil Anda. Jual beli dan sewa mobil terpercaya.">
+    <meta property="og:image" content="{{ asset('ride62/img/about/about-pic.jpg') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="GARASI62">
+    <meta property="og:site_name" content="Ride62">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Tentang Kami - Garasi62">
-    <meta name="twitter:description" content="Tentang Garasi62 - Kami menyediakan segala kebutuhan mobil Anda.">
-    <meta name="twitter:image" content="{{ asset('garasi62/img/about/about-pic.jpg') }}">
+    <meta name="twitter:title" content="Tentang Kami - Ride62">
+    <meta name="twitter:description" content="Tentang Ride62 - Kami menyediakan segala kebutuhan mobil Anda.">
+    <meta name="twitter:image" content="{{ asset('ride62/img/about/about-pic.jpg') }}">
 @endsection
 
 
@@ -24,9 +24,9 @@
 @section('content')
     @php
         $aboutImage = \App\Models\SiteSetting::get('about_image', 'img/about/about-pic.jpg');
-        $aboutTitle = \App\Models\SiteSetting::get('about_title', 'Selamat Datang di Garasi62');
+        $aboutTitle = \App\Models\SiteSetting::get('about_title', 'Selamat Datang di Ride62');
         $aboutSubtitle = \App\Models\SiteSetting::get('about_subtitle', 'Kami Menyediakan Segala yang Anda Butuhkan untuk Mobil');
-        $aboutDescription = \App\Models\SiteSetting::get('about_description', 'Garasi62 adalah platform terpercaya untuk jual beli dan sewa mobil. Kami berkomitmen memberikan layanan terbaik bagi pelanggan kami.');
+        $aboutDescription = \App\Models\SiteSetting::get('about_description', 'Ride62 adalah platform terpercaya untuk jual beli dan sewa mobil. Kami berkomitmen memberikan layanan terbaik bagi pelanggan kami.');
         $aboutFeature1Title = \App\Models\SiteSetting::get('about_feature_1_title', 'Sistem Jaminan Kualitas');
         $aboutFeature1Text = \App\Models\SiteSetting::get('about_feature_1_text', 'Kami memastikan setiap kendaraan yang kami tawarkan telah melalui inspeksi ketat.');
         $aboutFeature1Icon = \App\Models\SiteSetting::get('about_feature_1_icon', 'img/about/af-1.png');

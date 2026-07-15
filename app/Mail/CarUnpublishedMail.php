@@ -48,7 +48,7 @@ class CarUnpublishedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: "Mobil {$this->carName} Di-Unpublish - Garasi62",
+            subject: "Mobil {$this->carName} Di-Unpublish - Ride62",
         );
     }
 

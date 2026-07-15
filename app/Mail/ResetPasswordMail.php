@@ -34,7 +34,7 @@ class ResetPasswordMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Reset Password - Garasi62',
+            subject: 'Reset Password - Ride62',
             from: new Address(config('mail.from.address'), config('mail.from.name')),
             to: [new Address($this->email)],
         );

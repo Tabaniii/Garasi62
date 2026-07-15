@@ -271,7 +271,7 @@ class CarController extends Controller
                 $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeName = \Illuminate\Support\Str::slug($originalName, '_');
                 $extension = $file->getClientOriginalExtension();
-                $newFileName = 'garasi62_' . $safeName . '_' . uniqid() . '.' . $extension;
+                $newFileName = 'ride62_' . $safeName . '_' . uniqid() . '.' . $extension;
                 $imagePaths[] = media()->uploadAs($file, 'cars', $newFileName);
             }
 
@@ -427,7 +427,7 @@ class CarController extends Controller
                 $originalName = pathinfo($image->getClientOriginalName(), PATHINFO_FILENAME);
                 $safeName = \Illuminate\Support\Str::slug($originalName, '_');
                 $extension = $image->getClientOriginalExtension();
-                $newFileName = 'garasi62_' . $safeName . '_' . uniqid() . '.' . $extension;
+                $newFileName = 'ride62_' . $safeName . '_' . uniqid() . '.' . $extension;
                 $imagePaths[] = media()->uploadAs($image, 'cars', $newFileName);
             }
         }

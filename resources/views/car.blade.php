@@ -198,7 +198,7 @@
                                                     </div>
                                                 @endif
                                             @else
-                                                <img src="{{ asset('garasi62/img/cars/car-8.jpg') }}"
+                                                <img src="{{ asset('ride62/img/cars/car-8.jpg') }}"
                                                     alt="{{ $car->brand }} {{ $car->nama ?? '' }}" class="car-card-main-image">
                                             @endif
                                         </div>

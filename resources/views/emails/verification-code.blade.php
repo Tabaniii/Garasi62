@@ -95,14 +95,14 @@
 <body>
     <div class="email-container">
         <div class="email-header">
-            <h1>Garasi62</h1>
+            <h1>Ride62</h1>
         </div>
         <div class="email-body">
             <div class="greeting">
                 Halo, {{ $name }}!
             </div>
             <div class="message">
-                Terima kasih telah mendaftar di Garasi62. Untuk menyelesaikan proses registrasi, silakan masukkan kode verifikasi berikut:
+                Terima kasih telah mendaftar di Ride62. Untuk menyelesaikan proses registrasi, silakan masukkan kode verifikasi berikut:
             </div>
             
             <div class="code-container">
@@ -117,11 +117,11 @@
             </div>
             
             <div class="message">
-                Jika Anda tidak melakukan registrasi di Garasi62, abaikan email ini.
+                Jika Anda tidak melakukan registrasi di Ride62, abaikan email ini.
             </div>
         </div>
         <div class="footer">
-            <p>&copy; {{ date('Y') }} Garasi62. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} Ride62. All rights reserved.</p>
             <p>Email ini dikirim secara otomatis, mohon tidak membalas email ini.</p>
         </div>
     </div>

@@ -44,7 +44,7 @@ class DuplicateCarController extends Controller
                 continue;
             foreach ($car->image as $imagePath) {
                 $fileName = basename($imagePath);
-                if (str_starts_with($fileName, 'garasi62_garasi62')) {
+                if (str_starts_with($fileName, 'ride62_ride62') || str_starts_with($fileName, 'garasi62_garasi62')) {
                     $fotoPencurianEntries[] = [
                         'car' => $car,
                         'image_path' => $imagePath,

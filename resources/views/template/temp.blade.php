@@ -8,8 +8,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     @php
-        $siteName = \App\Models\SiteSetting::get('site_name', 'GARASI62');
-        $siteLogo = \App\Models\SiteSetting::get('site_logo', 'garasi62/img/ride62-fix.svg');
+        $siteName = \App\Models\SiteSetting::get('site_name', 'Ride62');
+        $siteLogo = \App\Models\SiteSetting::get('site_logo', 'ride62/img/ride62-fix.svg');
         $siteEmail = \App\Models\SiteSetting::get('site_email', \App\Models\SiteSetting::get('footer_email', 'Colorlib@gmail.com'));
         $siteOperationalHours = \App\Models\SiteSetting::get('site_operational_hours', 'Sales: 08:00 am to 18:00 pm');
         $siteFavicon = \App\Models\SiteSetting::get('site_favicon', 'favicon.ico');
@@ -45,13 +45,13 @@
     @hasSection('meta')
         @yield('meta')
     @else
-        <meta name="description" content="Garasi62 - Temukan Mobil Impianmu Disini">
-        <meta name="keywords" content="Garasi62, Jual Beli Mobil, Sewa Mobil, Mobil Bekas, Mobil Baru">
+        <meta name="description" content="Ride62 - Temukan Mobil Impianmu Disini">
+        <meta name="keywords" content="Ride62, Jual Beli Mobil, Sewa Mobil, Mobil Bekas, Mobil Baru">
 
         <!-- Open Graph General -->
         <meta property="og:title" content="{{ $siteName }} - Temukan Mobil Impianmu Disini">
         <meta property="og:description"
-            content="Garasi62 adalah platform terpercaya untuk jual beli dan sewa mobil. Temukan berbagai pilihan mobil berkualitas dengan harga terbaik.">
+            content="Ride62 adalah platform terpercaya untuk jual beli dan sewa mobil. Temukan berbagai pilihan mobil berkualitas dengan harga terbaik.">
         <meta property="og:image" content="{{ media_url($siteLogo) }}">
         <meta property="og:url" content="{{ url()->current() }}">
         <meta property="og:site_name" content="{{ $siteName }}">
@@ -62,7 +62,7 @@
         <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{{ $siteName }} - Temukan Mobil Impianmu Disini">
         <meta name="twitter:description"
-            content="Garasi62 adalah platform terpercaya untuk jual beli dan sewa mobil. Temukan berbagai pilihan mobil berkualitas dengan harga terbaik.">
+            content="Ride62 adalah platform terpercaya untuk jual beli dan sewa mobil. Temukan berbagai pilihan mobil berkualitas dengan harga terbaik.">
         <meta name="twitter:image" content="{{ media_url($siteLogo) }}">
     @endif
 
@@ -80,19 +80,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 
     <!-- Css Styles -->
-    <link rel="stylesheet" href="{{ asset('garasi62/css/bootstrap.min.css')}}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('ride62/css/bootstrap.min.css')}}" type="text/css">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('garasi62/css/font-awesome.min.css')}}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('ride62/css/font-awesome.min.css')}}" type="text/css">
     <!-- Font Awesome 6 (sama seperti seller) untuk ikon gas-pump / BBM -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('garasi62/css/elegant-icons.css')}}" type="text/css">
-    <link rel="stylesheet" href="{{ asset('garasi62/css/nice-select.css')}}" type="text/css">
-    <link rel="stylesheet" href="{{ asset('garasi62/css/magnific-popup.css')}}" type="text/css">
-    <link rel="stylesheet" href="{{ asset('garasi62/css/jquery-ui.min.css')}}" type="text/css">
-    <link rel="stylesheet" href="{{ asset('garasi62/css/owl.carousel.min.css')}}" type="text/css">
-    <link rel="stylesheet" href="{{ asset('garasi62/css/slicknav.min.css')}}" type="text/css">
-    <link rel="stylesheet" href="{{ asset('garasi62/css/style.css')}}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('ride62/css/elegant-icons.css')}}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('ride62/css/nice-select.css')}}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('ride62/css/magnific-popup.css')}}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('ride62/css/jquery-ui.min.css')}}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('ride62/css/owl.carousel.min.css')}}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('ride62/css/slicknav.min.css')}}" type="text/css">
+    <link rel="stylesheet" href="{{ asset('ride62/css/style.css')}}" type="text/css">
 
     <style>
         @media (max-width: 360px) {
@@ -231,17 +231,17 @@
     <!-- Search End -->
 
     <!-- Js Plugins -->
-    <script src="{{ asset('garasi62/js/jquery-3.3.1.min.js')}}"></script>
-    <script src="{{ asset('garasi62/js/bootstrap.min.js')}}"></script>
+    <script src="{{ asset('ride62/js/jquery-3.3.1.min.js')}}"></script>
+    <script src="{{ asset('ride62/js/bootstrap.min.js')}}"></script>
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ asset('garasi62/js/jquery.nice-select.min.js')}}"></script>
-    <script src="{{ asset('garasi62/js/jquery-ui.min.js')}}"></script>
-    <script src="{{ asset('garasi62/js/jquery.magnific-popup.min.js')}}"></script>
-    <script src="{{ asset('garasi62/js/mixitup.min.js')}}"></script>
-    <script src="{{ asset('garasi62/js/jquery.slicknav.js')}}"></script>
-    <script src="{{ asset('garasi62/js/owl.carousel.min.js')}}"></script>
-    <script src="{{ asset('garasi62/js/main.js')}}"></script>
+    <script src="{{ asset('ride62/js/jquery.nice-select.min.js')}}"></script>
+    <script src="{{ asset('ride62/js/jquery-ui.min.js')}}"></script>
+    <script src="{{ asset('ride62/js/jquery.magnific-popup.min.js')}}"></script>
+    <script src="{{ asset('ride62/js/mixitup.min.js')}}"></script>
+    <script src="{{ asset('ride62/js/jquery.slicknav.js')}}"></script>
+    <script src="{{ asset('ride62/js/owl.carousel.min.js')}}"></script>
+    <script src="{{ asset('ride62/js/main.js')}}"></script>
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

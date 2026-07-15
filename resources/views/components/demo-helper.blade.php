@@ -15,10 +15,10 @@
     <div class="demo-account-item" style="background: rgba(220,53,69,0.05); border: 1px solid rgba(220,53,69,0.15); padding: 10px; border-radius: 5px; margin-bottom: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
             <strong style="font-size: 0.85rem; color: #dc3545;">Role: Admin</strong>
-            <button onclick="fillDemoLogin('admin@garasi62.com', 'admin123')" class="btn-demo-fill" style="background: #dc3545; color: #fff; border: none; font-size: 0.75rem; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-weight: 600;">Gunakan</button>
+            <button onclick="fillDemoLogin('admin@ride62.com', 'admin123')" class="btn-demo-fill" style="background: #dc3545; color: #fff; border: none; font-size: 0.75rem; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-weight: 600;">Gunakan</button>
         </div>
         <div style="font-size: 0.8rem; color: #ddd; word-break: break-all;">
-            <div style="margin-bottom: 2px;">Email: <span class="copyable" onclick="copyText('admin@garasi62.com', this)" style="cursor:pointer; text-decoration:underline;" title="Klik untuk menyalin">admin@garasi62.com</span> <i class="fa-regular fa-copy" style="font-size: 10px; opacity: 0.7;"></i></div>
+            <div style="margin-bottom: 2px;">Email: <span class="copyable" onclick="copyText('admin@ride62.com', this)" style="cursor:pointer; text-decoration:underline;" title="Klik untuk menyalin">admin@ride62.com</span> <i class="fa-regular fa-copy" style="font-size: 10px; opacity: 0.7;"></i></div>
             <div>Password: <code>admin123</code></div>
         </div>
     </div>
@@ -27,10 +27,10 @@
     <div class="demo-account-item" style="background: rgba(59,130,246,0.05); border: 1px solid rgba(59,130,246,0.15); padding: 10px; border-radius: 5px; margin-bottom: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
             <strong style="font-size: 0.85rem; color: #3b82f6;">Role: Seller</strong>
-            <button onclick="fillDemoLogin('seller@garasi62.com', 'seller123')" class="btn-demo-fill" style="background: #3b82f6; color: #fff; border: none; font-size: 0.75rem; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-weight: 600;">Gunakan</button>
+            <button onclick="fillDemoLogin('seller@ride62.com', 'seller123')" class="btn-demo-fill" style="background: #3b82f6; color: #fff; border: none; font-size: 0.75rem; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-weight: 600;">Gunakan</button>
         </div>
         <div style="font-size: 0.8rem; color: #ddd; word-break: break-all;">
-            <div style="margin-bottom: 2px;">Email: <span class="copyable" onclick="copyText('seller@garasi62.com', this)" style="cursor:pointer; text-decoration:underline;" title="Klik untuk menyalin">seller@garasi62.com</span> <i class="fa-regular fa-copy" style="font-size: 10px; opacity: 0.7;"></i></div>
+            <div style="margin-bottom: 2px;">Email: <span class="copyable" onclick="copyText('seller@ride62.com', this)" style="cursor:pointer; text-decoration:underline;" title="Klik untuk menyalin">seller@ride62.com</span> <i class="fa-regular fa-copy" style="font-size: 10px; opacity: 0.7;"></i></div>
             <div>Password: <code>seller123</code></div>
         </div>
     </div>
@@ -39,10 +39,10 @@
     <div class="demo-account-item" style="background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.15); padding: 10px; border-radius: 5px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
             <strong style="font-size: 0.85rem; color: #10b981;">Role: Buyer</strong>
-            <button onclick="fillDemoLogin('buyer@garasi62.com', 'buyer123')" class="btn-demo-fill" style="background: #10b981; color: #fff; border: none; font-size: 0.75rem; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-weight: 600;">Gunakan</button>
+            <button onclick="fillDemoLogin('buyer@ride62.com', 'buyer123')" class="btn-demo-fill" style="background: #10b981; color: #fff; border: none; font-size: 0.75rem; padding: 2px 8px; border-radius: 3px; cursor: pointer; font-weight: 600;">Gunakan</button>
         </div>
         <div style="font-size: 0.8rem; color: #ddd; word-break: break-all;">
-            <div style="margin-bottom: 2px;">Email: <span class="copyable" onclick="copyText('buyer@garasi62.com', this)" style="cursor:pointer; text-decoration:underline;" title="Klik untuk menyalin">buyer@garasi62.com</span> <i class="fa-regular fa-copy" style="font-size: 10px; opacity: 0.7;"></i></div>
+            <div style="margin-bottom: 2px;">Email: <span class="copyable" onclick="copyText('buyer@ride62.com', this)" style="cursor:pointer; text-decoration:underline;" title="Klik untuk menyalin">buyer@ride62.com</span> <i class="fa-regular fa-copy" style="font-size: 10px; opacity: 0.7;"></i></div>
             <div>Password: <code>buyer123</code></div>
         </div>
     </div>

@@ -295,8 +295,9 @@
                                                         @foreach($car->image as $imgPath)
                                                             <span class="nama-file-label">
                                                                 @php $fname = basename($imgPath); @endphp
-                                                                @if(str_starts_with($fname, 'garasi62_'))
-                                                                    <span class="prefix">garasi62_</span>{{ substr($fname, 9) }}
+                                                                @if(str_starts_with($fname, 'ride62_') || str_starts_with($fname, 'garasi62_'))
+                                                                    @php $imgPrefix = str_starts_with($fname, 'ride62_') ? 'ride62_' : 'garasi62_'; @endphp
+                                                                    <span class="prefix">{{ $imgPrefix }}</span>{{ substr($fname, strlen($imgPrefix)) }}
                                                                 @else
                                                                     {{ $fname }}
                                                                 @endif
@@ -394,7 +395,7 @@
                             <h6>
                                 @if(($group['type'] ?? 'hash') === 'prefix')
                                     <i class="fas fa-user-secret me-2"></i>
-                                    Foto Terindikasi Pencurian (Awalan garasi62_)
+                                    Foto Terindikasi Pencurian (Awalan ride62_ / garasi62_)
                                 @else
                                     <i class="fas fa-fingerprint me-2"></i>
                                     Grup Foto Duplikat #{{ $idx + 1 }}
@@ -429,8 +430,9 @@
                                         <div class="foto-dup-file-name">
                                             <i class="fas fa-file-image me-1"></i>
                                             Nama File:
-                                            @if(str_starts_with($entry['file_name'], 'garasi62_'))
-                                                <span class="prefix">garasi62_</span>{{ substr($entry['file_name'], 9) }}
+                                            @if(str_starts_with($entry['file_name'], 'ride62_') || str_starts_with($entry['file_name'], 'garasi62_'))
+                                                @php $imgPrefix = str_starts_with($entry['file_name'], 'ride62_') ? 'ride62_' : 'garasi62_'; @endphp
+                                                <span class="prefix">{{ $imgPrefix }}</span>{{ substr($entry['file_name'], strlen($imgPrefix)) }}
                                             @else
                                                 {{ $entry['file_name'] }}
                                             @endif

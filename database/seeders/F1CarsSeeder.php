@@ -15,11 +15,11 @@ class F1CarsSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get seller with email seller@garasi62.com
-        $seller = User::where('email', 'seller@garasi62.com')->first();
+        // Get seller with email seller@ride62.com
+        $seller = User::where('email', 'seller@ride62.com')->first();
         
         if (!$seller) {
-            $this->command->error('Seller dengan email seller@garasi62.com tidak ditemukan!');
+            $this->command->error('Seller dengan email seller@ride62.com tidak ditemukan!');
             $this->command->info('Silakan jalankan: php artisan db:seed --class=TestUsersSeeder');
             return;
         }

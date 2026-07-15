@@ -1,6 +1,6 @@
 @extends('template.temp')
 
-<!-- @section('title', 'Home - GARASI62') Set the title for the page -->
+<!-- @section('title', 'Home - Ride62') Set the title for the page -->
 @include('components.messages-widget')
 @section('content')
     <!-- Blog Details Hero Begin -->

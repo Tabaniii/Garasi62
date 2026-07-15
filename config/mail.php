@@ -111,7 +111,7 @@ return [
 
     'from' => [
         'address' => env('MAIL_FROM_ADDRESS', 'mimin@rubicweb.co.id'),
-        'name' => env('MAIL_FROM_NAME', 'Garasi62'),
+        'name' => env('MAIL_FROM_NAME', 'Ride62'),
     ],
 
 ];

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - Garasi62</title>
+    <title>Reset Password - Ride62</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f4f4;">
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
@@ -14,7 +14,7 @@
                     <tr>
                         <td style="background-color: #dc3545; color: #ffffff; padding: 30px 20px; text-align: center;">
                             <h1 style="margin: 0; font-size: 24px; font-weight: bold;">Reset Password</h1>
-                            <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;">Garasi62</p>
+                            <p style="margin: 10px 0 0 0; font-size: 14px; opacity: 0.9;">Ride62</p>
                         </td>
                     </tr>
                     
@@ -25,7 +25,7 @@
                                 Halo,
                             </p>
                             <p style="margin: 0 0 20px 0; font-size: 16px; color: #333; line-height: 1.6;">
-                                Kami menerima permintaan untuk mereset password akun Anda di Garasi62. Jika Anda yang melakukan permintaan ini, silakan klik tombol di bawah ini untuk mereset password Anda.
+                                Kami menerima permintaan untuk mereset password akun Anda di Ride62. Jika Anda yang melakukan permintaan ini, silakan klik tombol di bawah ini untuk mereset password Anda.
                             </p>
                             
                             <!-- Button -->
@@ -60,7 +60,7 @@
                     <tr>
                         <td style="background-color: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0;">
                             <p style="margin: 0 0 10px 0; font-size: 12px; color: #666666;">
-                                Email ini dikirim dari sistem Garasi62
+                                Email ini dikirim dari sistem Ride62
                             </p>
                             <p style="margin: 0; font-size: 12px; color: #666666;">
                                 Jangan balas email ini. Jika Anda memiliki pertanyaan, silakan hubungi tim support kami.

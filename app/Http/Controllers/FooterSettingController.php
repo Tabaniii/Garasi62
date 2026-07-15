@@ -105,10 +105,10 @@ class FooterSettingController extends Controller
         $socialLinks = $this->getSocialLinks();
 
         $settings = [
-            'site_name' => SiteSetting::get('site_name', 'GARASI62'),
+            'site_name' => SiteSetting::get('site_name', 'Ride62'),
             'site_email' => SiteSetting::get('site_email', SiteSetting::get('footer_email', 'Colorlib@gmail.com')),
             'site_operational_hours' => SiteSetting::get('site_operational_hours', 'Sales: 08:00 am to 18:00 pm'),
-            'site_logo' => SiteSetting::get('site_logo', 'garasi62/img/ride62-fix.svg'),
+            'site_logo' => SiteSetting::get('site_logo', 'ride62/img/ride62-fix.svg'),
             'site_favicon' => SiteSetting::get('site_favicon', 'favicon.ico'),
             'contact_hours_weekday' => SiteSetting::get('contact_hours_weekday', '08:00 am to 18:00 pm'),
             'contact_hours_saturday' => SiteSetting::get('contact_hours_saturday', '10:00 am to 16:00 pm'),

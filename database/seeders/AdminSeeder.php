@@ -16,7 +16,7 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         // Buat/Update Admin
-        $admin = Users::where('email', 'admin@garasi62.com')->first();
+        $admin = Users::where('email', 'admin@ride62.com')->first();
         
         if ($admin) {
             $admin->update([
@@ -33,7 +33,7 @@ class AdminSeeder extends Seeder
         } else {
             Users::create([
                 'name' => 'Administrator',
-                'email' => 'admin@garasi62.com',
+                'email' => 'admin@ride62.com',
                 'password' => Hash::make('admin123'),
                 'role' => 'admin',
                 'email_verified_at' => Carbon::now(),
@@ -46,7 +46,7 @@ class AdminSeeder extends Seeder
         }
 
         // Buat/Update Seller
-        $seller = Users::where('email', 'seller@garasi62.com')->first();
+        $seller = Users::where('email', 'seller@ride62.com')->first();
         
         if ($seller) {
             $seller->update([
@@ -63,7 +63,7 @@ class AdminSeeder extends Seeder
         } else {
             Users::create([
                 'name' => 'Seller Account',
-                'email' => 'seller@garasi62.com',
+                'email' => 'seller@ride62.com',
                 'password' => Hash::make('seller123'),
                 'role' => 'seller',
                 'email_verified_at' => Carbon::now(),
@@ -76,7 +76,7 @@ class AdminSeeder extends Seeder
         }
 
         // Buat/Update Buyer
-        $buyer = Users::where('email', 'buyer@garasi62.com')->first();
+        $buyer = Users::where('email', 'buyer@ride62.com')->first();
         
         if ($buyer) {
             $buyer->update([
@@ -93,7 +93,7 @@ class AdminSeeder extends Seeder
         } else {
             Users::create([
                 'name' => 'Buyer Account',
-                'email' => 'buyer@garasi62.com',
+                'email' => 'buyer@ride62.com',
                 'password' => Hash::make('buyer123'),
                 'role' => 'buyer',
                 'email_verified_at' => Carbon::now(),
@@ -108,15 +108,15 @@ class AdminSeeder extends Seeder
         $this->command->info('');
         $this->command->info('=== Account Credentials ===');
         $this->command->info('Admin:');
-        $this->command->info('  Email: admin@garasi62.com');
+        $this->command->info('  Email: admin@ride62.com');
         $this->command->info('  Password: admin123');
         $this->command->info('');
         $this->command->info('Seller:');
-        $this->command->info('  Email: seller@garasi62.com');
+        $this->command->info('  Email: seller@ride62.com');
         $this->command->info('  Password: seller123');
         $this->command->info('');
         $this->command->info('Buyer:');
-        $this->command->info('  Email: buyer@garasi62.com');
+        $this->command->info('  Email: buyer@ride62.com');
         $this->command->info('  Password: buyer123');
     }
 }

@@ -2,23 +2,23 @@
 
 @section('meta')
     <meta name="description"
-        content="Garasi62 - Platform jual beli dan sewa mobil terpercaya. Temukan mobil impian Anda di sini.">
-    <meta name="keywords" content="Jual Mobil, Beli Mobil, Sewa Mobil, Garasi62, Mobil Bekas">
+        content="Ride62 - Platform jual beli dan sewa mobil terpercaya. Temukan mobil impian Anda di sini.">
+    <meta name="keywords" content="Jual Mobil, Beli Mobil, Sewa Mobil, Ride62, Mobil Bekas">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="Garasi62 - Temukan Mobil Impianmu Disini">
+    <meta property="og:title" content="Ride62 - Temukan Mobil Impianmu Disini">
     <meta property="og:description"
-        content="Garasi62 - Platform jual beli dan sewa mobil terpercaya. Temukan mobil impian Anda di sini.">
-    <meta property="og:image" content="{{ asset('garasi62/img/hero-bg.jpg') }}">
+        content="Ride62 - Platform jual beli dan sewa mobil terpercaya. Temukan mobil impian Anda di sini.">
+    <meta property="og:image" content="{{ asset('ride62/img/hero-bg.jpg') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="GARASI62">
+    <meta property="og:site_name" content="Ride62">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Garasi62 - Temukan Mobil Impianmu Disini">
-    <meta name="twitter:description" content="Garasi62 - Platform jual beli dan sewa mobil terpercaya.">
-    <meta name="twitter:image" content="{{ asset('garasi62/img/hero-bg.jpg') }}">
+    <meta name="twitter:title" content="Ride62 - Temukan Mobil Impianmu Disini">
+    <meta name="twitter:description" content="Ride62 - Platform jual beli dan sewa mobil terpercaya.">
+    <meta name="twitter:image" content="{{ asset('ride62/img/hero-bg.jpg') }}">
 @endsection
 
 
@@ -45,7 +45,7 @@
                 <div class="col-12 d-block d-md-none">
                     <div class="hero__text">
                         <div class="hero__text__title">
-                            <h1 style="color: #fff; font-weight: 800;">Garasi62</h1>
+                            <h1 style="color: #fff; font-weight: 800;">Ride62</h1>
                             <span>TEMUKAN MOBIL IMPIANMU DISINI</span>
                         </div>
                     </div>
@@ -370,7 +370,7 @@
                                     @else
                                         <div
                                             style="width: 100%; height: 220px; min-height: 220px; max-height: 220px; overflow: hidden;">
-                                            <img src="{{ asset('garasi62/img/cars/car-8.jpg') }}"
+                                            <img src="{{ asset('ride62/img/cars/car-8.jpg') }}"
                                                 alt="{{ $car->brand }} {{ $car->nama ?? '' }}"
                                                 style="width: 100%; height: 220px; min-height: 220px; max-height: 220px; object-fit: cover; display: block;">
                                         </div>

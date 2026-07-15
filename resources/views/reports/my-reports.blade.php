@@ -2,7 +2,7 @@
 
 @section('content')
 <!-- Breadcrumb Begin -->
-<div class="breadcrumb-option set-bg" data-setbg="{{ asset('garasi62/img/breadcrumb-bg.jpg') }}">
+<div class="breadcrumb-option set-bg" data-setbg="{{ asset('ride62/img/breadcrumb-bg.jpg') }}">
     <div class="container">
         <div class="row">
             <div class="col-lg-12 text-center">

@@ -1,10 +1,10 @@
 <header class="header">
     @php
-        $siteName = \App\Models\SiteSetting::get('site_name', 'GARASI62');
+        $siteName = \App\Models\SiteSetting::get('site_name', 'Ride62');
         $siteEmail = \App\Models\SiteSetting::get('site_email', \App\Models\SiteSetting::get('footer_email', 'Colorlib@gmail.com'));
         $siteOperationalHours = \App\Models\SiteSetting::get('site_operational_hours', 'Sales: 08:00 am to 18:00 pm');
-        $siteLogo = \App\Models\SiteSetting::get('site_logo', 'garasi62/img/ride62-fix.svg');
-        $logoFallback = asset('garasi62/img/ride62-fix.svg');
+        $siteLogo = \App\Models\SiteSetting::get('site_logo', 'ride62/img/ride62-fix.svg');
+        $logoFallback = asset('ride62/img/ride62-fix.svg');
         $sitePhone = \App\Models\SiteSetting::get('footer_phone', '(+12) 345 678 910');
 
         // Dynamic Social Links Logic

@@ -35,7 +35,7 @@ class VerificationCodeMail extends Mailable
                 config('mail.from.address'),
                 config('mail.from.name')
             ),
-            subject: 'Kode Verifikasi Email - Garasi62',
+            subject: 'Kode Verifikasi Email - Ride62',
         );
     }
 

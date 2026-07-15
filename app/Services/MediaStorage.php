@@ -126,7 +126,7 @@ class MediaStorage
             return asset($path);
         }
 
-        if (str_starts_with($path, 'garasi62/') || str_starts_with($path, 'img/')) {
+        if (str_starts_with($path, 'ride62/') || str_starts_with($path, 'img/')) {
             return asset($path);
         }
 

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Dashboard - Garasi62</title>
+    <title>Dashboard - Ride62</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -802,13 +802,13 @@
         <div class="sidebar-header">
             <a href="{{ route('dashboard') }}" class="sidebar-logo">
                 <div class="sidebar-logo-icon">
-                    <img src="{{ asset('img/ride62-fix.svg') }}" alt="Garasi62"
+                    <img src="{{ asset('img/ride62-fix.svg') }}" alt="Ride62"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                     <div
                         style="display:none; width: 100%; height: 100%; background: linear-gradient(135deg, #dc2626, #991b1b); border-radius: 5px; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 20px;">
                         G</div>
                 </div>
-                <span>Garasi62</span>
+                <span>Ride62</span>
             </a>
         </div>
 

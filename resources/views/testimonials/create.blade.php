@@ -74,7 +74,7 @@
                         <label for="company" class="form-label-custom">
                             <i class="fas fa-building me-2"></i>Perusahaan
                         </label>
-                        <input type="text" class="form-control-custom @error('company') is-invalid @enderror" id="company" name="company" value="{{ old('company') }}" placeholder="Contoh: Garasi62">
+                        <input type="text" class="form-control-custom @error('company') is-invalid @enderror" id="company" name="company" value="{{ old('company') }}" placeholder="Contoh: Ride62">
                         @error('company')
                             <div class="invalid-feedback-custom">{{ $message }}</div>
                         @enderror

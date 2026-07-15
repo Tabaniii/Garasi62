@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobil Di-Unpublish - Garasi62</title>
+    <title>Mobil Di-Unpublish - Ride62</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -107,13 +107,13 @@
 <body>
     <div class="email-container">
         <div class="header">
-            <h1>🚗 Garasi62</h1>
+            <h1>🚗 Ride62</h1>
         </div>
 
         <div class="content">
             <p>Halo <strong>{{ $sellerName }}</strong>,</p>
             
-            <p>Kami ingin memberitahu Anda bahwa mobil yang Anda posting telah di-unpublish dari platform Garasi62.</p>
+            <p>Kami ingin memberitahu Anda bahwa mobil yang Anda posting telah di-unpublish dari platform Ride62.</p>
 
             <div class="car-info">
                 <h3>Informasi Mobil:</h3>
@@ -177,8 +177,8 @@
         </div>
 
         <div class="footer">
-            <p>Terima kasih telah menggunakan layanan Garasi62.</p>
-            <p>© {{ date('Y') }} Garasi62. All rights reserved.</p>
+            <p>Terima kasih telah menggunakan layanan Ride62.</p>
+            <p>© {{ date('Y') }} Ride62. All rights reserved.</p>
         </div>
     </div>
 </body>

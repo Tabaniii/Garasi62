@@ -26,7 +26,7 @@
     @include('components.messages-widget')
     <!-- Hero Section Begin -->
     <section class="hero spad set-bg">
-        <!-- Video Background -->
+        <!-- Video Background (autoplay, muted, loop) -->
         <video autoplay muted loop playsinline style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;">
             <source src="{{ asset('ride62/video/kompres_hero_video_fix.mp4') }}" type="video/mp4">
         </video>

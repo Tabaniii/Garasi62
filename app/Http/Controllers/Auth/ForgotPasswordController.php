@@ -32,6 +32,38 @@ class ForgotPasswordController extends Controller
     }
 
     /**
+     * Send a reset link to the given user.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
+    public function sendResetLinkEmail(Request $request)
+    {
+        $this->validateEmail($request);
+
+        try {
+            // We receive the response from the password broker...
+            $response = $this->broker()->sendResetLink(
+                $this->credentials($request)
+            );
+
+            return $response == \Illuminate\Support\Facades\Password::RESET_LINK_SENT
+                        ? $this->sendResetLinkResponse($request, $response)
+                        : $this->sendResetLinkFailedResponse($request, $response);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mengirim email reset password: ' . $e->getMessage(), [
+                'exception' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'mail_driver' => config('mail.default'),
+            ]);
+
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Gagal mengirim email reset password. Hubungi admin atau periksa kembali konfigurasi SMTP Gmail Anda di .env.']);
+        }
+    }
+
+    /**
      * Get the response for a successful password reset link.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -57,3 +89,4 @@ class ForgotPasswordController extends Controller
             ->withErrors(['email' => 'Email tidak ditemukan atau tidak terdaftar.']);
     }
 }
+

@@ -4,7 +4,7 @@
 @include('components.messages-widget')
 @section('content')
     <!-- Blog Details Hero Begin -->
-    <section class="blog-details-hero spad set-bg" data-setbg="img/blog/details/details-hero-bg.jpg">
+    <section class="blog-details-hero spad set-bg" data-setbg="{{ asset('ride62/video/kompres_hero_video_fix.jpg') }}">
         <div class="container">
             <div class="row d-flex justify-content-center">
                 <div class="col-lg-10">

@@ -8,7 +8,7 @@
     <meta property="og:title" content="{{ $blog->title }} - Ride62">
     <meta property="og:description" content="{{ Str::limit(strip_tags($blog->content), 150) }}">
     <meta property="og:image"
-        content="{{ $blog->image ? media_url($blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
+        content="{{ $blog->image ? media_url($blog->image) : asset('ride62/video/kompres_hero_video_fix.jpg') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="Ride62">
@@ -30,7 +30,7 @@
     <meta name="twitter:title" content="{{ $blog->title }} - Ride62">
     <meta name="twitter:description" content="{{ Str::limit(strip_tags($blog->content), 150) }}">
     <meta name="twitter:image"
-        content="{{ $blog->image ? media_url($blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
+        content="{{ $blog->image ? media_url($blog->image) : asset('ride62/video/kompres_hero_video_fix.jpg') }}">
 @endsection
 
 @include('components.messages-widget')
@@ -38,7 +38,7 @@
 @section('content')
     <!-- Blog Details Hero Begin -->
     <section class="blog-details-hero spad set-bg"
-        data-setbg="{{ $blog->image ? media_url($blog->image) : asset('img/blog/details/details-hero-bg.jpg') }}">
+        data-setbg="{{ $blog->image ? media_url($blog->image) : asset('ride62/video/kompres_hero_video_fix.jpg') }}">
         <div class="container">
             <div class="row d-flex justify-content-center">
                 <div class="col-lg-10">
